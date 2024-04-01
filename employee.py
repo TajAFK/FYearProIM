@@ -10,7 +10,6 @@ class employeeClass:
         self.root.title("Inventory Management System")
         self.root.config(bg="white")
         self.root.focus_force()
-
         # ======================
         # All variables
         self.var_searchby = StringVar()
