@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk, messagebox
 import sqlite3
 import time
+import os
+import tempfile
 
 
 class BillClass:
@@ -11,6 +13,7 @@ class BillClass:
         self.root.title("Inventory management System")
         self.root.config(bg="white")
         self.cart_list = []
+        self.chk_print = 0
 
         # ==title====
         self.icon_title = PhotoImage(file="images/logo1.png")
@@ -280,7 +283,7 @@ class BillClass:
                                  bg="#607d8b", fg="white")
         self.lbl_net_pay.place(x=246, y=5, width=160, height=70)
 
-        btn_print = Button(billMenuFrame, text='Print', cursor='hand2', font=("goudy old style", 15, "bold"),
+        btn_print = Button(billMenuFrame, text='Print', cursor='hand2',command=self.print_bill, font=("goudy old style", 15, "bold"),
                            bg="lightgreen", fg="white")
         btn_print.place(x=2, y=80, width=120, height=50)
 
@@ -452,6 +455,7 @@ class BillClass:
             fp.write(self.txt_bill_area.get('1.0', END))
             fp.close()
             messagebox.showinfo('Saved', "Bill has been generated/Save in Backend", parent=self.root)
+            self.chk_print = 1
 
     def bill_top(self):
         self.invoice = int(time.strftime("%H%M%S")) + int(time.strftime("%d%m%Y"))
@@ -488,7 +492,7 @@ class BillClass:
 
                 pid = row[0]
                 name = row[1]
-                qty = int(row[4])-int(row[3])
+                qty = int(row[4]) - int(row[3])
                 if int(row[3]) == int(row[4]):
                     status = 'Inactive'
                 if int(row[3]) != int(row[4]):
@@ -540,6 +544,15 @@ class BillClass:
 
         # Call this function again after 200 milliseconds
         self.lbl_clock.after(200, self.update_date_time)
+
+    def print_bill(self):
+        if self.chk_print==1:
+            messagebox.showinfo('Print',"Please wait while printing",parent=self.root)
+            new_file = tempfile.mktemp('.txt')
+            open(new_file, 'w').write(self.txt_bill_area.get('1.0', END))
+            os.startfile(new_file, 'print')
+        else:
+            messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
 
 
 if __name__ == "__main__":
