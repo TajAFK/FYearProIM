@@ -52,7 +52,7 @@ class salesClass:
                            ).pack(side=TOP, fill=X)
 
         scrolly2 = Scrollbar(bill_Frame, orient=VERTICAL)
-        self.bill_area = Text(bill_Frame, font=("goudy old style", 15), bg="lightyellow", yscrollcommand=scrolly2.set)
+        self.bill_area = Text(bill_Frame, bg="lightyellow", yscrollcommand=scrolly2.set)
         scrolly2.pack(side=RIGHT, fill=Y)
         scrolly2.config(command=self.bill_area.yview)
         self.bill_area.pack(fill=BOTH, expand=1)
@@ -81,18 +81,14 @@ class salesClass:
     # print(file_name)
 
     def get_data(self, ev):
-        del self.bill_list[:]
         selected_indices = self.Sales_List.curselection()
         if selected_indices:  # Check if there is at least one item selected
             index = selected_indices[0]  # Get the index of the first selected item
             file_name = self.Sales_List.get(index)  # Retrieve the file name using the index
-            print(file_name)
-            self.bill_area.delete('1.0', END)
-            fp = open(f'bill/{file_name}', 'r')
-            for i in fp:
-                self.bill_area.insert(END, i)
-                self.bill_list.append(i.split('.')[1])
-            fp.close()
+            self.bill_area.delete('1.0', END)  # Clear previous bill area contents
+            with open(f'bill/{file_name}', 'r') as file:  # Ensuring the file is properly closed after reading
+                content = file.read()  # Read the whole content of the file
+                self.bill_area.insert(END, content)  # Insert content into the bill_area
         else:
             messagebox.showwarning("Warning", "Please select a bill from the list.", parent=self.root)
 
