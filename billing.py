@@ -4,6 +4,7 @@ import sqlite3
 import time
 import os
 import tempfile
+import subprocess
 
 
 class BillClass:
@@ -23,7 +24,7 @@ class BillClass:
                                                                                                          height=70)
 
         # --button logout====
-        Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow",
+        Button(self.root, text="Logout", command=self.logout, font=("times new roman", 15, "bold"), bg="yellow",
                cursor="hand2").place(x=1150, y=10, height=50, width=150)
 
         # ==clock==
@@ -283,7 +284,8 @@ class BillClass:
                                  bg="#607d8b", fg="white")
         self.lbl_net_pay.place(x=246, y=5, width=160, height=70)
 
-        btn_print = Button(billMenuFrame, text='Print', cursor='hand2',command=self.print_bill, font=("goudy old style", 15, "bold"),
+        btn_print = Button(billMenuFrame, text='Print', cursor='hand2', command=self.print_bill,
+                           font=("goudy old style", 15, "bold"),
                            bg="lightgreen", fg="white")
         btn_print.place(x=2, y=80, width=120, height=50)
 
@@ -546,13 +548,17 @@ class BillClass:
         self.lbl_clock.after(200, self.update_date_time)
 
     def print_bill(self):
-        if self.chk_print==1:
-            messagebox.showinfo('Print',"Please wait while printing",parent=self.root)
+        if self.chk_print == 1:
+            messagebox.showinfo('Print', "Please wait while printing", parent=self.root)
             new_file = tempfile.mktemp('.txt')
             open(new_file, 'w').write(self.txt_bill_area.get('1.0', END))
             os.startfile(new_file, 'print')
         else:
             messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
+
+    def logout(self):
+        self.root.destroy()
+        subprocess.run(["python", "login.py"], check=True)
 
 
 if __name__ == "__main__":

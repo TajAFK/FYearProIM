@@ -9,6 +9,7 @@ import sqlite3
 from tkinter import messagebox
 import os
 import time
+import subprocess
 
 class IMS:
     def __init__(self, root):
@@ -25,7 +26,7 @@ class IMS:
                                                                                                          height=70)
 
         # --button logout====
-        Button(self.root, text="Logout", font=("times new roman", 15, "bold"), bg="yellow",
+        Button(self.root, text="Logout",command=self.logout, font=("times new roman", 15, "bold"), bg="yellow",
                cursor="hand2").place(x=1150, y=10, height=50, width=150)
 
         # ==clock==
@@ -134,7 +135,7 @@ class IMS:
             employee = cur.fetchall()
             self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')
 
-            self.lbl_sales.config(text=f'Total Sales [{str(len(os.listdir('bill')))}]')
+            self.lbl_sales.config(text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')
 
             # Fetch current date and time
             current_time = time.strftime("%I:%M:%S %p")  # Format time in 12-hour format with AM/PM
@@ -150,7 +151,9 @@ class IMS:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-
+    def logout(self):
+        self.root.destroy()
+        subprocess.run(["python", "login.py"], check=True)
 
 
 if __name__ == "__main__":
