@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk, messagebox
 import sqlite3
+from cryptography.fernet import Fernet
+import os
 
 
 class employeeClass:
@@ -10,7 +12,13 @@ class employeeClass:
         self.root.title("Inventory Management System")
         self.root.config(bg="white")
         self.root.focus_force()
-        # ======================
+
+        # Generate and store this key securely, for example in an environment variable or a key management system
+        self.key = Fernet.generate_key()
+        self.cipher = Fernet(self.key)
+
+        self.cipher = self.load_key_and_initialize_cipher()
+
         # All variables
         self.var_searchby = StringVar()
         self.var_searctxt = StringVar()
@@ -110,6 +118,10 @@ class employeeClass:
                cursor="hand2").place(
             x=860, y=305, width=110, height=28)
 
+        # Generate and save this key securely; you'll need the same key for decryption
+        key = Fernet.generate_key()
+        cipher = Fernet(key)
+
         # ====Employee Details======
 
         emp_frame = Frame(self.root, bd=3, relief=RIDGE)
@@ -156,8 +168,36 @@ class employeeClass:
 
         self.show()
 
+    def load_key_and_initialize_cipher(self):
+        key_path = 'secret.key'
+        if not os.path.exists(key_path):
+            # Generate a key and save it to a file
+            key = Fernet.generate_key()
+            with open(key_path, 'wb') as key_file:
+                key_file.write(key)
+        else:
+            # Load the key from the file
+            with open(key_path, 'rb') as key_file:
+                key = key_file.read()
+
+        return Fernet(key)
+
+    def encrypt_data(self, plain_text):
+        try:
+            return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8') if plain_text else plain_text
+        except Exception as e:
+            messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
+            return None
+
+    def decrypt_data(self, cipher_text):
+        try:
+            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8') if cipher_text else cipher_text
+        except Exception as e:
+            messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
+            return None
+
     # =====================ADD DATA=========================================================================
-    # =====================ADD DATA=========================================================================
+
     def add(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
@@ -171,18 +211,18 @@ class employeeClass:
                     messagebox.showerror("Error", "This Employee ID already assigned, try different", parent=self.root)
                 else:
                     cur.execute(
-                        "INSERT INTO employee(eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+                        "INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (
                             self.var_emp_id.get(),
-                            self.var_name.get(),
-                            self.var_email.get(),
+                            self.encrypt_data(self.var_name.get()),
+                            self.encrypt_data(self.var_email.get()),
                             self.var_gender.get(),
-                            self.var_contact.get(),
+                            self.encrypt_data(self.var_contact.get()),
                             self.var_dob.get(),
                             self.var_doj.get(),
-                            self.var_pass.get(),
+                            self.encrypt_data(self.var_pass.get()),
                             self.var_utype.get(),
-                            self.txt_address.get('1.0', END).strip(),  # Use .strip() to remove trailing newline
+                            self.encrypt_data(self.txt_address.get('1.0', END).strip()),
                             self.var_salary.get(),
                         ))
                     con.commit()
@@ -200,28 +240,32 @@ class employeeClass:
             rows = cur.fetchall()
             self.EmployeeTable.delete(*self.EmployeeTable.get_children())
             for row in rows:
-                self.EmployeeTable.insert('', END, values=row)
+                decrypted_row = [row[0], self.decrypt_data(row[1]), self.decrypt_data(row[2]), row[3],
+                                 self.decrypt_data(row[4]), row[5], row[6], self.decrypt_data(row[7]), row[8],
+                                 self.decrypt_data(row[9]), row[10]]
+                self.EmployeeTable.insert('', END, values=decrypted_row)
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # ====================== Get Data Back to Form =======================
+
     def get_data(self, ev):
         f = self.EmployeeTable.focus()
-        content = (self.EmployeeTable.item(f))
+        content = self.EmployeeTable.item(f)
         row = content['values']
         if row:
-            self.var_emp_id.set(row[0]),
-            self.var_name.set(row[1]),
-            self.var_email.set(row[2]),
-            self.var_gender.set(row[3]),
-            self.var_contact.set(row[4]),
-            self.var_dob.set(row[5]),
-            self.var_doj.set(row[6]),
-            self.var_pass.set(row[7]),
-            self.var_utype.set(row[8]),
-            self.txt_address.delete('1.0', END),
-            self.txt_address.insert(END, row[9]),
-            self.var_salary.set(row[10]),
+            self.var_emp_id.set(row[0])
+            self.var_name.set(self.decrypt_data(row[1]))
+            self.var_email.set(self.decrypt_data(row[2]))
+            self.var_gender.set(row[3])
+            self.var_contact.set(self.decrypt_data(row[4]))
+            self.var_dob.set(row[5])
+            self.var_doj.set(row[6])
+            self.var_pass.set(self.decrypt_data(row[7]))
+            self.var_utype.set(row[8])
+            self.txt_address.delete('1.0', END)
+            self.txt_address.insert(END, self.decrypt_data(row[9]))
+            self.var_salary.set(row[10])
 
     # ====================UPDATE DATA======================
     def update(self):
@@ -234,15 +278,15 @@ class employeeClass:
                 cur.execute(
                     "UPDATE employee set name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, address=?, salary=? WHERE eid=?",
                     (
-                        self.var_name.get(),
-                        self.var_email.get(),
+                        self.encrypt_data(self.var_name.get()),
+                        self.encrypt_data(self.var_email.get()),
                         self.var_gender.get(),
-                        self.var_contact.get(),
+                        self.encrypt_data(self.var_contact.get()),
                         self.var_dob.get(),
                         self.var_doj.get(),
-                        self.var_pass.get(),
+                        self.encrypt_data(self.var_pass.get()),
                         self.var_utype.get(),
-                        self.txt_address.get('1.0', END).strip(),
+                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),
                         self.var_salary.get(),
                         self.var_emp_id.get(),
                     ))
@@ -275,24 +319,26 @@ class employeeClass:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def clear(self):
-        f = self.EmployeeTable.focus()
-        content = (self.EmployeeTable.item(f))
-        row = content['values']
-        if row:
-            self.var_emp_id.set(""),
-            self.var_name.set(""),
-            self.var_email.set(""),
-            self.var_gender.set(""),
-            self.var_contact.set(""),
-            self.var_dob.set(""),
-            self.var_doj.set(""),
-            self.var_pass.set(""),
-            self.var_utype.set("Admin"),
-            self.txt_address.delete('1.0', END),
-            self.var_salary.set(""),
-            self.var_searctxt.set("")
-            self.var_searchby.set("Select")
-            self.show()
+        # Set all the variable fields to their default values
+        self.var_emp_id.set("")
+        self.var_name.set("")
+        self.var_email.set("")
+        self.var_gender.set("Select")
+        self.var_contact.set("")
+        self.var_dob.set("")
+        self.var_doj.set("")
+        self.var_pass.set("")
+        self.var_utype.set("Admin")
+        self.var_salary.set("")
+        self.var_searctxt.set("")
+        self.var_searchby.set("Select")
+
+        # Clear the address Text field
+        self.txt_address.delete('1.0', END)
+
+        # Optionally clear and refresh the table to show all records or leave it as is
+        # If there's a need to refresh the view after clearing, uncomment the next line:
+        self.show()
 
     def search(self):
         con = sqlite3.connect(database=r'ims.db')
@@ -303,8 +349,11 @@ class employeeClass:
             elif self.var_searctxt.get() == "":
                 messagebox.showerror("Error", "Search input should be required", parent=self.root)
             else:
-                cur.execute(
-                    "SELECT * FROM employee where " + self.var_searchby.get() + " LIKE '%" + self.var_searctxt.get() + "%'")
+                # Parameterize the query to prevent SQL injection
+                query = f"SELECT * FROM employee WHERE {self.var_searchby.get()} LIKE ?"
+                # Use % as wildcard for LIKE statement in SQL
+                parameters = ('%' + self.var_searctxt.get() + '%',)
+                cur.execute(query, parameters)
                 rows = cur.fetchall()
                 if len(rows) != 0:
                     self.EmployeeTable.delete(*self.EmployeeTable.get_children())
