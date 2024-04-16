@@ -183,18 +183,26 @@ class employeeClass:
         return Fernet(key)
 
     def encrypt_data(self, plain_text):
+        if plain_text is None:
+            return ""
+        if not isinstance(plain_text, str):
+            plain_text = str(plain_text)
         try:
-            return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8') if plain_text else plain_text
+            return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8')
         except Exception as e:
             messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
-            return None
+            return ""
 
     def decrypt_data(self, cipher_text):
+        if cipher_text is None:
+            return ""
+        if not isinstance(cipher_text, str):
+            cipher_text = str(cipher_text)
         try:
-            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8') if cipher_text else cipher_text
+            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
         except Exception as e:
             messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
-            return None
+            return ""
 
     # =====================ADD DATA=========================================================================
 
@@ -254,18 +262,18 @@ class employeeClass:
         content = self.EmployeeTable.item(f)
         row = content['values']
         if row:
-            self.var_emp_id.set(row[0])
-            self.var_name.set(self.decrypt_data(row[1]))
-            self.var_email.set(self.decrypt_data(row[2]))
-            self.var_gender.set(row[3])
-            self.var_contact.set(self.decrypt_data(row[4]))
-            self.var_dob.set(row[5])
-            self.var_doj.set(row[6])
-            self.var_pass.set(self.decrypt_data(row[7]))
-            self.var_utype.set(row[8])
+            self.var_emp_id.set(str(row[0]))
+            self.var_name.set(str(row[1]))  # No decryption needed if already decrypted
+            self.var_email.set(str(row[2]))
+            self.var_gender.set(str(row[3]))
+            self.var_contact.set(str(row[4]))
+            self.var_dob.set(str(row[5]))
+            self.var_doj.set(str(row[6]))
+            self.var_pass.set(str(row[7]))
+            self.var_utype.set(str(row[8]))
             self.txt_address.delete('1.0', END)
-            self.txt_address.insert(END, self.decrypt_data(row[9]))
-            self.var_salary.set(row[10])
+            self.txt_address.insert(END, str(row[9]))  # Direct insertion
+            self.var_salary.set(str(row[10]))
 
     # ====================UPDATE DATA======================
     def update(self):
@@ -349,16 +357,18 @@ class employeeClass:
             elif self.var_searctxt.get() == "":
                 messagebox.showerror("Error", "Search input should be required", parent=self.root)
             else:
-                # Parameterize the query to prevent SQL injection
-                query = f"SELECT * FROM employee WHERE {self.var_searchby.get()} LIKE ?"
-                # Use % as wildcard for LIKE statement in SQL
-                parameters = ('%' + self.var_searctxt.get() + '%',)
+                encrypted_search_input = self.encrypt_data(self.var_searctxt.get())
+                query = f"SELECT * FROM employee WHERE {self.var_searchby.get()} = ?"  # Changed LIKE to = for exact match
+                parameters = (encrypted_search_input,)
                 cur.execute(query, parameters)
                 rows = cur.fetchall()
                 if len(rows) != 0:
                     self.EmployeeTable.delete(*self.EmployeeTable.get_children())
                     for row in rows:
-                        self.EmployeeTable.insert('', END, values=row)
+                        decrypted_row = [row[0], self.decrypt_data(row[1]), self.decrypt_data(row[2]), row[3],
+                                         self.decrypt_data(row[4]), row[5], row[6], self.decrypt_data(row[7]), row[8],
+                                         self.decrypt_data(row[9]), row[10]]
+                        self.EmployeeTable.insert('', END, values=decrypted_row)
                 else:
                     messagebox.showerror("Error", "No record found", parent=self.root)
         except Exception as ex:
