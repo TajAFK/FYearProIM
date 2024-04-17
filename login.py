@@ -61,12 +61,6 @@ class LoginSystem:
             x=50, y=240, width=250)
 
         # Login button
-        # Button(login_frame, text="Sign In", command=self.login, font=("Arial Rounded MT Bold", 15), bg="#007BFF",
-        #        fg="white",
-        #        activebackground="#00B0F0", activeforeground="white", cursor="hand2").place(x=50, y=300, width=250,
-        #                                                                                    height=35)
-
-        # Login button
         # Define a function to handle hover effect
         def on_enter(event):
             sign_btn.config(bg="#00597A")  # Change background color to a darker shade of blue
@@ -83,11 +77,9 @@ class LoginSystem:
         def on_release(event):
             sign_btn.config(bg="#007BFF")  # Revert back to the default background color
 
-
-
         # Create the button
         sign_btn = Button(login_frame, text="Sign In", command=self.login, font=("Arial Rounded MT Bold", 15),
-                              bg="#007BFF", fg="white", bd=0, relief=FLAT, cursor="hand2")
+                          bg="#007BFF", fg="white", bd=0, relief=FLAT, cursor="hand2")
 
         # Bind events for hover and pressed effects
         sign_btn.bind("<Enter>", on_enter)
@@ -98,15 +90,10 @@ class LoginSystem:
         # Place the button in the frame
         sign_btn.place(x=50, y=300, width=250, height=35)
 
-
         # Horizontal line and 'OR' text
         Label(login_frame, bg="lightgray").place(x=50, y=370, width=250, height=2)
         Label(login_frame, text="OR", bg="white", fg="lightgray", font=("times new roman", 15, "bold")).place(x=150,
                                                                                                               y=355)
-
-        # Forget password button
-        # Button(login_frame, text="Forget Password?", command=self.forget_window, font=("times new roman", 13),
-        #        bg="white", fg="#00759E", bd=0, activeforeground="#00759E", activebackground="white").place(x=100, y=390)
 
         # Forget Password Button
         forget_btn = Button(login_frame, text="Forget Password?", command=self.forget_window,
@@ -120,7 +107,7 @@ class LoginSystem:
         style = Style()
         style.theme_use("clam")  # Use 'clam' theme for gradient effect
         style.map("TButton",
-                      background=[("active", "#00597A")])
+                  background=[("active", "#00597A")])
 
         # Configure hover effects
         forget_btn.bind("<Enter>", lambda e: forget_btn.config(bg="#00597A"))
@@ -129,16 +116,11 @@ class LoginSystem:
         # Adjust padding and width
         forget_btn.place(x=50, y=390, width=250, height=35)
 
-
         # ====Frame 2===========
         # Create a frame for registration or promotional actions
         register_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         register_frame.place(x=650, y=570, width=350, height=60)
 
-        # Adding a label to the registration frame for promotional text
-        # Label(register_frame, text="Subscribe | LIKE | SHARE", font=("times new roman", 13), bg="white").place(x=0,
-        #                                                                                                        y=20,
-        #                                                                                                        relwidth=1)
         # Shadow label for the promotional text
         Label(register_frame, text="Join Our Community - Stay Updated!",
               font=("Arial", 13, "bold"),
@@ -157,14 +139,14 @@ class LoginSystem:
                        PhotoImage(file="images/im3.png")]
         self.image_index = 0
 
-        # Setup the label to display images
+        # Set up the label to display images
         self.lbl_change_image = Label(self.root, image=self.images[self.image_index], bg="white")
         self.lbl_change_image.place(x=367, y=153, width=240, height=428)
 
         # Start the animation
         self.animate()
 
-    #=====All Functions============
+    # All Functions
 
     @staticmethod
     def load_key_and_initialize_cipher():
@@ -263,36 +245,6 @@ class LoginSystem:
                                      parent=self.root)
                 return
 
-            # Display forget password window
-            # self.forget_win = Toplevel(self.root)
-            # self.forget_win.title('RESET PASSWORD')
-            # self.forget_win.geometry('400x350+500+100')
-            # self.forget_win.focus_force()
-            #
-            # Label(self.forget_win, text='Reset Password', font=('goudy old style', 15, 'bold'), bg="#3f51b5",
-            #       fg="white").pack(side=TOP, fill=X)
-            # Label(self.forget_win, text="Enter OTP Sent on Registered Email",
-            #       font=("times new roman", 15)).place(x=20, y=60)
-            # txt_reset = Entry(self.forget_win, textvariable=self.var_otp, font=("times new roman", 15),
-            #                   bg='lightyellow')
-            # txt_reset.place(x=20, y=100, width=250, height=30)
-            # self.btn_reset = Button(self.forget_win, text="SUBMIT", command=self.validate_otp,
-            #                         font=('goudy old style', 15, 'bold'),
-            #                         bg="lightblue", fg="white")
-            # self.btn_reset.place(x=280, y=100, width=100, height=30)
-            #
-            # lbl_new_pass = Label(self.forget_win, text="New Password", font=("times new roman", 15)).place(x=20, y=160)
-            # txt_new_pass = Entry(self.forget_win, textvariable=self.var_new_pass, font=("times new roman", 15),
-            #                      bg='lightyellow', show="*").place(x=20, y=190, width=250, height=30)
-            #
-            # lbl_c_pass = Label(self.forget_win, text="Confirm Password", font=("times new roman", 15)).place(x=20,
-            #                                                                                                  y=225)
-            # txt_c_pass = Entry(self.forget_win, textvariable=self.var_conf_pass, font=("times new roman", 15),
-            #                    bg='lightyellow', show="*").place(x=20, y=255, width=250, height=30)
-            #
-            # self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
-            #                          font=('goudy old style', 15, 'bold'), bg="lightblue", fg="white")
-            # self.btn_update.place(x=150, y=300, width=100, height=30)
             self.forget_win = Toplevel(self.root)
             self.forget_win.title("Reset Password")
             self.forget_win.geometry("400x400")
@@ -300,39 +252,39 @@ class LoginSystem:
 
             # Title Label
             Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5",
-                      fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
+                  fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
 
             # Enter OTP Label and Entry
             Label(self.forget_win, text="Enter OTP Sent on Registered Email", font=("Arial", 14)).place(x=20, y=60)
             self.var_otp = StringVar()
             txt_reset = Entry(self.forget_win, textvariable=self.var_otp, font=("Arial", 14), bg='lightyellow',
-                                  bd=2, relief=GROOVE)
+                              bd=2, relief=GROOVE)
             txt_reset.place(x=20, y=100, width=250, height=30)
 
             # Submit Button
             self.btn_reset = Button(self.forget_win, text="SUBMIT", command=self.validate_otp,
-                                        font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
-                                        cursor="hand2")
+                                    font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
+                                    cursor="hand2")
             self.btn_reset.place(x=280, y=100, width=100, height=30)
 
             # New Password Label and Entry
             Label(self.forget_win, text="New Password", font=("Arial", 14)).place(x=20, y=160)
             self.var_new_pass = StringVar()
             txt_new_pass = Entry(self.forget_win, textvariable=self.var_new_pass, font=("Arial", 14),
-                                     bg='lightyellow', show="*", bd=2, relief=GROOVE)
+                                 bg='lightyellow', show="*", bd=2, relief=GROOVE)
             txt_new_pass.place(x=20, y=190, width=250, height=30)
 
             # Confirm Password Label and Entry
             Label(self.forget_win, text="Confirm Password", font=("Arial", 14)).place(x=20, y=225)
             self.var_conf_pass = StringVar()
             txt_c_pass = Entry(self.forget_win, textvariable=self.var_conf_pass, font=("Arial", 14),
-                                   bg='lightyellow', show="*", bd=2, relief=GROOVE)
+                               bg='lightyellow', show="*", bd=2, relief=GROOVE)
             txt_c_pass.place(x=20, y=255, width=250, height=30)
 
             # Update Button
             self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
-                                         font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED,
-                                         cursor="hand2")
+                                     font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED,
+                                     cursor="hand2")
             self.btn_update.place(x=150, y=300, width=100, height=30)
 
         except Exception as ex:

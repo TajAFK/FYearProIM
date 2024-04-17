@@ -4,30 +4,38 @@ import sqlite3
 
 
 class productclass:
+    # Constructor method to initialize the class
     def __init__(self, root):
+        # Initialize the root window and configure its properties
         self.root = root
-        self.root.geometry("1100x500+220+130")
-        self.root.title("Inventory Management System")
-        self.root.config(bg="white")
-        self.root.focus_force()
+        self.root.geometry("1100x500+220+130")  # Set window geometry
+        self.root.title("Inventory Management System")  # Set window title
+        self.root.config(bg="white")  # Set background color
+        self.root.focus_force()  # Ensure the window is in focus
 
+        # Initialize StringVar variables for search functionality
         self.var_searchby = StringVar()
         self.var_searctxt = StringVar()
 
-        # ==============================
+        # Initialize StringVar variables for product details
         self.var_pid = StringVar()
         self.var_cat = StringVar()
         self.var_sup = StringVar()
 
+        # Initialize lists to store category and supplier data
         self.cat_list = []
         self.sup_list = []
+
+        # Fetch category and supplier data from the database
         self.fetch_cat_sup()
 
+        # Initialize StringVar variables for product details
         self.var_name = StringVar()
         self.var_price = StringVar()
         self.var_qty = StringVar()
         self.var_status = StringVar()
 
+        # Create a frame for product details display
         product_Frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         product_Frame.place(x=10, y=10, width=450, height=480)
 
@@ -182,44 +190,126 @@ class productclass:
         self.show()
 
     # =====================FETCH DATA=========================================================================
+    # def fetch_cat_sup(self):
+    #     self.cat_list.append("Empty")
+    #     self.sup_list.append("Empty")
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #         cur.execute("select name from category")
+    #         cat = cur.fetchall()
+    #         if len(cat) > 0:
+    #             del self.cat_list[:]
+    #             self.cat_list.append("Select")
+    #             for i in cat:
+    #                 self.cat_list.append(i[0])
+    #
+    #         cur.execute("select name from supplier")
+    #         sup = cur.fetchall()
+    #         if len(sup) > 0:
+    #             del self.sup_list[:]
+    #             self.sup_list.append("Select")
+    #             for i in sup:
+    #                 self.sup_list.append(i[0])
+    #
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def fetch_cat_sup(self):
+        # Append 'Empty' as the first item in both cat_list and sup_list
         self.cat_list.append("Empty")
         self.sup_list.append("Empty")
+
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
+            # Fetch category names from the category table
             cur.execute("select name from category")
             cat = cur.fetchall()
+
+            # If there are categories in the database, update cat_list
             if len(cat) > 0:
+                # Clear existing category list and add 'Select' as the first item
                 del self.cat_list[:]
                 self.cat_list.append("Select")
+
+                # Append fetched category names to cat_list
                 for i in cat:
                     self.cat_list.append(i[0])
 
+            # Fetch supplier names from the supplier table
             cur.execute("select name from supplier")
             sup = cur.fetchall()
+
+            # If there are suppliers in the database, update sup_list
             if len(sup) > 0:
+                # Clear existing supplier list and add 'Select' as the first item
                 del self.sup_list[:]
                 self.sup_list.append("Select")
+
+                # Append fetched supplier names to sup_list
                 for i in sup:
                     self.sup_list.append(i[0])
 
         except Exception as ex:
+            # Display error message if an exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+        finally:
+            # Close the database connection
+            con.close()
+
     # =====================ADD DATA=========================================================================
+    # def add(self):
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #         if self.var_cat.get() == "Select" or self.var_cat.get() == "Empty" or self.var_sup.get() == "Select" or self.var_sup.get() == "":
+    #             messagebox.showerror("Error", "All fields be required", parent=self.root)
+    #         else:
+    #             cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
+    #             row = cur.fetchone()
+    #             if row is not None:
+    #                 messagebox.showerror("Error", "This Product already present, try different", parent=self.root)
+    #             else:
+    #                 cur.execute(
+    #                     "INSERT INTO product(Category, Supplier, name, price, qty, status) VALUES(?,?,?,?,?,?)",
+    #                     (
+    #                         self.var_cat.get(),
+    #                         self.var_sup.get(),
+    #                         self.var_name.get(),
+    #                         self.var_price.get(),
+    #                         self.var_qty.get(),
+    #                         self.var_status.get(),
+    #                     ))
+    #                 con.commit()
+    #                 messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
+    #                 self.show()
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def add(self):
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
-            if self.var_cat.get() == "Select" or self.var_cat.get() == "Empty" or self.var_sup.get() == "Select" or self.var_sup.get() == "":
-                messagebox.showerror("Error", "All fields be required", parent=self.root)
+            # Check if all fields are filled out
+            if (self.var_cat.get() == "Select" or self.var_cat.get() == "Empty" or
+                    self.var_sup.get() == "Select" or self.var_sup.get() == "" or
+                    self.var_name.get() == "" or self.var_price.get() == "" or
+                    self.var_qty.get() == "" or self.var_status.get() == ""):
+                messagebox.showerror("Error", "All fields are required", parent=self.root)
             else:
+                # Check if the product already exists
                 cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
                 row = cur.fetchone()
                 if row is not None:
-                    messagebox.showerror("Error", "This Product already present, try different", parent=self.root)
+                    messagebox.showerror("Error", "This Product already exists, try a different name", parent=self.root)
                 else:
+                    # Insert the product into the database
                     cur.execute(
                         "INSERT INTO product(Category, Supplier, name, price, qty, status) VALUES(?,?,?,?,?,?)",
                         (
@@ -232,49 +322,88 @@ class productclass:
                         ))
                     con.commit()
                     messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
+
+                    # Refresh the product list
                     self.show()
+
         except Exception as ex:
+            # Display error message if an exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
+        finally:
+            # Close the database connection
+            con.close()
 
     # =================SHOW DATA=================
     def show(self):
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
+            # Execute SQL query to select all rows from the product table
             cur.execute("SELECT * FROM product")
+
+            # Fetch all rows from the result set
             rows = cur.fetchall()
+
+            # Clear existing data in the product table
             self.product_table.delete(*self.product_table.get_children())
+
+            # Insert fetched rows into the product table
             for row in rows:
                 self.product_table.insert('', END, values=row)
+
+            # Center align the column headings and data in the product table
+            for col in self.product_table["columns"]:
+                self.product_table.heading(col, anchor=CENTER)
+                self.product_table.column(col, anchor=CENTER)
+
         except Exception as ex:
+            # Display error message if an exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
+        finally:
+            # Close the database connection
+            con.close()
 
     # ====================== Get Data Back to Form =======================
     def get_data(self, ev):
+        # Get the focused item in the product table
         f = self.product_table.focus()
+
+        # Get the content of the focused item
         content = (self.product_table.item(f))
+
+        # Extract the values from the content dictionary
         row = content['values']
-        self.var_pid.set(row[0]),
-        self.var_cat.set(row[2]),
-        self.var_sup.set(row[1]),
-        self.var_name.set(row[3]),
-        self.var_price.set(row[4]),
-        self.var_qty.set(row[5]),
-        self.var_status.set(row[6]),
+
+        # Update the variables with the values from the selected row
+        self.var_pid.set(row[0])  # Product ID
+        self.var_cat.set(row[2])  # Category
+        self.var_sup.set(row[1])  # Supplier
+        self.var_name.set(row[3])  # Name
+        self.var_price.set(row[4])  # Price
+        self.var_qty.set(row[5])  # Quantity
+        self.var_status.set(row[6])  # Status
 
     # ====================UPDATE DATA======================
     def update(self):
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
+            # Check if Product ID is provided
             if self.var_pid.get() == "":
                 messagebox.showerror("Error", "Please select product from list", parent=self.root)
             else:
+                # Check if the selected Product ID exists in the database
                 cur.execute("Select * from product where pid=?", (self.var_pid.get(),))
                 row = cur.fetchone()
                 if row == None:
+                    # Show error if the Product ID is invalid
                     messagebox.showerror("Error", "Invalid Product", parent=self.root)
                 else:
+                    # Update the product details in the database
                     cur.execute("Update product set Category=?,Supplier=?,name=?,price=?,qty=?,status=? where pid=?", (
                         self.var_cat.get(),
                         self.var_sup.get(),
@@ -283,37 +412,53 @@ class productclass:
                         self.var_qty.get(),
                         self.var_status.get(),
                         self.var_pid.get()
-                    )
-                                )
-                con.commit()
-                messagebox.showinfo("Success", "Product Updated Successfully", parent=self.root)
-                self.show()
+                    ))
+
+                    # Commit the changes to the database
+                    con.commit()
+
+                    # Show success message
+                    messagebox.showinfo("Success", "Product Updated Successfully", parent=self.root)
+
+                    # Update the product table display
+                    self.show()
         except Exception as ex:
+            # Show error if any exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def delete(self):
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
+            # Check if Product ID is provided
             if self.var_pid.get() == "":
+                # Show error if no Product ID is selected
                 messagebox.showerror("Error", "Select product from the list", parent=self.root)
             else:
+                # Check if the selected Product ID exists in the database
                 cur.execute("Select * from product where pid=?", (self.var_pid.get(),))
                 row = cur.fetchone()
                 if row is None:
+                    # Show error if the Product ID is invalid
                     messagebox.showerror("Error", "Invalid Product", parent=self.root)
                 else:
+                    # Ask for confirmation before deleting the product
                     op = messagebox.askyesno("Confirm", "Do you really want to delete")
                     if op:
+                        # Delete the product from the database
                         cur.execute("delete from product where pid=?", (self.var_pid.get(),))
                         con.commit()
+                        # Show success message
                         messagebox.showinfo("Delete", "Product deleted Successfully", parent=self.root)
+                        # Clear the input fields after deletion
                         self.clear()
-
         except Exception as ex:
+            # Show error if any exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def clear(self):
+        # Reset all input fields to default values
         self.var_cat.set("Select")
         self.var_sup.set("Select")
         self.var_name.set("")
@@ -322,23 +467,30 @@ class productclass:
         self.var_status.set("Active")
         self.var_pid.set("")
 
+        # Reset search fields to default values
         self.var_searctxt.set("")
         self.var_searchby.set("Select")
+
+        # Update the product table with default data
         self.show()
 
     def search(self):
+        # Connect to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
+            # Check if search criteria and input are provided
             if self.var_searchby.get() == "Select":
                 messagebox.showerror("Error", "Select Search By option", parent=self.root)
             elif self.var_searctxt.get() == "":
                 messagebox.showerror("Error", "Search input should be required", parent=self.root)
             else:
+                # Execute the SQL query based on search criteria and input
                 cur.execute(
                     "SELECT * FROM product where " + self.var_searchby.get() + " LIKE '%" + self.var_searctxt.get() + "%'")
                 rows = cur.fetchall()
                 if len(rows) != 0:
+                    # If records found, delete existing data in product table and insert new records
                     self.product_table.delete(*self.product_table.get_children())
                     for row in rows:
                         self.product_table.insert('', END, values=row)
@@ -348,8 +500,14 @@ class productclass:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
 
-# This block should be at the module level, not inside the class.
+# Entry point of the program
 if __name__ == "__main__":
+    # Create a Tkinter root window
     root = Tk()
+
+    # Create an instance of the product class with the root window as its parent
     obj = productclass(root)
+
+    # Start the Tkinter event loop
     root.mainloop()
+

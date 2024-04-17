@@ -4,6 +4,8 @@ import sqlite3
 from PIL import Image, ImageTk
 import os
 
+from cryptography.fernet import Fernet
+
 
 class salesClass:
     def __init__(self, root):
@@ -12,6 +14,9 @@ class salesClass:
         self.root.title("Inventory Management System")
         self.root.config(bg="white")
         self.root.focus_force()
+
+        # Load the encryption key and initialize the cipher
+        self.cipher = self.load_key_and_initialize_cipher()
 
         self.bill_list = []
         self.var_invoice = StringVar()
@@ -80,15 +85,52 @@ class salesClass:
     #  file_name=self.Sales_List.get(index-)
     # print(file_name)
 
+    @staticmethod
+    def load_key_and_initialize_cipher():
+        """
+        Load encryption key from file and initialize cipher.
+        """
+        key_path = 'secret.key'
+        if not os.path.exists(key_path):
+            # If key does not exist, handle it appropriately
+            raise Exception("Encryption key file not found")
+        with open(key_path, 'rb') as key_file:
+            key = key_file.read()
+        return Fernet(key)
+
+    def decrypt_data(self, cipher_text):
+        if cipher_text is None:
+            return ""
+        if not isinstance(cipher_text, str):
+            cipher_text = str(cipher_text)
+        try:
+            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
+        except Exception as e:
+            messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
+            return ""
+
+    # def get_data(self, ev):
+    #     selected_indices = self.Sales_List.curselection()
+    #     if selected_indices:  # Check if there is at least one item selected
+    #         index = selected_indices[0]  # Get the index of the first selected item
+    #         file_name = self.Sales_List.get(index)  # Retrieve the file name using the index
+    #         self.bill_area.delete('1.0', END)  # Clear previous bill area contents
+    #         with open(f'bill/{file_name}', 'r') as file:  # Ensuring the file is properly closed after reading
+    #             content = file.read()  # Read the whole content of the file
+    #             self.bill_area.insert(END, content)  # Insert content into the bill_area
+    #     else:
+    #         messagebox.showwarning("Warning", "Please select a bill from the list.", parent=self.root)
+
     def get_data(self, ev):
         selected_indices = self.Sales_List.curselection()
-        if selected_indices:  # Check if there is at least one item selected
-            index = selected_indices[0]  # Get the index of the first selected item
-            file_name = self.Sales_List.get(index)  # Retrieve the file name using the index
-            self.bill_area.delete('1.0', END)  # Clear previous bill area contents
-            with open(f'bill/{file_name}', 'r') as file:  # Ensuring the file is properly closed after reading
-                content = file.read()  # Read the whole content of the file
-                self.bill_area.insert(END, content)  # Insert content into the bill_area
+        if selected_indices:
+            index = selected_indices[0]
+            file_name = self.Sales_List.get(index)
+            self.bill_area.delete('1.0', END)
+            with open(f'bill/{file_name}', 'r') as file:
+                encrypted_content = file.read()
+                decrypted_content = self.decrypt_data(encrypted_content)
+                self.bill_area.insert(END, decrypted_content)
         else:
             messagebox.showwarning("Warning", "Please select a bill from the list.", parent=self.root)
 

@@ -37,8 +37,14 @@ class IMS:
                                font=("Elephant", 15,), bg="#34515e", fg="white")
         self.lbl_clock.place(x=0, y=70, relwidth=1, height=30)
 
+        '''
+        ### Menu Image 4998752 Attribution
+        Image by "https://www.freepik.com/free-vector/gradient-accounting-logo-template_12418648.htm#query=account%20logo&position=6&from_view=keyword&track=ais&uuid=a7fde1a3-569a-48a5-a14c-ea7663b3b358"
+        
+        '''
+
         # ====left Menu==
-        self.MenuLogo = Image.open("images/menu_im.png")
+        self.MenuLogo = Image.open("images/4998752.png")
         self.MenuLogo = self.MenuLogo.resize((200, 200), Image.Resampling.LANCZOS)
         self.MenuLogo = ImageTk.PhotoImage(self.MenuLogo)
 
@@ -56,25 +62,6 @@ class IMS:
                                                                                                           fill=X)
 
         # Menu Buttons
-        # Button(LeftMenu, text="Employee", command=self.employee, image=self.icon_side, compound=LEFT,
-        #        padx=5, anchor="w", font=("times new roman", 20, "bold"), bg="white", bd=3,
-        #        cursor="hand2").pack(side=TOP, fill=X)
-        # Button(LeftMenu, text="Supplier", command=self.supplier, image=self.icon_side, compound=LEFT, padx=5,
-        #        anchor="w",
-        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-        #                                                                                     fill=X)
-        # Button(LeftMenu, text="Category", command=self.category, image=self.icon_side, compound=LEFT, padx=5,
-        #        anchor="w",
-        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-        #                                                                                     fill=X)
-        # Button(LeftMenu, text="Product", command=self.product, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-        #                                                                                     fill=X)
-        # Button(LeftMenu, text="Sales", command=self.sales, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-        #                                                                                     fill=X)
-        # Button(LeftMenu, text="Exit", image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP, fill=X)
 
         menu_font = ("times new roman", 18, "bold")
         button_bg = "#eeeeee"
