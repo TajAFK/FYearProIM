@@ -1,6 +1,6 @@
 from tkinter import *
 from PIL import Image, ImageTk
-from employee import employeeClass
+from employee import EmployeeClass
 from supplier import supplierclass
 from category import categoryclass
 from product import productclass
@@ -11,6 +11,7 @@ import os
 import time
 import subprocess
 
+
 class IMS:
     def __init__(self, root):
         self.root = root
@@ -18,21 +19,22 @@ class IMS:
         self.root.title("Inventory management System")
         self.root.config(bg="white")
 
-        # ==title====
+        # Title Bar
         self.icon_title = PhotoImage(file="images/logo1.png")
         Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
-              font=("times new roman", 40, "bold"), bg="#010c48", fg="white", anchor="w", padx=20).place(x=0, y=0,
-                                                                                                         relwidth=1,
-                                                                                                         height=70)
+              font=("Elephant", 40, "bold"), bg="#02457A", fg="white", anchor="w", padx=20).place(x=0, y=0,
+                                                                                                  relwidth=1,
+                                                                                                  height=70)
 
-        # --button logout====
-        Button(self.root, text="Logout",command=self.logout, font=("times new roman", 15, "bold"), bg="yellow",
-               cursor="hand2").place(x=1150, y=10, height=50, width=150)
+        # Logout Button
+        Button(self.root, text="Logout", command=self.logout, font=("Elephant", 15, "bold"), bg="#D32F2F", fg="white",
+               cursor="hand2", relief='raised', borderwidth=2,
+               highlightthickness=0).place(x=1150, y=10, height=50, width=150)
 
-        # ==clock==
+        # Clock
         self.lbl_clock = Label(self.root,
                                text="Welcome To Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time: HH-MM-SS",
-                               font=("times new roman", 15), bg="#4d636d", fg="white")
+                               font=("Elephant", 15,), bg="#34515e", fg="white")
         self.lbl_clock.place(x=0, y=70, relwidth=1, height=30)
 
         # ====left Menu==
@@ -40,64 +42,98 @@ class IMS:
         self.MenuLogo = self.MenuLogo.resize((200, 200), Image.Resampling.LANCZOS)
         self.MenuLogo = ImageTk.PhotoImage(self.MenuLogo)
 
-        LeftMenu = Frame(self.root, bd=3, relief=RIDGE, bg="white")
+        # Menu Background
+        LeftMenu = Frame(self.root, bd=3, relief=RIDGE, bg="#005662")
         LeftMenu.place(x=0, y=102, width=200, height=565)
 
-        lbl_menuLogo = Label(LeftMenu, image=self.MenuLogo)
+        # Menu Logo
+        lbl_menuLogo = Label(LeftMenu, image=self.MenuLogo, bg="#005662")
         lbl_menuLogo.pack(side=TOP, fill=X)
 
+        # Menu Title
         self.icon_side = PhotoImage(file="images/side.png")
-        Label(LeftMenu, text="Menu", font=("times new roman", 20), bg="#009688").pack(side=TOP, fill=X)
+        Label(LeftMenu, text="Menu", font=("times new roman", 20, "bold"), bg="#007580", fg="white").pack(side=TOP,
+                                                                                                          fill=X)
 
-        Button(LeftMenu, text="Employee", command=self.employee, image=self.icon_side, compound=LEFT,
-               padx=5, anchor="w", font=("times new roman", 20, "bold"), bg="white", bd=3,
-               cursor="hand2").pack(side=TOP, fill=X)
-        Button(LeftMenu, text="Supplier", command=self.supplier, image=self.icon_side, compound=LEFT, padx=5,
-               anchor="w",
-               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-                                                                                            fill=X)
-        Button(LeftMenu, text="Category", command=self.category, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-                                                                                            fill=X)
-        Button(LeftMenu, text="Product",command=self.product, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-                                                                                            fill=X)
-        Button(LeftMenu, text="Sales",command=self.sales, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
-                                                                                            fill=X)
-        Button(LeftMenu, text="Exit", image=self.icon_side, compound=LEFT, padx=5, anchor="w",
-               font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP, fill=X)
+        # Menu Buttons
+        # Button(LeftMenu, text="Employee", command=self.employee, image=self.icon_side, compound=LEFT,
+        #        padx=5, anchor="w", font=("times new roman", 20, "bold"), bg="white", bd=3,
+        #        cursor="hand2").pack(side=TOP, fill=X)
+        # Button(LeftMenu, text="Supplier", command=self.supplier, image=self.icon_side, compound=LEFT, padx=5,
+        #        anchor="w",
+        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
+        #                                                                                     fill=X)
+        # Button(LeftMenu, text="Category", command=self.category, image=self.icon_side, compound=LEFT, padx=5,
+        #        anchor="w",
+        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
+        #                                                                                     fill=X)
+        # Button(LeftMenu, text="Product", command=self.product, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
+        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
+        #                                                                                     fill=X)
+        # Button(LeftMenu, text="Sales", command=self.sales, image=self.icon_side, compound=LEFT, padx=5, anchor="w",
+        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP,
+        #                                                                                     fill=X)
+        # Button(LeftMenu, text="Exit", image=self.icon_side, compound=LEFT, padx=5, anchor="w",
+        #        font=("times new roman", 20, "bold"), bg="white", bd=3, cursor="hand2").pack(side=TOP, fill=X)
 
-        # ===content===
-        self.lbl_employee = Label(self.root, text="Total Employee\n[0]", bd=5, relief=RIDGE, bg="#33bbf9", fg="white",
-                                  font=("goudy old style", 20, "bold"))
+        menu_font = ("times new roman", 18, "bold")
+        button_bg = "#eeeeee"
+        button_fg = "#005662"
+
+        # Define a common style for all buttons
+        def create_menu_button(parent, text, command, icon):
+            Button(parent, text=text, command=command, image=icon, compound=LEFT, padx=10, pady=10, anchor="w",
+                   font=menu_font, bg=button_bg, fg=button_fg, bd=2, relief=RIDGE, cursor="hand2").pack(side=TOP,
+                                                                                                        fill=X)
+
+        create_menu_button(LeftMenu, "Employee", self.employee, self.icon_side)
+        create_menu_button(LeftMenu, "Supplier", self.supplier, self.icon_side)
+        create_menu_button(LeftMenu, "Category", self.category, self.icon_side)
+        create_menu_button(LeftMenu, "Product", self.product, self.icon_side)
+        create_menu_button(LeftMenu, "Sales", self.sales, self.icon_side)
+
+        # New Label
+
+        self.lbl_employee = Label(self.root, text="Total Employee\n[0]", bd=5, relief=RIDGE,
+                                  bg="#34aeeb", fg="white", font=("Roboto", 20, "bold"),
+                                  padx=10, pady=10)
         self.lbl_employee.place(x=300, y=120, height=150, width=300)
+        self.lbl_employee.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
 
-        self.lbl_supplier = Label(self.root, text="Total Supplier\n[0]", bd=5, relief=RIDGE, bg="#ff5722", fg="white",
-                                  font=("goudy old style", 20, "bold"))
+        self.lbl_supplier = Label(self.root, text="Total Supplier\n[0]", bd=5, relief=RIDGE, bg="#ff7043", fg="white",
+                                  font=("Roboto", 20, "bold"))
         self.lbl_supplier.place(x=650, y=120, height=150, width=300)
+        self.lbl_supplier.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
 
-        self.lbl_category = Label(self.root, text="Total category\n[0]", bd=5, relief=RIDGE, bg="#009688", fg="white",
-                                  font=("goudy old style", 20, "bold"))
+        self.lbl_category = Label(self.root, text="Total Category\n[0]", bd=5, relief=RIDGE, bg="#00bfa5", fg="white",
+                                  font=("Roboto", 20, "bold"))
         self.lbl_category.place(x=1000, y=120, height=150, width=300)
+        self.lbl_category.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
 
-        self.lbl_product = Label(self.root, text="Total Product\n[0]", bd=5, relief=RIDGE, bg="#607d8b", fg="white",
-                                 font=("goudy old style", 20, "bold"))
+        self.lbl_product = Label(self.root, text="Total Product\n[0]", bd=5, relief=RIDGE, bg="#78909c", fg="white",
+                                 font=("Roboto", 20, "bold"))
         self.lbl_product.place(x=300, y=300, height=150, width=300)
+        self.lbl_product.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
 
-        self.lbl_sales = Label(self.root, text="Total Sales\n[0]", bd=5, relief=RIDGE, bg="#ffc107", fg="white",
-                               font=("goudy old style", 20, "bold"))
+        self.lbl_sales = Label(self.root, text="Total Sales\n[0]", bd=5, relief=RIDGE, bg="#ffca28", fg="white",
+                               font=("Roboto", 20, "bold"))
         self.lbl_sales.place(x=650, y=300, height=150, width=300)
+        self.lbl_sales.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
 
-        # ==footer==
-        Label(self.root, text="IMS-Inventory Management System\nFor any Technical issue",
-              font=("times new roman", 12), bg="#4d636d", fg="white").pack(side=BOTTOM, fill=X)
-        self.update_content()
+        # ==Footer==
+        footer_text = "© 2024 IMS | Inventory Management System | Contact Support for Assistance"
+        footer_bg = "#263238"  # Dark charcoal grey background for a professional look
+        footer_fg = "#FFFFFF"  # White text for contrast
+        footer_font = ("Roboto", 14)  # Modern font with a suitable size for readability
+
+        Label(self.root, text=footer_text, font=footer_font, bg=footer_bg, fg=footer_fg).pack(side=BOTTOM, fill=X)
+        self.update_content()  # Ensuring the content update method is still called
+
     # =========================================================================
 
     def employee(self):
         self.new_win = Toplevel(self.root)
-        self.new_obj = employeeClass(self.new_win)
+        self.new_obj = EmployeeClass(self.new_win)
 
     def supplier(self):
         self.new_win = Toplevel(self.root)

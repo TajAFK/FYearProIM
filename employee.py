@@ -1,26 +1,28 @@
 from tkinter import *
-from tkinter import ttk, messagebox
-import sqlite3
-from cryptography.fernet import Fernet
-import os
+from tkinter import ttk, messagebox  # Importing required modules from tkinter
+import sqlite3  # Importing sqlite3 module for database operations
+from cryptography.fernet import Fernet  # Importing Fernet for encryption
+import os  # Importing os module for file operations
 
 
-class employeeClass:
+class EmployeeClass:
     def __init__(self, root):
+        # Initialize the main window
         self.root = root
         self.root.geometry("1100x500+220+130")
         self.root.title("Inventory Management System")
         self.root.config(bg="white")
         self.root.focus_force()
 
-        # Generate and store this key securely, for example in an environment variable or a key management system
+        # Generate and store the encryption key securely
         self.key = Fernet.generate_key()
         self.cipher = Fernet(self.key)
 
+        # Load the encryption key and initialize the cipher
         self.cipher = self.load_key_and_initialize_cipher()
 
-        # All variables
-        self.var_searchby = StringVar()
+        # Initialize variables
+        self.var_search = StringVar()
         self.var_searctxt = StringVar()
 
         self.var_emp_id = StringVar()
@@ -34,13 +36,13 @@ class employeeClass:
         self.var_utype = StringVar()
         self.var_salary = StringVar()
 
-        # ====searchFrame====
+        # Search Frame
         SearchFrame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
                                  bd=2, relief=RIDGE)
         SearchFrame.place(x=250, y=20, width=600, height=70)
 
-        # ===options====
-        cmb_search = ttk.Combobox(SearchFrame, textvariable=self.var_searchby,
+        # Search options
+        cmb_search = ttk.Combobox(SearchFrame, textvariable=self.var_search,
                                   values=("Select", "Email", "Name", "Contact"), state='readonly', justify=CENTER,
                                   font=("goudy old style", 15))
         cmb_search.place(x=10, y=10, width=180)
@@ -51,12 +53,12 @@ class employeeClass:
         Button(SearchFrame, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white",
                cursor="hand2").place(x=410, y=9, width=150, height=30)
 
-        # =======title======
+        # Title
         title = Label(self.root, text="Employee Details", font=("goudy old style", 15), bg="#0f4d7d", fg="white").place(
             x=50, y=100, width=1000)
 
-        # =====content#######
-        # ==row1=====
+        # Content
+        # Row 1
         lbl_empid = Label(self.root, text="Emp ID", font=("goudy old style", 15), bg="white").place(x=50, y=150)
         lbl_gender = Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
         lbl_contact = Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
@@ -71,7 +73,7 @@ class employeeClass:
         txt_contact = Entry(self.root, textvariable=self.var_contact, font=("goudy old style", 15),
                             bg="lightyellow").place(x=850, y=150, width=180)
 
-        # ==row2=====
+        # Row 2
         lbl_name = Label(self.root, text="Name", font=("goudy old style", 15), bg="white").place(x=50, y=190)
         lbl_dob = Label(self.root, text="D.O.B", font=("goudy old style", 15), bg="white").place(x=350, y=190)
         lbl_doj = Label(self.root, text="D.O.J", font=("goudy old style", 15), bg="white").place(x=750, y=190)
@@ -83,7 +85,7 @@ class employeeClass:
         txt_doj = Entry(self.root, textvariable=self.var_doj, font=("goudy old style", 15), bg="lightyellow").place(
             x=850, y=190, width=180)
 
-        # ==row3=====
+        # Row 3
         lbl_email = Label(self.root, text="Email", font=("goudy old style", 15), bg="white").place(x=50, y=230)
         lbl_pass = Label(self.root, text="Password", font=("goudy old style", 15), bg="white").place(x=350, y=230)
         lbl_utype = Label(self.root, text="User Type", font=("goudy old style", 15), bg="white").place(x=750, y=230)
@@ -97,7 +99,7 @@ class employeeClass:
         cmb_utype.place(x=850, y=230, width=180)
         cmb_utype.current(0)
 
-        # ==row4=====
+        # Row 4
         lbl_address = Label(self.root, text="Address", font=("goudy old style", 15), bg="white").place(x=50, y=270)
         lbl_salary = Label(self.root, text="Salary", font=("goudy old style", 15), bg="white").place(x=500, y=270)
 
@@ -106,7 +108,7 @@ class employeeClass:
         txt_salary = Entry(self.root, textvariable=self.var_salary, font=("goudy old style", 15),
                            bg="lightyellow").place(x=600, y=270, width=180)
 
-        # ===buttons====
+        # Buttons
         Button(self.root, text="Save", command=self.add, font=("goudy old style", 15), bg="#2196f3", fg="white",
                cursor="hand2").place(x=500, y=305, width=110, height=28)
         Button(self.root, text="Update", command=self.update, font=("goudy old style", 15), bg="#4caf50", fg="white",
@@ -118,12 +120,7 @@ class employeeClass:
                cursor="hand2").place(
             x=860, y=305, width=110, height=28)
 
-        # Generate and save this key securely; you'll need the same key for decryption
-        key = Fernet.generate_key()
-        cipher = Fernet(key)
-
-        # ====Employee Details======
-
+        # Employee Details
         emp_frame = Frame(self.root, bd=3, relief=RIDGE)
         emp_frame.place(x=0, y=350, relwidth=1, height=150)
 
@@ -138,6 +135,7 @@ class employeeClass:
         scrollx.config(command=self.EmployeeTable.xview)
         scrolly.config(command=self.EmployeeTable.yview)
 
+        # Set headings for the table
         self.EmployeeTable.heading("eid", text="Emp ID")
         self.EmployeeTable.heading("name", text="Name")
         self.EmployeeTable.heading("email", text="Email")
@@ -152,6 +150,7 @@ class employeeClass:
 
         self.EmployeeTable["show"] = "headings"
 
+        # Set column widths
         self.EmployeeTable.column("eid", width=90)
         self.EmployeeTable.column("name", width=100)
         self.EmployeeTable.column("email", width=100)
@@ -166,9 +165,11 @@ class employeeClass:
         self.EmployeeTable.pack(fill=BOTH, expand=1)
         self.EmployeeTable.bind("<ButtonRelease-1>", self.get_data)
 
+        # Show initial data in the table
         self.show()
 
-    def load_key_and_initialize_cipher(self):
+    @staticmethod
+    def load_key_and_initialize_cipher():
         key_path = 'secret.key'
         if not os.path.exists(key_path):
             # Generate a key and save it to a file
@@ -204,8 +205,7 @@ class employeeClass:
             messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
             return ""
 
-    # =====================ADD DATA=========================================================================
-
+    # Add data to the database
     def add(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
@@ -239,7 +239,7 @@ class employeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # =================SHOW DATA=================
+    # Show data in the table
     def show(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
@@ -255,8 +255,7 @@ class employeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # ====================== Get Data Back to Form =======================
-
+    # Get data from the table and fill the form fields
     def get_data(self, ev):
         f = self.EmployeeTable.focus()
         content = self.EmployeeTable.item(f)
@@ -275,7 +274,7 @@ class employeeClass:
             self.txt_address.insert(END, str(row[9]))  # Direct insertion
             self.var_salary.set(str(row[10]))
 
-    # ====================UPDATE DATA======================
+    # Update existing data in the database
     def update(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
@@ -304,6 +303,7 @@ class employeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+    # Delete data from the database
     def delete(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
@@ -326,6 +326,7 @@ class employeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+    # Clear all form fields
     def clear(self):
         # Set all the variable fields to their default values
         self.var_emp_id.set("")
@@ -339,26 +340,27 @@ class employeeClass:
         self.var_utype.set("Admin")
         self.var_salary.set("")
         self.var_searctxt.set("")
-        self.var_searchby.set("Select")
+        self.var_search.set("Select")
 
         # Clear the address Text field
         self.txt_address.delete('1.0', END)
 
         # Optionally clear and refresh the table to show all records or leave it as is
         # If there's a need to refresh the view after clearing, uncomment the next line:
-        self.show()
+        # self.show()
 
+    # Search for data based on user input
     def search(self):
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
-            if self.var_searchby.get() == "Select":
+            if self.var_search.get() == "Select":
                 messagebox.showerror("Error", "Select Search By option", parent=self.root)
             elif self.var_searctxt.get() == "":
                 messagebox.showerror("Error", "Search input should be required", parent=self.root)
             else:
                 encrypted_search_input = self.encrypt_data(self.var_searctxt.get())
-                query = f"SELECT * FROM employee WHERE {self.var_searchby.get()} = ?"  # Changed LIKE to = for exact match
+                query = f"SELECT * FROM employee WHERE {self.var_search.get()} = ?"  # Changed LIKE to = for exact match
                 parameters = (encrypted_search_input,)
                 cur.execute(query, parameters)
                 rows = cur.fetchall()
@@ -378,5 +380,5 @@ class employeeClass:
 # This block should be at the module level, not inside the class.
 if __name__ == "__main__":
     root = Tk()
-    obj = employeeClass(root)
+    obj = EmployeeClass(root)
     root.mainloop()
