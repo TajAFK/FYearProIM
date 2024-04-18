@@ -56,21 +56,27 @@ class BillClass:
         ProductFrame2 = Frame(ProductFrame1, bd=2, relief=RIDGE, bg="white")
         ProductFrame2.place(x=2, y=42, width=398, height=90)
 
-        # Label for search
-        lbl_search = Label(ProductFrame2, text="Search Product | By Name ", font=("times new roman", 15, "bold"),
-                           bg="white", fg="green").place(x=2, y=5)
+        # Define the search label within the product frame.
+        # This label acts as a prompt for users, indicating where to enter the product name for searching.
+        Label(ProductFrame2, text="Search Product | By Name ", font=("times new roman", 15, "bold"),
+              bg="white", fg="green").place(x=2, y=5)
 
-        txt_search = Label(ProductFrame2, text="Product Name", font=("times new roman", 15, "bold"), bg="white").place(
-            x=5, y=45)
-        txt_search = Entry(ProductFrame2, textvariable=self.var_search,
-                           font=("times new roman", 15), bg="light yellow").place(
+        # This label is used as a static placeholder to indicate the field's purpose, i.e., to enter a product name.
+        # Entry widget for entering the search term.
+        # Users can type the product name here to search in the database.
+        # It uses a 'light yellow' background for the entry field to make it visually distinct.
+        Entry(ProductFrame2, textvariable=self.var_search,
+              font=("times new roman", 15), bg="light yellow").place(
             x=128, y=47, width=150, height=22)
-        btn_search = Button(ProductFrame2, text="Search", command=self.search, font=("goudy old style", 15),
-                            bg="#2196f3", fg="white",
-                            cursor="hand2").place(x=285, y=45, width=100, height=25)
-        btn_show_all = Button(ProductFrame2, text="Show All", command=self.show, font=("goudy old style", 15),
-                              bg="#083531", fg="white",
-                              cursor="hand2").place(x=285, y=10, width=100, height=25)
+        # Button to initiate the search based on the entered product name.
+        # Clicking this button will trigger the 'search' method in the application.
+        Button(ProductFrame2, text="Search", command=self.search, font=("goudy old style", 15),
+               bg="#2196f3", fg="white", cursor="hand2").place(x=285, y=45, width=100, height=25)
+
+        # Button to display all products.
+        # This is used to reset or clear the search filter and show all entries in the database.
+        Button(ProductFrame2, text="Show All", command=self.show, font=("goudy old style", 15),
+               bg="#083531", fg="white", cursor="hand2").place(x=285, y=10, width=100, height=25)
 
         # ======Product Details Frame===============
 
@@ -602,18 +608,43 @@ class BillClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+    # def search(self):
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #
+    #         if self.var_search.get() == "":
+    #             messagebox.showerror("Error", "Search input should be required", parent=self.root)
+    #         else:
+    #             cur.execute(
+    #                 "SELECT pid, name, price, qty, status FROM product where name LIKE '%" + self.var_search.get() + "%' and status='Active'")
+    #             rows = cur.fetchall()
+    #             if len(rows) != 0:
+    #                 self.product_Table.delete(*self.product_Table.get_children())
+    #                 for row in rows:
+    #                     self.product_Table.insert('', END, values=row)
+    #             else:
+    #                 messagebox.showerror("Error", "No record found", parent=self.root)
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def search(self):
+        # Connect to the SQLite database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
-
-            if self.var_search.get() == "":
+            # Check if the search input is empty
+            if self.var_search.get().strip() == "":
                 messagebox.showerror("Error", "Search input should be required", parent=self.root)
             else:
-                cur.execute(
-                    "SELECT pid, name, price, qty, status FROM product where name LIKE '%" + self.var_search.get() + "%' and status='Active'")
+                # Prepare a query using parameterized SQL to avoid SQL injection
+                query = "SELECT pid, name, price, qty, status FROM product WHERE name LIKE ? AND status='Active'"
+                # Execute the query with user input included safely
+                cur.execute(query, ('%' + self.var_search.get() + '%',))
                 rows = cur.fetchall()
-                if len(rows) != 0:
+
+                # Check if any rows were returned from the database
+                if rows:
                     self.product_Table.delete(*self.product_Table.get_children())
                     for row in rows:
                         self.product_Table.insert('', END, values=row)
@@ -621,185 +652,525 @@ class BillClass:
                     messagebox.showerror("Error", "No record found", parent=self.root)
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+        finally:
+            # Ensure that the database connection is closed even if an error occurs
+            con.close()
+
+    # def get_data(self, ev):
+    #     f = self.product_Table.focus()
+    #     content = (self.product_Table.item(f))
+    #     row = content['values']
+    #     self.var_pid.set(row[0])
+    #     self.var_pname.set(row[1])
+    #     self.var_price.set(row[2])
+    #     self.lbl_inStock.config(text=f"In Stock [{str(row[3])}]")
+    #     self.var_stock.set(row[3])
+    #     self.var_qty.set('1')
 
     def get_data(self, ev):
+        # Focus on the currently selected item in the product table
         f = self.product_Table.focus()
-        content = (self.product_Table.item(f))
+
+        # Retrieve the content of the selected item
+        content = self.product_Table.item(f)
+
+        # Extract the row values from the content
         row = content['values']
-        self.var_pid.set(row[0])
-        self.var_pname.set(row[1])
-        self.var_price.set(row[2])
-        self.lbl_inStock.config(text=f"In Stock [{str(row[3])}]")
-        self.var_stock.set(row[3])
-        self.var_qty.set('1')
+
+        # Check if the row contains data before attempting to access it
+        if row:
+            # Set product ID in the corresponding variable
+            self.var_pid.set(row[0])
+
+            # Set product name in the corresponding variable
+            self.var_pname.set(row[1])
+
+            # Set product price in the corresponding variable
+            self.var_price.set(row[2])
+
+            # Update the in-stock label with the quantity from the selected row
+            self.lbl_inStock.config(text=f"In Stock [{str(row[3])}]")
+
+            # Set the stock quantity in the corresponding variable
+            self.var_stock.set(row[3])
+
+            # Initialize the quantity to 1 each time a row is selected
+            self.var_qty.set('1')
+        else:
+            # Optionally, clear all fields or notify the user if no data is found in the row
+            self.clear_fields()  # You would need to implement this method to clear all fields or handle this case appropriately.
+
+    # def get_data_cart(self, ev):
+    #     f = self.CartTable.focus()
+    #     content = (self.CartTable.item(f))
+    #     row = content['values']
+    #     self.var_pid.set(row[0])
+    #     self.var_pname.set(row[1])
+    #     self.var_price.set(row[2])
+    #     self.var_qty.set(row[3])
+    #     self.lbl_inStock.config(text=f"In Stock [{str(row[4])}]")
+    #     self.var_stock.set(row[4])
 
     def get_data_cart(self, ev):
+        # Get the current focus of the cart table
         f = self.CartTable.focus()
-        content = (self.CartTable.item(f))
+
+        # Retrieve the content associated with the focused item
+        content = self.CartTable.item(f)
+
+        # Extract the values stored in the row
         row = content['values']
-        self.var_pid.set(row[0])
-        self.var_pname.set(row[1])
-        self.var_price.set(row[2])
-        self.var_qty.set(row[3])
-        self.lbl_inStock.config(text=f"In Stock [{str(row[4])}]")
-        self.var_stock.set(row[4])
+
+        # Check if the row contains data to prevent errors
+        if row:
+            # Set the product ID from the cart data into the product ID variable
+            self.var_pid.set(row[0])
+
+            # Set the product name from the cart data into the product name variable
+            self.var_pname.set(row[1])
+
+            # Set the product price from the cart data into the product price variable
+            self.var_price.set(row[2])
+
+            # Set the product quantity from the cart data into the product quantity variable
+            self.var_qty.set(row[3])
+
+            # Update the label to show the current stock from the cart data
+            self.lbl_inStock.config(text=f"In Stock [{str(row[4])}]")
+
+            # Set the stock quantity from the cart data into the stock variable
+            self.var_stock.set(row[4])
+        else:
+            # Handle the case when no data is selected or the row is empty
+            self.clear_cart()  # Implement this method to clear or reset the cart fields
+
+    # def add_update_cart(self):
+    #     if self.var_pid.get() == '':
+    #         messagebox.showerror('Error', "Please select product from the list", parent=self.root)
+    #     elif self.var_qty.get() == '':
+    #         messagebox.showerror('Error', "Quantity is required", parent=self.root)
+    #     elif int(self.var_qty.get()) > int(self.var_stock.get()):
+    #         messagebox.showerror('Error', "Invalid Quantity", parent=self.root)
+    #     else:
+    #         # price_cal = float(int(self.var_qty.get()) * float(self.var_price.get()))
+    #         #pid, name, price, qty, status
+    #         price_cal = self.var_price.get()
+    #         cart_data = [self.var_pid.get(), self.var_pname.get(), price_cal, self.var_qty.get(), self.var_stock.get()]
+    #
+    #         #===============update cart===========
+    #         present = 'no'
+    #         index_ = 0
+    #         for row in self.cart_list:
+    #             if self.var_pid.get() == row[0]:
+    #                 present = 'yes'
+    #                 break
+    #             index_ += 1
+    #
+    #         if present == 'yes':
+    #             op = messagebox.askyesno('Confirm',
+    #                                      "Product already present\nDo you want to Update | Remove from the Cart List",
+    #                                      parent=self.root)
+    #             if op == True:
+    #                 if self.var_qty.get() == "0":
+    #                     self.cart_list.pop(index_)
+    #                 else:
+    #                     #self.cart_list[index_][2]=price_cal #price
+    #                     self.cart_list[index_][3] = self.var_qty.get()  #quantity
+    #         else:
+    #             self.cart_list.append(cart_data)
+    #
+    #         self.show_cart()
+    #         self.bill_updates()
 
     def add_update_cart(self):
+        # Validate if a product is selected
         if self.var_pid.get() == '':
             messagebox.showerror('Error', "Please select product from the list", parent=self.root)
+        # Validate if the quantity is entered
         elif self.var_qty.get() == '':
             messagebox.showerror('Error', "Quantity is required", parent=self.root)
+        # Check if the requested quantity exceeds available stock
         elif int(self.var_qty.get()) > int(self.var_stock.get()):
             messagebox.showerror('Error', "Invalid Quantity", parent=self.root)
         else:
-            # price_cal = float(int(self.var_qty.get()) * float(self.var_price.get()))
-            #pid, name, price, qty, status
+            # Calculate price based on quantity and unit price
             price_cal = self.var_price.get()
+
+            # Prepare cart data entry
             cart_data = [self.var_pid.get(), self.var_pname.get(), price_cal, self.var_qty.get(), self.var_stock.get()]
 
-            #===============update cart===========
+            # Initialize flag and index for checking presence in cart
             present = 'no'
             index_ = 0
+
+            # Check if the product is already in the cart
             for row in self.cart_list:
                 if self.var_pid.get() == row[0]:
                     present = 'yes'
                     break
                 index_ += 1
 
+            # If the product is present, confirm with the user about update or removal
             if present == 'yes':
                 op = messagebox.askyesno('Confirm',
-                                         "Product already present\nDo you want to Update | Remove from the Cart List",
+                                         "Product already present\nDo you want to Update or Remove from the Cart List",
                                          parent=self.root)
-                if op == True:
-                    if self.var_qty.get() == "0":
+                if op:
+                    if self.var_qty.get() == "0":  # Consider removing the product if quantity is set to 0
                         self.cart_list.pop(index_)
                     else:
-                        #self.cart_list[index_][2]=price_cal #price
-                        self.cart_list[index_][3] = self.var_qty.get()  #quantity
+                        # Update the quantity in the cart
+                        self.cart_list[index_][3] = self.var_qty.get()
             else:
+                # Add new product to the cart
                 self.cart_list.append(cart_data)
 
+            # Refresh the cart display and update billing information
             self.show_cart()
             self.bill_updates()
 
+    # def bill_updates(self):
+    #     self.bill_amt = 0
+    #     self.net_pay = 0
+    #     self.discount = 0
+    #
+    #     for row in self.cart_list:
+    #         self.bill_amt += (float(row[2]) * int(row[3]))  # Assuming row[2] contains the item price
+    #     self.discount = (self.bill_amt * 5) / 100
+    #     self.net_pay = self.bill_amt - self.discount  # Assuming you want to add 5% of the bill_amt to itself
+    #
+    #     # Corrected lines below
+    #     self.lbl_amt.config(text=f"Bill Amt.\n{str(self.bill_amt)}")
+    #     self.lbl_net_pay.config(text=f"Net Pay\n{str(self.net_pay)}")
+    #     self.cartTitle.config(text=f"Cart \t Total Product:[{str(len(self.cart_list))}]")
+
     def bill_updates(self):
+        # Initialize the total bill amount, net payable, and discount values
         self.bill_amt = 0
         self.net_pay = 0
         self.discount = 0
 
+        # Calculate the total bill amount from the cart list
         for row in self.cart_list:
-            self.bill_amt += (float(row[2]) * int(row[3]))  # Assuming row[2] contains the item price
-        self.discount = (self.bill_amt * 5) / 100
-        self.net_pay = self.bill_amt - self.discount  # Assuming you want to add 5% of the bill_amt to itself
+            # Assuming row[2] is the price per unit and row[3] is the quantity
+            self.bill_amt += (float(row[2]) * int(row[3]))
 
-        # Corrected lines below
+        # Calculate a 5% discount on the total bill amount
+        self.discount = (self.bill_amt * 5) / 100
+
+        # Calculate net payable after subtracting the discount from the total bill amount
+        self.net_pay = self.bill_amt - self.discount
+
+        # Update the GUI to show the total bill amount
         self.lbl_amt.config(text=f"Bill Amt.\n{str(self.bill_amt)}")
+
+        # Update the GUI to show the net payable amount
         self.lbl_net_pay.config(text=f"Net Pay\n{str(self.net_pay)}")
+
+        # Update the GUI to show the total number of products in the cart
         self.cartTitle.config(text=f"Cart \t Total Product:[{str(len(self.cart_list))}]")
 
+    # def show_cart(self):
+    #
+    #     try:
+    #
+    #         self.CartTable.delete(*self.CartTable.get_children())
+    #         for row in self.cart_list:
+    #             self.CartTable.insert('', END, values=row)
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def show_cart(self):
-
+        """
+        Refreshes the cart table display with the current items in the cart list.
+        """
         try:
-
+            # Clear all existing entries from the cart table before updating
             self.CartTable.delete(*self.CartTable.get_children())
+
+            # Iterate through each item in the cart list and add them to the cart table
             for row in self.cart_list:
                 self.CartTable.insert('', END, values=row)
+
         except Exception as ex:
+            # Handle exceptions that may occur during the cart display update
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+    # def generate_bill(self):
+    #     if self.var_cname.get() == '' or self.var_contact.get() == '':
+    #         messagebox.showerror("Error", f"Customer Details are required", parent=self.root)
+    #     elif len(self.cart_list) == 0:
+    #         messagebox.showerror("Error", f"Please Add Product to the Cart!!!", parent=self.root)
+    #
+    #     else:
+    #         #=====Bill Top======
+    #         self.bill_top()
+    #         # =====Bill Middle======
+    #         self.bill_middle()
+    #         # =====Bill Bottom======
+    #         self.bill_bottom()
+    #
+    #         fp = open(f'bill/{str(self.invoice)}.txt', 'w')
+    #         fp.write(self.encrypt_data(self.txt_bill_area.get('1.0', END)))
+    #         fp.close()
+    #         messagebox.showinfo('Saved', "Bill has been generated/Save in Backend", parent=self.root)
+    #         self.chk_print = 1
+
     def generate_bill(self):
+        """
+        Generate a bill if customer details are provided and products are added to the cart.
+        This method saves the bill to a file and updates the user interface.
+        """
+        # Validate customer name and contact details
         if self.var_cname.get() == '' or self.var_contact.get() == '':
-            messagebox.showerror("Error", f"Customer Details are required", parent=self.root)
-        elif len(self.cart_list) == 0:
-            messagebox.showerror("Error", f"Please Add Product to the Cart!!!", parent=self.root)
+            messagebox.showerror("Error", "Customer Details are required", parent=self.root)
+            return
 
-        else:
-            #=====Bill Top======
-            self.bill_top()
-            # =====Bill Middle======
-            self.bill_middle()
-            # =====Bill Bottom======
-            self.bill_bottom()
+        # Validate that the cart is not empty
+        if len(self.cart_list) == 0:
+            messagebox.showerror("Error", "Please Add Product to the Cart!!!", parent=self.root)
+            return
 
-            fp = open(f'bill/{str(self.invoice)}.txt', 'w')
-            fp.write(self.encrypt_data(self.txt_bill_area.get('1.0', END)))
-            fp.close()
-            messagebox.showinfo('Saved', "Bill has been generated/Save in Backend", parent=self.root)
-            self.chk_print = 1
+        # Generate bill sections
+        self.bill_top()
+        self.bill_middle()
+        self.bill_bottom()
+
+        # Save the bill to a file safely using a context manager
+        try:
+            with open(f'bill/{str(self.invoice)}.txt', 'w') as fp:
+                # Encrypt and write the bill data to the file
+                encrypted_data = self.encrypt_data(self.txt_bill_area.get('1.0', END))
+                fp.write(encrypted_data)
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to save bill: {str(e)}", parent=self.root)
+            return
+
+        # Show confirmation that the bill has been saved
+        messagebox.showinfo('Saved', "Bill has been generated/Save in Backend", parent=self.root)
+        # Set a flag to indicate the print check status (optional)
+        self.chk_print = 1
+
+    #     def bill_top(self):
+    #         self.invoice = int(time.strftime("%H%M%S")) + int(time.strftime("%d%m%Y"))
+    #         bill_top_temp = f'''
+    # \t\tAriatech-Inventory
+    # \t Phone Mo. 730573****, Ipswich-IP1 5RA
+    # {str("=" * 47)}
+    #  Customer Name: {self.var_cname.get()}
+    #  Ph No. :{self.var_contact.get()}
+    #  Bill No. {str(self.invoice)}\t\t\tDate: {str(time.strftime("%d/%m/%Y"))}
+    # {str("=" * 47)}
+    #  Product Name\t\t\tQTY\tPrice
+    # {str("=" * 47)}
+    #         '''
+    #         self.txt_bill_area.delete('1.0', END)
+    #         self.txt_bill_area.insert('1.0', bill_top_temp)
+
+    # def bill_top(self):
+    #     """
+    #     Constructs the header part of the bill with customer and store details.
+    #     """
+    #     # Generate a unique invoice number based on the current date and time
+    #     self.invoice = int(time.strftime("%H%M%S")) + int(time.strftime("%d%m%Y"))
+    #
+    #     # Template for the bill's top section
+    #     bill_top_temp = (
+    #         f"\t\tAriatech-Inventory\n"
+    #         f"\t Phone Mo. 730573****, Ipswich-IP1 5RA\n"
+    #         f"{('=' * 47)}\n"
+    #         f" Customer Name: {self.var_cname.get()}\n"
+    #         f" Ph No. :{self.var_contact.get()}\n"
+    #         f" Bill No. {self.invoice}\t\t\tDate: {time.strftime('%d/%m/%Y')}\n"
+    #         f"{('=' * 47)}\n"
+    #         f" Product Name\t\t\tQTY\tPrice\n"
+    #         f"{('=' * 47)}\n"
+    #     )
+    #
+    #     # Clear existing content in the billing area and insert the new header
+    #     self.txt_bill_area.delete('1.0', END)
+    #     self.txt_bill_area.insert('1.0', bill_top_temp)
 
     def bill_top(self):
-        self.invoice = int(time.strftime("%H%M%S")) + int(time.strftime("%d%m%Y"))
-        bill_top_temp = f'''
-\t\tAriatech-Inventory
-\t Phone Mo. 730573****, Ipswich-IP1 5RA
-{str("=" * 47)}
- Customer Name: {self.var_cname.get()}
- Ph No. :{self.var_contact.get()}
- Bill No. {str(self.invoice)}\t\t\tDate: {str(time.strftime("%d/%m/%Y"))}
-{str("=" * 47)}
- Product Name\t\t\tQTY\tPrice
-{str("=" * 47)}
-        '''
+        # Generate a unique invoice number using UUID
+        self.invoice = time.strftime("%Y%m%d%H%M%S")  # e.g., 20240417093045 for April 17, 2024 at 09:30:45
+
+        # Template for the bill's top section
+        bill_top_temp = (
+            "\t\tAriatech-Inventory\n"
+            "\t Phone Mo. 730573****, Ipswich-IP1 5RA\n"
+            f"{'=' * 47}\n"
+            f" Customer Name: {self.var_cname.get()}\n"
+            f" Ph No. :{self.var_contact.get()}\n"
+            f" Bill No. {self.invoice}\t\t\tDate: {time.strftime('%d/%m/%Y')}\n"
+            f"{'=' * 47}\n"
+            " Product Name\t\t\tQTY\tPrice\n"
+            f"{'=' * 47}\n"
+        )
+
+        # Clear existing content in the billing area and insert the new header
         self.txt_bill_area.delete('1.0', END)
         self.txt_bill_area.insert('1.0', bill_top_temp)
 
+    #     def bill_bottom(self):
+    #         bill_bottom_temp = f'''
+    # {str("=" * 47)}
+    #  Bill Amount\t\t\t\tGBP.{self.bill_amt}
+    #  Discount\t\t\t\tGBP.{self.discount}
+    #  Net Pay\t\t\t\tGBP.{self.net_pay}
+    # {str("=" * 47)}\n
+    #         '''
+    #         self.txt_bill_area.insert(END, bill_bottom_temp)
+
     def bill_bottom(self):
-        bill_bottom_temp = f'''
-{str("=" * 47)}
- Bill Amount\t\t\t\tGBP.{self.bill_amt}
- Discount\t\t\t\tGBP.{self.discount}
- Net Pay\t\t\t\tGBP.{self.net_pay}
-{str("=" * 47)}\n          
-        '''
+        """
+        Appends the bottom section of the bill with totals, discount, and net payable amount.
+        """
+        # Template for the bill's bottom section with totals and calculations
+        bill_bottom_temp = (
+            f"{('=' * 47)}\n"
+            f" Bill Amount\t\t\t\tGBP {self.bill_amt:.2f}\n"
+            f" Discount\t\t\t\tGBP {self.discount:.2f}\n"
+            f" Net Pay\t\t\t\tGBP {self.net_pay:.2f}\n"
+            f"{('=' * 47)}\n"
+        )
+
+        # Insert the formatted totals and calculations into the bill area
         self.txt_bill_area.insert(END, bill_bottom_temp)
 
+    # def bill_middle(self):
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #
+    #         for row in self.cart_list:
+    #
+    #             pid = row[0]
+    #             name = row[1]
+    #             qty = int(row[4]) - int(row[3])
+    #             if int(row[3]) == int(row[4]):
+    #                 status = 'Inactive'
+    #             if int(row[3]) != int(row[4]):
+    #                 status = 'Active'
+    #
+    #             price = float(row[2]) * int(row[3])
+    #             price = str(price)
+    #             self.txt_bill_area.insert(END, "\n " + name + "\t\t\t" + row[3] + "\tGBP. " + price)
+    #             #====Update quantity in product table
+    #             cur.execute('Update product set qty=?,status=? where pid=?', (
+    #                 qty,
+    #                 status,
+    #                 pid
+    #
+    #             ))
+    #             con.commit()
+    #         con.close()
+    #         self.show()
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def bill_middle(self):
+        """
+        Processes each item in the cart, updates the bill display, and adjusts inventory quantities in the database.
+        Ensures consistent formatting in the display of product names, quantities, and prices.
+        """
+        # Establish database connection
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
         try:
-
             for row in self.cart_list:
-
                 pid = row[0]
                 name = row[1]
-                qty = int(row[4]) - int(row[3])
-                if int(row[3]) == int(row[4]):
-                    status = 'Inactive'
-                if int(row[3]) != int(row[4]):
-                    status = 'Active'
+                qty = int(row[4]) - int(row[3])  # Calculate remaining quantity
+                status = 'Active' if int(row[3]) != int(
+                    row[4]) else 'Inactive'  # Determine status based on quantity left
 
-                price = float(row[2]) * int(row[3])
-                price = str(price)
-                self.txt_bill_area.insert(END, "\n " + name + "\t\t\t" + row[3] + "\tGBP. " + price)
-                #====Update quantity in product table
-                cur.execute('Update product set qty=?,status=? where pid=?', (
-                    qty,
-                    status,
-                    pid
+                price = float(row[2]) * int(row[3])  # Calculate total price for the item
 
-                ))
+                # Use string formatting to ensure consistent alignment in the bill display
+                formatted_line = "{:<30}{:>3}\tGBP {:>8.2f}\n".format(name, row[3], price)
+                self.txt_bill_area.insert(END, formatted_line)
+
+                # Update product quantity and status in the database
+                cur.execute('UPDATE product SET qty=?, status=? WHERE pid=?', (qty, status, pid))
                 con.commit()
+
             con.close()
-            self.show()
+            self.show()  # Refresh display (if necessary)
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+        finally:
+            # Ensure database connection is closed in case of any failures
+            if con:
+                con.close()
+
+    # def clear_cart(self):
+    #     self.var_pid.set('')
+    #     self.var_pname.set('')
+    #     self.var_price.set('')
+    #     self.var_qty.set('')
+    #     self.lbl_inStock.config(text=f"In Stock")
+    #     self.var_stock.set('')
 
     def clear_cart(self):
+        """
+        Resets the product input fields and stock information in the GUI.
+        This function is called to clear the form after a transaction or when manually resetting the cart.
+        """
+        # Clear the product ID field
         self.var_pid.set('')
+
+        # Clear the product name field
         self.var_pname.set('')
+
+        # Reset the price field to empty
         self.var_price.set('')
+
+        # Reset the quantity field to empty
         self.var_qty.set('')
-        self.lbl_inStock.config(text=f"In Stock")
+
+        # Reset the stock label to its default text without specific stock info
+        self.lbl_inStock.config(text="In Stock")
+
+        # Clear the stock variable
         self.var_stock.set('')
 
+    # def clear_all(self):
+    #     del self.cart_list[:]
+    #     self.var_cname.set('')
+    #     self.var_contact.set('')
+    #     self.txt_bill_area.delete('1.0', END)
+    #     self.cartTitle.config(text=f"Cart \t Total Product: [0]")
+    #     self.var_search.set('')
+    #     self.clear_cart()
+    #     self.show()
+    #     self.show_cart()
+
     def clear_all(self):
+        """
+        Clears all user inputs and resets the application to its initial state.
+        This includes clearing the cart list, all customer details, search fields, and resetting the display areas.
+        """
+        # Clear the cart list and remove all items
         del self.cart_list[:]
+
+        # Reset customer name and contact information fields
         self.var_cname.set('')
         self.var_contact.set('')
+
+        # Clear the entire bill area text
         self.txt_bill_area.delete('1.0', END)
-        self.cartTitle.config(text=f"Cart \t Total Product: [0]")
+
+        # Reset the cart title to show zero products
+        self.cartTitle.config(text="Cart \t Total Product: [0]")
+
+        # Clear the search input field
         self.var_search.set('')
+
+        # Call the clear_cart method to reset product-related input fields and labels
         self.clear_cart()
+
+        # Refresh the product and cart displays (assuming these methods are responsible for UI updates)
         self.show()
         self.show_cart()
 
@@ -815,18 +1186,59 @@ class BillClass:
         # Call this function again after 200 milliseconds
         self.lbl_clock.after(200, self.update_date_time)
 
+    # def print_bill(self):
+    #     if self.chk_print == 1:
+    #         messagebox.showinfo('Print', "Please wait while printing", parent=self.root)
+    #         new_file = tempfile.mktemp('.txt')
+    #         open(new_file, 'w').write(self.txt_bill_area.get('1.0', END))
+    #         os.startfile(new_file, 'print')
+    #     else:
+    #         messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
+
+    import os
+    import tempfile
+    from tkinter import messagebox
+
     def print_bill(self):
+        """
+        Prints the bill if it has been generated.
+        Displays a message if the bill has not yet been generated.
+        """
         if self.chk_print == 1:
-            messagebox.showinfo('Print', "Please wait while printing", parent=self.root)
-            new_file = tempfile.mktemp('.txt')
-            open(new_file, 'w').write(self.txt_bill_area.get('1.0', END))
-            os.startfile(new_file, 'print')
+            try:
+                messagebox.showinfo('Print', "Please wait while printing", parent=self.root)
+                # Create a new temporary file for printing
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.txt', mode='w') as tf:
+                    # Write the contents of the bill area to the temporary file
+                    tf.write(self.txt_bill_area.get('1.0', END))
+                    # Ensure data is written to disk
+                    tf.flush()
+                # Use the default application associated with printing text files
+                os.startfile(tf.name, 'print')
+            except Exception as ex:
+                messagebox.showerror('Print Error', f"Failed to print bill: {str(ex)}", parent=self.root)
         else:
             messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
 
+    # def logout(self):
+    #     self.root.destroy()
+    #     subprocess.run(["python", "login.py"], check=True)
+
     def logout(self):
-        self.root.destroy()
-        subprocess.run(["python", "login.py"], check=True)
+        """
+        Destroys the current application window and restarts the login interface.
+        """
+        try:
+            # First, attempt to close the current root window
+            self.root.destroy()
+            # Then, try to open the login interface using a subprocess
+            subprocess.run(["python", "login.py"], check=True)
+        except subprocess.CalledProcessError as e:
+            # Handle exceptions related to subprocess execution, such as the script not executing correctly
+            messagebox.showerror("Logout Failed", f"Failed to start login process: {e}")
+        except Exception as e:
+            # Handle other potential errors
+            messagebox.showerror("Logout Error", f"An error occurred: {e}")
 
 
 if __name__ == "__main__":

@@ -1,15 +1,15 @@
 # Import necessary modules
+import json
+import os
+import smtplib
+import sqlite3
+import subprocess
+from random import randint
 from tkinter import *
 from tkinter import messagebox
-import sqlite3
 from tkinter.ttk import Style
 
 from cryptography.fernet import Fernet
-import subprocess
-import smtplib
-from random import randint
-import os
-import json
 
 
 # Define the main class for the login system
@@ -47,10 +47,10 @@ class LoginSystem:
         # Title label for the login form
         title = Label(login_frame, text="Login", font=("Arial Rounded MT Bold", 30), bg="white", fg="#00759E")
         title.pack(fill=X,
-                   pady=(30, 20))  # Adjusted the pady to provide more spacing between the title and other elements
+                   pady=(30, 20))
 
         # Label and entry for Username
-        Label(login_frame, text="Username", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=100)
+        Label(login_frame, text="User ID", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=100)
         Entry(login_frame, textvariable=self.employee_id, font=("Andlus", 15), bg="#FFFFFF", fg="#343A40").place(x=50,
                                                                                                                  y=140,
                                                                                                                  width=250)

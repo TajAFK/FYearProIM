@@ -1,87 +1,108 @@
+import os  # Importing os module for file operations
+import sqlite3  # Importing sqlite3 module for database operations
 from tkinter import *
 from tkinter import ttk, messagebox  # Importing required modules from tkinter
-import sqlite3  # Importing sqlite3 module for database operations
+
 from cryptography.fernet import Fernet  # Importing Fernet for encryption
-import os  # Importing os module for file operations
 
 
 class EmployeeClass:
     def __init__(self, root):
-        # Initialize the main window
+        """
+        Initialize the main application window with necessary GUI components and data handling setup.
+        """
+        # Basic window setup
         self.root = root
-        self.root.geometry("1100x500+220+130")
-        self.root.title("Inventory Management System")
-        self.root.config(bg="white")
-        self.root.focus_force()
+        self.root.geometry("1100x500+220+130")  # Set the size and position of the window
+        self.root.title("Inventory Management System")  # Set the window title
+        self.root.config(bg="white")  # Set the background color of the window
+        self.root.focus_force()  # Set focus on the main window to capture all keyboard inputs
 
-        # Generate and store the encryption key securely
-        self.key = Fernet.generate_key()
-        self.cipher = Fernet(self.key)
+        # Encryption setup
+        self.key = Fernet.generate_key()  # Generate a secure encryption key
+        self.cipher = Fernet(self.key)  # Create a cipher object for encrypting and decrypting
+        self.cipher = self.load_key_and_initialize_cipher()  # Load existing key if available, else generate new
 
-        # Load the encryption key and initialize the cipher
-        self.cipher = self.load_key_and_initialize_cipher()
+        # Initialize tkinter string variables for form handling
+        self.var_search = StringVar()  # Variable to handle search mode (by email, name, etc.)
+        self.var_searctxt = StringVar()  # Variable to handle the search input text
 
-        # Initialize variables
-        self.var_search = StringVar()
-        self.var_searctxt = StringVar()
-
-        self.var_emp_id = StringVar()
-        self.var_gender = StringVar()
-        self.var_contact = StringVar()
-        self.var_name = StringVar()
-        self.var_dob = StringVar()
-        self.var_doj = StringVar()
-        self.var_email = StringVar()
-        self.var_pass = StringVar()
-        self.var_utype = StringVar()
-        self.var_salary = StringVar()
+        # Employee data variables
+        self.var_emp_id = StringVar()  # Employee ID
+        self.var_gender = StringVar()  # Gender
+        self.var_contact = StringVar()  # Contact number
+        self.var_name = StringVar()  # Employee name
+        self.var_dob = StringVar()  # Date of birth
+        self.var_doj = StringVar()  # Date of joining
+        self.var_email = StringVar()  # Email address
+        self.var_pass = StringVar()  # Password for login or system access
+        self.var_utype = StringVar()  # User type (e.g., Admin, Employee)
+        self.var_salary = StringVar()  # Salary
 
         # Search Frame
+        # Initialize a LabelFrame widget for employee search operations. This frame is designed with a white background and
+        # bold font, enhancing its visibility on the interface. It is positioned centrally with specific dimensions.
         SearchFrame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
                                  bd=2, relief=RIDGE)
-        SearchFrame.place(x=250, y=20, width=600, height=70)
+        SearchFrame.place(x=250, y=20, width=600, height=70)  # Set the frame's position and size on the main window.
 
-        # Search options
+        # Search Options
+        # Initialize a Combobox within the SearchFrame to allow users to select the criterion for searching employees.
+        # It is set to 'readonly' to prevent user-typed entries, ensuring they select from predefined options.
         cmb_search = ttk.Combobox(SearchFrame, textvariable=self.var_search,
                                   values=("Select", "Email", "Name", "Contact"), state='readonly', justify=CENTER,
                                   font=("goudy old style", 15))
-        cmb_search.place(x=10, y=10, width=180)
-        cmb_search.current(0)
+        cmb_search.place(x=10, y=10, width=180)  # Position the combobox within the SearchFrame.
+        cmb_search.current(0)  # Set the default selection of the combobox to the first item ("Select").
 
+        # Entry Field for Search Text
+        # Set up an entry widget for users to input their search query, configured with a specific font and background color.
+        # This widget captures the search text, which is used when the 'Search' button is clicked.
         Entry(SearchFrame, textvariable=self.var_searctxt, font=("goudy old style", 15),
-              bg="lightyellow").place(x=200, y=10)
+              bg="lightyellow").place(x=200, y=10)  # Position the entry field within the SearchFrame.
+
+        # Search Button
+        # Create a button to initiate the search operation. The button is styled with a green background and white text.
+        # Clicking this button triggers the 'search' method to perform the search based on the selected criteria and input text.
         Button(SearchFrame, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white",
-               cursor="hand2").place(x=410, y=9, width=150, height=30)
+               cursor="hand2").place(x=410, y=9, width=150, height=30)  # Position the button next to the entry field.
 
-        # Title
+        # Title Label
+        # Display a label at the top of the form to indicate the section for Employee Details, using a contrasting color scheme.
         title = Label(self.root, text="Employee Details", font=("goudy old style", 15), bg="#0f4d7d", fg="white").place(
-            x=50, y=100, width=1000)
+            x=50, y=100, width=1000)  # Set the position and width to span across the window for visibility.
 
-        # Content
-        # Row 1
+        # Content: Row 1 - Employee Information
+        # Label and entry for Employee ID
         lbl_empid = Label(self.root, text="Emp ID", font=("goudy old style", 15), bg="white").place(x=50, y=150)
-        lbl_gender = Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
-        lbl_contact = Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
-
         txt_empid = Entry(self.root, textvariable=self.var_emp_id, font=("goudy old style", 15),
                           bg="lightyellow").place(x=150, y=150, width=180)
+
+        # Label and combobox for selecting Gender
+        lbl_gender = Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
         cmb_gender = ttk.Combobox(self.root, textvariable=self.var_gender, values=("Select", "Male", "Female", "Other"),
                                   state='readonly', justify=CENTER, font=("goudy old style", 15))
         cmb_gender.place(x=500, y=150, width=180)
-        cmb_gender.current(0)
+        cmb_gender.current(0)  # Default to the first entry 'Select'
 
+        # Label and entry for Contact Information
+        lbl_contact = Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
         txt_contact = Entry(self.root, textvariable=self.var_contact, font=("goudy old style", 15),
                             bg="lightyellow").place(x=850, y=150, width=180)
 
-        # Row 2
+        # Content: Row 2 - Additional Employee Information
+        # Label and entry for Employee Name
         lbl_name = Label(self.root, text="Name", font=("goudy old style", 15), bg="white").place(x=50, y=190)
-        lbl_dob = Label(self.root, text="D.O.B", font=("goudy old style", 15), bg="white").place(x=350, y=190)
-        lbl_doj = Label(self.root, text="D.O.J", font=("goudy old style", 15), bg="white").place(x=750, y=190)
-
         txt_name = Entry(self.root, textvariable=self.var_name, font=("goudy old style", 15), bg="lightyellow").place(
             x=150, y=190, width=180)
+
+        # Label and entry for Employee Date of Birth (D.O.B)
+        lbl_dob = Label(self.root, text="D.O.B", font=("goudy old style", 15), bg="white").place(x=350, y=190)
         txt_dob = Entry(self.root, textvariable=self.var_dob, font=("goudy old style", 15), bg="lightyellow").place(
             x=500, y=190, width=180)
+
+        # Label and entry for Employee Date of Joining (D.O.J)
+        lbl_doj = Label(self.root, text="D.O.J", font=("goudy old style", 15), bg="white").place(x=750, y=190)
         txt_doj = Entry(self.root, textvariable=self.var_doj, font=("goudy old style", 15), bg="lightyellow").place(
             x=850, y=190, width=180)
 
@@ -377,7 +398,7 @@ class EmployeeClass:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
 
-# This block should be at the module level, not inside the class.
+
 if __name__ == "__main__":
     root = Tk()
     obj = EmployeeClass(root)

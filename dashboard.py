@@ -175,8 +175,20 @@ class IMS:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def logout(self):
-        self.root.destroy()
-        subprocess.run(["python", "login.py"], check=True)
+        """
+        Destroys the current application window and restarts the login interface.
+        """
+        try:
+            # First, attempt to close the current root window
+            self.root.destroy()
+            # Then, try to open the login interface using a subprocess
+            subprocess.run(["python", "login.py"], check=True)
+        except subprocess.CalledProcessError as e:
+            # Handle exceptions related to subprocess execution, such as the script not executing correctly
+            messagebox.showerror("Logout Failed", f"Failed to start login process: {e}")
+        except Exception as e:
+            # Handle other potential errors
+            messagebox.showerror("Logout Error", f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
