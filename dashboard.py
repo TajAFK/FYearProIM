@@ -1,14 +1,27 @@
+# Standard imports for GUI development using tkinter.
 from tkinter import *
+from tkinter import messagebox  # Import for easy GUI dialogs like error messages.
+
+# PIL for handling images within the GUI.
 from PIL import Image, ImageTk
-from employee import EmployeeClass
-from supplier import supplierclass
-from category import categoryclass
-from product import productclass
-from sales import salesClass
+
+# Application-specific modules for different sections of the system.
+from employee import EmployeeClass  # Handles employee management functionalities.
+from supplier import supplierclass  # Manages supplier-related information.
+from category import categoryclass  # Manages product categories.
+from product import productclass  # Handles product information management.
+from sales import salesClass  # Manages sales transactions.
+
+# SQLite3 for database operations to store and retrieve application data.
 import sqlite3
-from tkinter import messagebox
+
+# OS module to interact with the operating system, like file and directory manipulation.
 import os
+
+# Time module for handling operations that involve time computations.
 import time
+
+# Subprocess module to handle processes like opening files or other programs from the application.
 import subprocess
 
 
@@ -69,110 +82,147 @@ class IMS:
 
         # Define a common style for all buttons
         def create_menu_button(parent, text, command, icon):
+            """
+            Create and pack a button with text, icon, and a command in the parent widget.
+            """
             Button(parent, text=text, command=command, image=icon, compound=LEFT, padx=10, pady=10, anchor="w",
                    font=menu_font, bg=button_bg, fg=button_fg, bd=2, relief=RIDGE, cursor="hand2").pack(side=TOP,
                                                                                                         fill=X)
 
-        create_menu_button(LeftMenu, "Employee", self.employee, self.icon_side)
-        create_menu_button(LeftMenu, "Supplier", self.supplier, self.icon_side)
-        create_menu_button(LeftMenu, "Category", self.category, self.icon_side)
-        create_menu_button(LeftMenu, "Product", self.product, self.icon_side)
-        create_menu_button(LeftMenu, "Sales", self.sales, self.icon_side)
+        # Creating navigation buttons on the sidebar for various application modules
+        create_menu_button(LeftMenu, "Employee", self.employee, self.icon_side)  # Employee management
+        create_menu_button(LeftMenu, "Supplier", self.supplier, self.icon_side)  # Supplier management
+        create_menu_button(LeftMenu, "Category", self.category, self.icon_side)  # Category management
+        create_menu_button(LeftMenu, "Product", self.product, self.icon_side)  # Product management
+        create_menu_button(LeftMenu, "Sales", self.sales, self.icon_side)  # Sales records
 
-        # New Label
-
+        # Label for displaying the total number of employees.
         self.lbl_employee = Label(self.root, text="Total Employee\n[0]", bd=5, relief=RIDGE,
                                   bg="#34aeeb", fg="white", font=("Roboto", 20, "bold"),
                                   padx=10, pady=10)
         self.lbl_employee.place(x=300, y=120, height=150, width=300)
-        self.lbl_employee.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
+        self.lbl_employee.config(font=("Roboto", 24, "bold"))
 
+        # Label for displaying the total number of suppliers.
         self.lbl_supplier = Label(self.root, text="Total Supplier\n[0]", bd=5, relief=RIDGE, bg="#ff7043", fg="white",
                                   font=("Roboto", 20, "bold"))
         self.lbl_supplier.place(x=650, y=120, height=150, width=300)
-        self.lbl_supplier.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
+        self.lbl_supplier.config(font=("Roboto", 24, "bold"))
 
+        # Label for displaying the total number of categories.
         self.lbl_category = Label(self.root, text="Total Category\n[0]", bd=5, relief=RIDGE, bg="#00bfa5", fg="white",
                                   font=("Roboto", 20, "bold"))
         self.lbl_category.place(x=1000, y=120, height=150, width=300)
-        self.lbl_category.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
+        self.lbl_category.config(font=("Roboto", 24, "bold"))
 
+        # Label for displaying the total number of products.
         self.lbl_product = Label(self.root, text="Total Product\n[0]", bd=5, relief=RIDGE, bg="#78909c", fg="white",
                                  font=("Roboto", 20, "bold"))
         self.lbl_product.place(x=300, y=300, height=150, width=300)
-        self.lbl_product.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
+        self.lbl_product.config(font=("Roboto", 24, "bold"))
 
+        # Label for displaying the total sales count.
         self.lbl_sales = Label(self.root, text="Total Sales\n[0]", bd=5, relief=RIDGE, bg="#ffca28", fg="white",
                                font=("Roboto", 20, "bold"))
         self.lbl_sales.place(x=650, y=300, height=150, width=300)
-        self.lbl_sales.config(font=("Roboto", 24, "bold"))  # Making the numbers larger and bolder
+        self.lbl_sales.config(font=("Roboto", 24, "bold"))
 
         # ==Footer==
+        # Define footer text and styling parameters.
         footer_text = "© 2024 IMS | Inventory Management System | Contact Support for Assistance"
-        footer_bg = "#263238"  # Dark charcoal grey background for a professional look
-        footer_fg = "#FFFFFF"  # White text for contrast
-        footer_font = ("Roboto", 14)  # Modern font with a suitable size for readability
+        footer_bg = "#263238"  # Background color for the footer
+        footer_fg = "#FFFFFF"  # Text color for the footer
+        footer_font = ("Roboto", 14)  # Font settings for the footer
 
+        # Create a label widget for the footer using predefined styling parameters and pack it at the bottom of the window.
+        # The footer is stretched horizontally to span the entire width of the window.
         Label(self.root, text=footer_text, font=footer_font, bg=footer_bg, fg=footer_fg).pack(side=BOTTOM, fill=X)
-        self.update_content()  # Ensuring the content update method is still called
 
-    # =========================================================================
+        # Call the update_content function to handle any dynamic updates or initializations after creating the footer.
+        self.update_content()
 
     def employee(self):
-        self.new_win = Toplevel(self.root)
-        self.new_obj = EmployeeClass(self.new_win)
+        """
+        Opens a new window for managing employee data by instantiating the EmployeeClass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = EmployeeClass(self.new_win)  # Instantiate the EmployeeClass in the new window
 
     def supplier(self):
-        self.new_win = Toplevel(self.root)
-        self.new_obj = supplierclass(self.new_win)
+        """
+        Opens a new window for managing supplier information by instantiating the supplierclass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = supplierclass(self.new_win)  # Instantiate the supplierclass in the new window
 
     def category(self):
-        self.new_win = Toplevel(self.root)
-        self.new_obj = categoryclass(self.new_win)
+        """
+        Opens a new window for managing product categories by instantiating the categoryclass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = categoryclass(self.new_win)  # Instantiate the categoryclass in the new window
 
     def product(self):
-        self.new_win = Toplevel(self.root)
-        self.new_obj = productclass(self.new_win)
+        """
+        Opens a new window for managing product details by instantiating the productclass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = productclass(self.new_win)  # Instantiate the productclass in the new window
 
     def sales(self):
-        self.new_win = Toplevel(self.root)
-        self.new_obj = salesClass(self.new_win)
+        """
+        Opens a new window for managing sales transactions by instantiating the salesClass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = salesClass(self.new_win)  # Instantiate the salesClass in the new window
 
     def update_content(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+        """
+        Updates the content on the dashboard dynamically by fetching the latest data from the database.
+        This includes counts of products, suppliers, categories, employees, and sales.
+        Also updates the current date and time on the display.
+        """
+        con = sqlite3.connect(database=r'ims.db')  # Connect to the SQLite database
+        cur = con.cursor()  # Create a cursor object to execute SQL queries
+
         try:
+            # Update product count
             cur.execute("select * from product")
             product = cur.fetchall()
-            self.lbl_product.config(text=f'Total Product\n[{str(len(product))}]')
+            self.lbl_product.config(text=f'Total Product\n[{str(len(product))}]')  # Display the number of products
 
+            # Update supplier count
             cur.execute("select * from supplier")
             supplier = cur.fetchall()
-            self.lbl_supplier.config(text=f'Total Suppliers\n[{str(len(supplier))}]')
+            self.lbl_supplier.config(text=f'Total Suppliers\n[{str(len(supplier))}]')  # Display the number of suppliers
 
+            # Update category count
             cur.execute("select * from category")
             category = cur.fetchall()
-            self.lbl_category.config(text=f'Total Categories\n[{str(len(category))}]')
+            self.lbl_category.config(
+                text=f'Total Categories\n[{str(len(category))}]')  # Display the number of categories
 
+            # Update employee count
             cur.execute("select * from employee")
             employee = cur.fetchall()
-            self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')
+            self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')  # Display the number of employees
 
-            self.lbl_sales.config(text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')
+            # Update sales count
+            self.lbl_sales.config(
+                text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')  # Display the number of sales files
 
-            # Fetch current date and time
+            # Update current time and date display
             current_time = time.strftime("%I:%M:%S %p")  # Format time in 12-hour format with AM/PM
             current_date = time.strftime("%d-%m-%Y")  # Format date in Day-Month-Year format
-
-            # Update the label text
             self.lbl_clock.config(
                 text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
 
-            # Call this function again after 200 milliseconds
+            # Schedule the update_content function to run again after 200 milliseconds
             self.lbl_clock.after(200, self.update_content)
 
         except Exception as ex:
-            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+            messagebox.showerror("Error", f"Error due to: {str(ex)}",
+                                 parent=self.root)  # Display error if any issue occurs
 
     def logout(self):
         """

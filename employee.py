@@ -11,6 +11,7 @@ class EmployeeClass:
         """
         Initialize the main application window with necessary GUI components and data handling setup.
         """
+
         # Basic window setup
         self.root = root
         self.root.geometry("1100x500+220+130")  # Set the size and position of the window
@@ -39,9 +40,12 @@ class EmployeeClass:
         self.var_utype = StringVar()  # User type (e.g., Admin, Employee)
         self.var_salary = StringVar()  # Salary
 
-        # Search Frame
-        # Initialize a LabelFrame widget for employee search operations. This frame is designed with a white background and
-        # bold font, enhancing its visibility on the interface. It is positioned centrally with specific dimensions.
+        # Debugging to check if encrypt decrypt working perfectly
+        #self.test_encryption_consistency()
+
+        # Search Frame Initialize a LabelFrame widget for employee search operations. This frame is designed with a
+        # white background and bold font, enhancing its visibility on the interface. It is positioned centrally with
+        # specific dimensions.
         SearchFrame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
                                  bd=2, relief=RIDGE)
         SearchFrame.place(x=250, y=20, width=600, height=70)  # Set the frame's position and size on the main window.
@@ -191,54 +195,116 @@ class EmployeeClass:
 
     @staticmethod
     def load_key_and_initialize_cipher():
-        key_path = 'secret.key'
+        """
+        Loads an encryption key from a file, or generates a new one if the file doesn't exist.
+        This method ensures that a secure key is always available for encrypting and decrypting data.
+
+        Returns:
+            Fernet: A cryptography.Fernet object initialized with the loaded or generated key.
+        """
+        key_path = 'secret.key'  # Define the path to the encryption key file
+
+        # Check if the encryption key file exists
         if not os.path.exists(key_path):
-            # Generate a key and save it to a file
+            # If the key file does not exist, generate a new encryption key
             key = Fernet.generate_key()
+            # Write the newly generated key to a file for future use
             with open(key_path, 'wb') as key_file:
                 key_file.write(key)
         else:
-            # Load the key from the file
+            # If the key file exists, load the key from the file
             with open(key_path, 'rb') as key_file:
                 key = key_file.read()
 
+        # Return a Fernet object initialized with the loaded or generated key
         return Fernet(key)
 
     def encrypt_data(self, plain_text):
+        """
+        Encrypts the provided plain text using the Fernet encryption algorithm.
+
+        Args:
+            plain_text (str): The text data to encrypt.
+
+        Returns:
+            str: The encrypted text, encoded in utf-8 and returned as a string.
+            If encryption fails, an empty string is returned and an error message is displayed.
+        """
+        # Return an empty string if the input is None
         if plain_text is None:
             return ""
+
+        # Convert the input to a string if it is not already one
         if not isinstance(plain_text, str):
             plain_text = str(plain_text)
+
         try:
+            # Attempt to encrypt the plain text and return it
             return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8')
         except Exception as e:
+            # Display an error message if encryption fails and return an empty string
             messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
             return ""
 
     def decrypt_data(self, cipher_text):
+        """
+        Decrypts the provided encrypted text using the Fernet encryption algorithm.
+
+        Args:
+            cipher_text (str): The encrypted text to be decrypted.
+
+        Returns:
+            str: The decrypted text, returned as a utf-8 encoded string.
+            If decryption fails, an empty string is returned and an error message is displayed.
+        """
+        # Return an empty string if the input is None
         if cipher_text is None:
             return ""
+
+        # Ensure the input is a string before processing
         if not isinstance(cipher_text, str):
             cipher_text = str(cipher_text)
+
         try:
+            # Attempt to decrypt the cipher text and return it
             return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
         except Exception as e:
+            # Display an error message if decryption fails and return an empty string
             messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
             return ""
 
+    '''
+    Debug function to verify if encrypt decrypt works as it should    
+    def test_encryption_consistency(self):
+        test_input = "Example Name"
+        encrypted_test = self.encrypt_data(test_input)
+        decrypted_test = self.decrypt_data(encrypted_test)
+
+        print(f"Original: {test_input}, Encrypted: {encrypted_test}, Decrypted: {decrypted_test}")
+    '''
+
     # Add data to the database
     def add(self):
+        """
+        Adds a new employee record to the database after validating that the employee ID is unique.
+        """
+        # Connect to the SQLite database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
+            # Validate if the employee ID field is not empty
             if self.var_emp_id.get() == "":
                 messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
             else:
+                # Check if the employee ID already exists in the database
                 cur.execute("SELECT * FROM employee WHERE eid=?", (self.var_emp_id.get(),))
                 row = cur.fetchone()
                 if row is not None:
+                    # If the ID already exists, notify the user
                     messagebox.showerror("Error", "This Employee ID already assigned, try different", parent=self.root)
                 else:
+                    # If the ID is unique, insert the new employee record into the database
                     cur.execute(
                         "INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         (
@@ -255,148 +321,252 @@ class EmployeeClass:
                             self.var_salary.get(),
                         ))
                     con.commit()
+                    # Inform the user of success
                     messagebox.showinfo("Success", "Employee Added Successfully", parent=self.root)
+                    # Refresh the display to show the new record
                     self.show()
         except Exception as ex:
+            # If an exception occurred, show an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Show data in the table
     def show(self):
+        """
+        Fetches and displays all employee records from the database into the EmployeeTable.
+        Data fields that require confidentiality are decrypted before display.
+        """
+        # Establish connection to the SQLite database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
+            # Execute a query to fetch all employee data
             cur.execute("SELECT * FROM employee")
             rows = cur.fetchall()
+
+            # Clear existing data in the table before updating
             self.EmployeeTable.delete(*self.EmployeeTable.get_children())
+
+            # Iterate through each record fetched from the database
             for row in rows:
-                decrypted_row = [row[0], self.decrypt_data(row[1]), self.decrypt_data(row[2]), row[3],
-                                 self.decrypt_data(row[4]), row[5], row[6], self.decrypt_data(row[7]), row[8],
-                                 self.decrypt_data(row[9]), row[10]]
+                # Decrypt sensitive data before adding it to the table view
+                decrypted_row = [
+                    row[0],  # Employee ID
+                    self.decrypt_data(row[1]),  # Name
+                    self.decrypt_data(row[2]),  # Email
+                    row[3],  # Gender
+                    self.decrypt_data(row[4]),  # Contact
+                    row[5],  # Date of Birth
+                    row[6],  # Date of Joining
+                    self.decrypt_data(row[7]),  # Password
+                    row[8],  # User Type
+                    self.decrypt_data(row[9]),  # Address
+                    row[10]  # Salary
+                ]
+                # Insert the decrypted data row into the table
                 self.EmployeeTable.insert('', END, values=decrypted_row)
         except Exception as ex:
+            # If an error occurs, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Get data from the table and fill the form fields
     def get_data(self, ev):
+        """
+        Retrieves data from the selected row in the EmployeeTable and sets it into the corresponding form fields.
+        This method allows the user to see and possibly edit the data of an employee selected from the list.
+        """
+        # Get the current focus of the table, which corresponds to the selected row
         f = self.EmployeeTable.focus()
+        # Retrieve the item's data from the focused row
         content = self.EmployeeTable.item(f)
         row = content['values']
+
+        # Check if the row has data to prevent errors on empty row selection
         if row:
-            self.var_emp_id.set(str(row[0]))
-            self.var_name.set(str(row[1]))  # No decryption needed if already decrypted
-            self.var_email.set(str(row[2]))
-            self.var_gender.set(str(row[3]))
-            self.var_contact.set(str(row[4]))
-            self.var_dob.set(str(row[5]))
-            self.var_doj.set(str(row[6]))
-            self.var_pass.set(str(row[7]))
-            self.var_utype.set(str(row[8]))
-            self.txt_address.delete('1.0', END)
-            self.txt_address.insert(END, str(row[9]))  # Direct insertion
-            self.var_salary.set(str(row[10]))
+            # Update form fields with the data from the selected row
+            self.var_emp_id.set(str(row[0]))  # Set Employee ID
+            self.var_name.set(str(row[1]))  # Set Name
+            self.var_email.set(str(row[2]))  # Set Email
+            self.var_gender.set(str(row[3]))  # Set Gender
+            self.var_contact.set(str(row[4]))  # Set Contact
+            self.var_dob.set(str(row[5]))  # Set Date of Birth
+            self.var_doj.set(str(row[6]))  # Set Date of Joining
+            self.var_pass.set(str(row[7]))  # Set Password
+            self.var_utype.set(str(row[8]))  # Set User Type
+            self.txt_address.delete('1.0', END)  # Clear the existing address text
+            self.txt_address.insert(END, str(row[9]))  # Insert Address
+            self.var_salary.set(str(row[10]))  # Set Salary
 
     # Update existing data in the database
     def update(self):
+        """
+        Updates the details of an existing employee in the database. The employee is identified by their ID.
+        All editable fields in the employee form can be updated through this method.
+        """
+        # Connect to the SQLite database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
+            # Check if the Employee ID field is empty (it should never be empty for an update operation)
             if self.var_emp_id.get() == "":
                 messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
             else:
+                # Execute the SQL command to update the employee details in the database
                 cur.execute(
                     "UPDATE employee set name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, address=?, salary=? WHERE eid=?",
                     (
-                        self.encrypt_data(self.var_name.get()),
-                        self.encrypt_data(self.var_email.get()),
-                        self.var_gender.get(),
-                        self.encrypt_data(self.var_contact.get()),
-                        self.var_dob.get(),
-                        self.var_doj.get(),
-                        self.encrypt_data(self.var_pass.get()),
-                        self.var_utype.get(),
-                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),
-                        self.var_salary.get(),
-                        self.var_emp_id.get(),
+                        self.encrypt_data(self.var_name.get()),  # Encrypt and update name
+                        self.encrypt_data(self.var_email.get()),  # Encrypt and update email
+                        self.var_gender.get(),  # Update gender
+                        self.encrypt_data(self.var_contact.get()),  # Encrypt and update contact
+                        self.var_dob.get(),  # Update date of birth
+                        self.var_doj.get(),  # Update date of joining
+                        self.encrypt_data(self.var_pass.get()),  # Encrypt and update password
+                        self.var_utype.get(),  # Update user type
+                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),  # Encrypt and update address
+                        self.var_salary.get(),  # Update salary
+                        self.var_emp_id.get(),  # Specify which employee to update
                     ))
-                con.commit()
+                con.commit()  # Commit changes to the database
                 messagebox.showinfo("Success", "Employee Updated Successfully", parent=self.root)
-                self.show()
+                self.show()  # Refresh the displayed data
         except Exception as ex:
+            # If an error occurs during the update, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Delete data from the database
     def delete(self):
+        """
+        Deletes an employee record from the database based on the provided employee ID.
+        Before deletion, the method confirms the existence of the employee and seeks user confirmation.
+        """
+        # Connect to the SQLite database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
+            # Check if the Employee ID field is empty, which is necessary to perform the deletion
             if self.var_emp_id.get() == "":
                 messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
             else:
+                # Check if the employee exists in the database
                 cur.execute("Select * from employee where eid=?", (self.var_emp_id.get(),))
                 row = cur.fetchone()
                 if row is None:
+                    # If no record is found, display an error message
                     messagebox.showerror("Error", "invalid Employee ID", parent=self.root)
                 else:
+                    # Confirm with the user if they really want to delete the record
                     op = messagebox.askyesno("Confirm", "Do you really want to delete")
                     if op:
+                        # If user confirms, execute the delete operation
                         cur.execute("delete from employee where eid=?", (self.var_emp_id.get(),))
-                        con.commit()
+                        con.commit()  # Commit changes to the database
                         messagebox.showinfo("Delete", "Employee deleted Successfully", parent=self.root)
-                        self.clear()
+                        self.clear()  # Clear all input fields after deletion
 
         except Exception as ex:
+            # If an error occurs, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Clear all form fields
     def clear(self):
-        # Set all the variable fields to their default values
+        """
+        Resets all form fields to their default values, effectively clearing any data entered or displayed
+        in the form inputs. This method is typically used to prepare the form for a new entry or to clear
+        current data after operations like delete or update.
+        """
+        # Reset each variable tied to the form fields to their default empty or preset states
         self.var_emp_id.set("")
         self.var_name.set("")
         self.var_email.set("")
-        self.var_gender.set("Select")
+        self.var_gender.set("Select")  # Reset dropdown to default 'Select'
         self.var_contact.set("")
         self.var_dob.set("")
         self.var_doj.set("")
         self.var_pass.set("")
-        self.var_utype.set("Admin")
+        self.var_utype.set("Admin")  # Set user type back to default 'Admin'
         self.var_salary.set("")
         self.var_searctxt.set("")
-        self.var_search.set("Select")
+        self.var_search.set("Select")  # Reset search criteria dropdown to 'Select'
 
-        # Clear the address Text field
-        self.txt_address.delete('1.0', END)
-
-        # Optionally clear and refresh the table to show all records or leave it as is
-        # If there's a need to refresh the view after clearing, uncomment the next line:
-        # self.show()
+        # Clear any text from the multiline Text widget used for addresses
+        self.txt_address.delete('1.0', END)  # Clear from the first character to the end
 
     # Search for data based on user input
     def search(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
-        try:
-            if self.var_search.get() == "Select":
-                messagebox.showerror("Error", "Select Search By option", parent=self.root)
-            elif self.var_searctxt.get() == "":
-                messagebox.showerror("Error", "Search input should be required", parent=self.root)
-            else:
-                encrypted_search_input = self.encrypt_data(self.var_searctxt.get())
-                query = f"SELECT * FROM employee WHERE {self.var_search.get()} = ?"  # Changed LIKE to = for exact match
-                parameters = (encrypted_search_input,)
-                cur.execute(query, parameters)
-                rows = cur.fetchall()
-                if len(rows) != 0:
-                    self.EmployeeTable.delete(*self.EmployeeTable.get_children())
-                    for row in rows:
-                        decrypted_row = [row[0], self.decrypt_data(row[1]), self.decrypt_data(row[2]), row[3],
-                                         self.decrypt_data(row[4]), row[5], row[6], self.decrypt_data(row[7]), row[8],
-                                         self.decrypt_data(row[9]), row[10]]
-                        self.EmployeeTable.insert('', END, values=decrypted_row)
-                else:
-                    messagebox.showerror("Error", "No record found", parent=self.root)
-        except Exception as ex:
-            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+        """
+            Searches for employee records based on a specified field and input value using encrypted fields.
+            Currently, this function is not operational due to the complexity involved with searching encrypted data.
+
+            Current Limitations:
+            - The function attempts to perform searches on encrypted fields using Fernet encryption which is not working
+              as expected so it has been left in current development.
+
+            Future Enhancements:
+            - Investigate alternative approaches such as deterministic encryption or additional searchable encrypted
+              or hashed fields specifically designed for search operations. This would enable efficient and secure searching.
+            - Implement parameterized queries to prevent SQL injection vulnerabilities.
+            - Optimize the function to handle large datasets more efficiently, ensuring that search operations do not
+              degrade the performance of the database system.
+
+            Note:
+            - This function will be carefully redesigned to ensure both operational effectiveness and security compliance.
+            - Future development will focus on addressing the current limitations and testing extensively with different
+              scenarios and datasets.
+
+            TODO:
+            - Reevaluate the encryption strategy and possibly integrate a more suitable method for searchable encrypted data.
+            - Redesign the search interface to accommodate new search methodologies and enhance user interaction.
+            """
+        messagebox.showinfo("Information",
+                            "Search function is currently under development and will be available in future updates.")
+        # # Establish a database connection
+        # con = sqlite3.connect(database=r'ims.db')
+        # cur = con.cursor()
+        #
+        # try:
+        #     # Validate that a search category has been selected
+        #     if self.var_search.get() == "Select":
+        #         messagebox.showerror("Error", "Select Search By option", parent=self.root)
+        #         return
+        #     # Ensure that search text has been entered
+        #     elif self.var_searctxt.get() == "":
+        #         messagebox.showerror("Error", "Search input should be required", parent=self.root)
+        #         return
+        #
+        #     # Encrypt the search input to match encrypted data in the database
+        #     encrypted_search_input = self.encrypt_data(self.var_searctxt.get())
+        #     # Prepare SQL query with encrypted data
+        #     query = f"SELECT * FROM employee WHERE {self.var_search.get()} = ?"
+        #     parameters = (encrypted_search_input,)
+        #
+        #     print(f"Executing query: {query} with parameters {parameters}")  # Debugging output
+        #     cur.execute(query, parameters)
+        #     rows = cur.fetchall()
+        #     print(f"Number of rows returned: {len(rows)}")  # Debugging output
+        #
+        #     # Check if any results were found
+        #     if len(rows) != 0:
+        #         # Clear the existing table entries
+        #         self.EmployeeTable.delete(*self.EmployeeTable.get_children())
+        #         # Insert each found row into the table after decrypting relevant fields
+        #         for row in rows:
+        #             decrypted_row = [
+        #                 row[0], self.decrypt_data(row[1]), self.decrypt_data(row[2]), row[3],
+        #                 self.decrypt_data(row[4]), row[5], row[6], self.decrypt_data(row[7]), row[8],
+        #                 self.decrypt_data(row[9]), row[10]
+        #             ]
+        #             self.EmployeeTable.insert('', END, values=decrypted_row)
+        #     else:
+        #         # Inform user if no records are found
+        #         messagebox.showerror("Error", "No record found", parent=self.root)
+        # except Exception as ex:
+        #     # Handle any exceptions during the search operation
+        #     print(f"Error during database operation: {ex}")  # Debugging output
+        #     messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
 
 if __name__ == "__main__":

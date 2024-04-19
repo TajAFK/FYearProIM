@@ -6,84 +6,61 @@ import sqlite3
 class productclass:
     # Constructor method to initialize the class
     def __init__(self, root):
-        # Initialize the root window and configure its properties
+        """
+        Initialize the main application window and set up variables and GUI components for product management.
+        """
+        # Set up the main window
         self.root = root
-        self.root.geometry("1100x500+220+130")  # Set window geometry
-        self.root.title("Inventory Management System")  # Set window title
-        self.root.config(bg="white")  # Set background color
-        self.root.focus_force()  # Ensure the window is in focus
+        self.root.geometry("1100x500+220+130")  # Window size and position
+        self.root.title("Inventory Management System")  # Window title
+        self.root.config(bg="white")  # Background color
+        self.root.focus_force()  # Focus the window
 
-        # Initialize StringVar variables for search functionality
-        self.var_searchby = StringVar()
-        self.var_searctxt = StringVar()
+        # Initialize variables for search functionality
+        self.var_searchby = StringVar()  # Variable for selecting search type
+        self.var_searctxt = StringVar()  # Variable for entering search text
 
-        # Initialize StringVar variables for product details
-        self.var_pid = StringVar()
-        self.var_cat = StringVar()
-        self.var_sup = StringVar()
+        # Initialize variables for product details
+        self.var_pid = StringVar()  # Product ID
+        self.var_cat = StringVar()  # Category
+        self.var_sup = StringVar()  # Supplier
+        self.var_name = StringVar()  # Product name
+        self.var_price = StringVar()  # Product price
+        self.var_qty = StringVar()  # Quantity
+        self.var_status = StringVar()  # Product status
 
-        # Initialize lists to store category and supplier data
-        self.cat_list = []
-        self.sup_list = []
-
-        # Fetch category and supplier data from the database
+        # Fetch initial data for categories and suppliers from the database
+        self.cat_list = []  # List for categories
+        self.sup_list = []  # List for suppliers
         self.fetch_cat_sup()
 
-        # Initialize StringVar variables for product details
-        self.var_name = StringVar()
-        self.var_price = StringVar()
-        self.var_qty = StringVar()
-        self.var_status = StringVar()
-
-        # Create a frame for product details display
+        # Set up a frame for displaying product details within the main window
         product_Frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
-        product_Frame.place(x=10, y=10, width=450, height=480)
+        product_Frame.place(x=10, y=10, width=450, height=480)  # Position and size of the frame
 
-        # =======title======
-        # title = Label(product_Frame, text="Manage Products Details", font=("goudy old style", 18), bg="#0f4d7d",
-        #               fg="white").pack(side=TOP, fill=X)
-        #
-        # # ===column1====
-        # lbl_category = Label(product_Frame, text="Category", font=("goudy old style", 18), bg="white"
-        #                      ).place(x=30, y=60)
-        #
-        # lbl_supplier = Label(product_Frame, text="Supplier", font=("goudy old style", 18), bg="white"
-        #                      ).place(x=30, y=110)
-        #
-        # lbl_name = Label(product_Frame, text="Name", font=("goudy old style", 18), bg="white"
-        #                  ).place(x=30, y=160)
-        #
-        # lbl_price = Label(product_Frame, text="Price", font=("goudy old style", 18), bg="white"
-        #                   ).place(x=30, y=210)
-        #
-        # lbl_quantity = Label(product_Frame, text="Quantity", font=("goudy old style", 18), bg="white"
-        #                      ).place(x=30, y=260)
-        #
-        # lbl_status = Label(product_Frame, text="Status", font=("goudy old style", 18), bg="white"
-        #                    ).place(x=30, y=310)
-
+        # Title label for the product management section
         title = Label(product_Frame, text="Manage Products Details", font=("Arial Rounded MT Bold", 18), bg="#0f4d7d",
                       fg="white")
-        title.pack(side=TOP, fill=X)
+        title.pack(side=TOP, fill=X)  # Display the title at the top of the frame, spanning the full width
 
-        # ===column1====
+        # Labels for product attributes in the first column of the product management frame
         lbl_category = Label(product_Frame, text="Category", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_category.place(x=30, y=60)
+        lbl_category.place(x=30, y=60)  # Category label
 
         lbl_supplier = Label(product_Frame, text="Supplier", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_supplier.place(x=30, y=110)
+        lbl_supplier.place(x=30, y=110)  # Supplier label
 
         lbl_name = Label(product_Frame, text="Name", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_name.place(x=30, y=160)
+        lbl_name.place(x=30, y=160)  # Product name label
 
         lbl_price = Label(product_Frame, text="Price", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_price.place(x=30, y=210)
+        lbl_price.place(x=30, y=210)  # Price label
 
         lbl_quantity = Label(product_Frame, text="Quantity", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_quantity.place(x=30, y=260)
+        lbl_quantity.place(x=30, y=260)  # Quantity label
 
         lbl_status = Label(product_Frame, text="Status", font=("Arial Rounded MT Bold", 18), bg="white")
-        lbl_status.place(x=30, y=310)
+        lbl_status.place(x=30, y=310)  # Status label
 
         # Column 1 Buttons
 
@@ -190,30 +167,6 @@ class productclass:
         self.show()
 
     # =====================FETCH DATA=========================================================================
-    # def fetch_cat_sup(self):
-    #     self.cat_list.append("Empty")
-    #     self.sup_list.append("Empty")
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #     try:
-    #         cur.execute("select name from category")
-    #         cat = cur.fetchall()
-    #         if len(cat) > 0:
-    #             del self.cat_list[:]
-    #             self.cat_list.append("Select")
-    #             for i in cat:
-    #                 self.cat_list.append(i[0])
-    #
-    #         cur.execute("select name from supplier")
-    #         sup = cur.fetchall()
-    #         if len(sup) > 0:
-    #             del self.sup_list[:]
-    #             self.sup_list.append("Select")
-    #             for i in sup:
-    #                 self.sup_list.append(i[0])
-    #
-    #     except Exception as ex:
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def fetch_cat_sup(self):
         # Append 'Empty' as the first item in both cat_list and sup_list
@@ -262,33 +215,6 @@ class productclass:
             con.close()
 
     # =====================ADD DATA=========================================================================
-    # def add(self):
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #     try:
-    #         if self.var_cat.get() == "Select" or self.var_cat.get() == "Empty" or self.var_sup.get() == "Select" or self.var_sup.get() == "":
-    #             messagebox.showerror("Error", "All fields be required", parent=self.root)
-    #         else:
-    #             cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
-    #             row = cur.fetchone()
-    #             if row is not None:
-    #                 messagebox.showerror("Error", "This Product already present, try different", parent=self.root)
-    #             else:
-    #                 cur.execute(
-    #                     "INSERT INTO product(Category, Supplier, name, price, qty, status) VALUES(?,?,?,?,?,?)",
-    #                     (
-    #                         self.var_cat.get(),
-    #                         self.var_sup.get(),
-    #                         self.var_name.get(),
-    #                         self.var_price.get(),
-    #                         self.var_qty.get(),
-    #                         self.var_status.get(),
-    #                     ))
-    #                 con.commit()
-    #                 messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
-    #                 self.show()
-    #     except Exception as ex:
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def add(self):
         # Connect to the database
