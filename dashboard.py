@@ -176,44 +176,91 @@ class IMS:
         self.new_win = Toplevel(self.root)  # Create a new top-level window
         self.new_obj = salesClass(self.new_win)  # Instantiate the salesClass in the new window
 
+    # def update_content(self):
+    #     """
+    #     Updates the content on the dashboard dynamically by fetching the latest data from the database.
+    #     This includes counts of products, suppliers, categories, employees, and sales.
+    #     Also updates the current date and time on the display.
+    #     """
+    #     con = sqlite3.connect(database=r'ims.db')  # Connect to the SQLite database
+    #     cur = con.cursor()  # Create a cursor object to execute SQL queries
+    #
+    #     try:
+    #         # Update product count
+    #         cur.execute("select * from product")
+    #         product = cur.fetchall()
+    #         self.lbl_product.config(text=f'Total Product\n[{str(len(product))}]')  # Display the number of products
+    #
+    #         # Update supplier count
+    #         cur.execute("select * from supplier")
+    #         supplier = cur.fetchall()
+    #         self.lbl_supplier.config(text=f'Total Suppliers\n[{str(len(supplier))}]')  # Display the number of suppliers
+    #
+    #         # Update category count
+    #         cur.execute("select * from category")
+    #         category = cur.fetchall()
+    #         self.lbl_category.config(
+    #             text=f'Total Categories\n[{str(len(category))}]')  # Display the number of categories
+    #
+    #         # Update employee count
+    #         cur.execute("select * from employee")
+    #         employee = cur.fetchall()
+    #         self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')  # Display the number of employees
+    #
+    #         # Update sales count
+    #         self.lbl_sales.config(
+    #             text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')  # Display the number of sales files
+    #
+    #         # Update current time and date display
+    #         current_time = time.strftime("%I:%M:%S %p")  # Format time in 12-hour format with AM/PM
+    #         current_date = time.strftime("%d-%m-%Y")  # Format date in Day-Month-Year format
+    #         self.lbl_clock.config(
+    #             text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
+    #
+    #         # Schedule the update_content function to run again after 200 milliseconds
+    #         self.lbl_clock.after(200, self.update_content)
+    #
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}",
+    #                              parent=self.root)  # Display error if any issue occurs
+
     def update_content(self):
         """
-        Updates the content on the dashboard dynamically by fetching the latest data from the database.
-        This includes counts of products, suppliers, categories, employees, and sales.
-        Also updates the current date and time on the display.
+        Dynamically updates dashboard metrics and the current date/time display. Fetches and displays counts
+        for products, suppliers, categories, employees, and sales from the database.
         """
-        con = sqlite3.connect(database=r'ims.db')  # Connect to the SQLite database
-        cur = con.cursor()  # Create a cursor object to execute SQL queries
-
         try:
-            # Update product count
-            cur.execute("select * from product")
-            product = cur.fetchall()
-            self.lbl_product.config(text=f'Total Product\n[{str(len(product))}]')  # Display the number of products
+            # Connect to the SQLite database and create a cursor object
+            with sqlite3.connect(database=r'ims.db') as con:
+                cur = con.cursor()
 
-            # Update supplier count
-            cur.execute("select * from supplier")
-            supplier = cur.fetchall()
-            self.lbl_supplier.config(text=f'Total Suppliers\n[{str(len(supplier))}]')  # Display the number of suppliers
+                # Fetch and update product count
+                cur.execute("SELECT COUNT(*) FROM product")
+                product_count = cur.fetchone()[0]
+                self.lbl_product.config(text=f'Total Product\n[{product_count}]')
 
-            # Update category count
-            cur.execute("select * from category")
-            category = cur.fetchall()
-            self.lbl_category.config(
-                text=f'Total Categories\n[{str(len(category))}]')  # Display the number of categories
+                # Fetch and update supplier count
+                cur.execute("SELECT COUNT(*) FROM supplier")
+                supplier_count = cur.fetchone()[0]
+                self.lbl_supplier.config(text=f'Total Suppliers\n[{supplier_count}]')
 
-            # Update employee count
-            cur.execute("select * from employee")
-            employee = cur.fetchall()
-            self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')  # Display the number of employees
+                # Fetch and update category count
+                cur.execute("SELECT COUNT(*) FROM category")
+                category_count = cur.fetchone()[0]
+                self.lbl_category.config(text=f'Total Categories\n[{category_count}]')
 
-            # Update sales count
-            self.lbl_sales.config(
-                text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')  # Display the number of sales files
+                # Fetch and update employee count
+                cur.execute("SELECT COUNT(*) FROM employee")
+                employee_count = cur.fetchone()[0]
+                self.lbl_employee.config(text=f'Total Employees\n[{employee_count}]')
+
+                # Fetch and update sales count
+                sales_count = len(os.listdir('bill'))
+                self.lbl_sales.config(text=f'Total Sales\n[{sales_count}]')
 
             # Update current time and date display
-            current_time = time.strftime("%I:%M:%S %p")  # Format time in 12-hour format with AM/PM
-            current_date = time.strftime("%d-%m-%Y")  # Format date in Day-Month-Year format
+            current_time = time.strftime("%I:%M:%S %p")
+            current_date = time.strftime("%d-%m-%Y")
             self.lbl_clock.config(
                 text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
 
@@ -221,8 +268,7 @@ class IMS:
             self.lbl_clock.after(200, self.update_content)
 
         except Exception as ex:
-            messagebox.showerror("Error", f"Error due to: {str(ex)}",
-                                 parent=self.root)  # Display error if any issue occurs
+            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def logout(self):
         """

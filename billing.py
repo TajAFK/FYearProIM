@@ -1,11 +1,13 @@
-from tkinter import *
-from tkinter import ttk, messagebox
-import sqlite3
-import time
-import os
-import tempfile
-import subprocess
-from cryptography.fernet import Fernet
+from tkinter import *  # Provides access to Tkinter GUI toolkit
+from tkinter import ttk  # Provides access to themed widgets
+from tkinter import messagebox  # Enables pop-up dialog windows for notifications
+import sqlite3  # Facilitates interactions with SQLite database
+import time  # Used for handling time-related tasks
+import os  # Allows interaction with the operating system, including file and directory handling
+import tempfile  # Used for generating temporary files and directories
+import subprocess  # Enables running of subprocesses, useful for starting other programs
+from cryptography.fernet import \
+    Fernet  # Provides encryption and decryption functionality using Fernet symmetric encryption
 
 
 class BillClass:
@@ -20,23 +22,52 @@ class BillClass:
         # Load the encryption key and initialize the cipher
         self.cipher = self.load_key_and_initialize_cipher()
 
+        # # Title Bar
+        # self.icon_title = PhotoImage(file="images/logo1.png")
+        # Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
+        #       font=("Elephant", 40, "bold"), bg="#02457A", fg="white", anchor="w", padx=20).place(x=0, y=0,
+        #                                                                                           relwidth=1,
+        #                                                                                           height=70)
+
         # Title Bar
-        self.icon_title = PhotoImage(file="images/logo1.png")
+        self.icon_title = PhotoImage(file="images/logo1.png")  # Load the application logo
+        # Create a label for the title bar, combining the icon and the title text
         Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
               font=("Elephant", 40, "bold"), bg="#02457A", fg="white", anchor="w", padx=20).place(x=0, y=0,
                                                                                                   relwidth=1,
                                                                                                   height=70)
 
-        # Logout Button
-        Button(self.root, text="Logout", command=self.logout, font=("Elephant", 15, "bold"), bg="#D32F2F", fg="white",
-               cursor="hand2", relief='raised', borderwidth=2,
-               highlightthickness=0).place(x=1150, y=10, height=50, width=150)
+        # # Logout Button
+        # Button(self.root, text="Logout", command=self.logout, font=("Elephant", 15, "bold"), bg="#D32F2F", fg="white",
+        #        cursor="hand2", relief='raised', borderwidth=2,
+        #        highlightthickness=0).place(x=1150, y=10, height=50, width=150)
 
-        # Clock
+        # Logout Button
+        Button(self.root, text="Logout", command=self.logout,
+               font=("Elephant", 15, "bold"), bg="#D32F2F", fg="white",
+               # Styling the button with bold text and red background
+               cursor="hand2", relief='raised', borderwidth=2,
+               # Making the button raised with a hand cursor for a clickable effect
+               highlightthickness=0).place(x=1150, y=10, height=50,
+                                           width=150)  # Positioning the button on the top right
+
+        # # Clock
+        # self.lbl_clock = Label(self.root,
+        #                        text="Welcome To Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time: HH-MM-SS",
+        #                        font=("Elephant", 15,), bg="#34515e", fg="white")
+        # self.lbl_clock.place(x=0, y=70, relwidth=1, height=30)
+
+        # Clock Display
         self.lbl_clock = Label(self.root,
                                text="Welcome To Inventory Management System\t\t Date: DD-MM-YYYY\t\t Time: HH-MM-SS",
-                               font=("Elephant", 15,), bg="#34515e", fg="white")
-        self.lbl_clock.place(x=0, y=70, relwidth=1, height=30)
+                               font=("Elephant", 15), bg="#34515e", fg="white",
+                               # Styling with specific font, background and text color
+                               anchor='center')  # Ensuring the text is centered
+        self.lbl_clock.place(x=0, y=70, relwidth=1,
+                             height=30)  # Placing the label across the width of the window just below the title bar
+
+        # This initial text will be updated with the actual current date and time through a function that refreshes
+        # periodically
 
         # ====Product_frame==========
         # Create a frame for displaying all products
@@ -125,37 +156,69 @@ class BillClass:
         scrolly = Scrollbar(ProductFrame3, orient=VERTICAL)
         scrollx = Scrollbar(ProductFrame3, orient=HORIZONTAL)
 
+        # # Create the treeview widget for product details
+        # self.product_Table = ttk.Treeview(ProductFrame3, columns=("pid", "name", "price", "qty", "status"),
+        #                                   yscrollcommand=scrolly.set, xscrollcommand=scrollx.set)
+        # scrollx.pack(side=BOTTOM, fill=X)
+        # scrolly.pack(side=RIGHT, fill=Y)
+        # scrollx.config(command=self.product_Table.xview)
+        # scrolly.config(command=self.product_Table.yview)
+        #
+        # # Set headings for columns
+        # self.product_Table.heading("pid", text="PID.")
+        # self.product_Table.heading("name", text="Name")
+        # self.product_Table.heading("price", text="Price")
+        # self.product_Table.heading("qty", text="QTY")
+        # self.product_Table.heading("status", text="Status")
+        #
+        # self.product_Table["show"] = "headings"
+        #
+        # # Set column widths
+        # self.product_Table.column("pid", width=40)
+        # self.product_Table.column("name", width=100)
+        # self.product_Table.column("price", width=100)
+        # self.product_Table.column("qty", width=40)
+        # self.product_Table.column("status", width=90)
+        #
+        # self.product_Table.pack(fill=BOTH, expand=1)
+        # self.product_Table.bind("<ButtonRelease-1>", self.get_data)
+        #
+        # # Note label
+        # lbl_note = Label(ProductFrame1, text="Note: 'Enter  0 Quantity to remove product from the cart' ",
+        #                  font=("Arial", 12), anchor='w', bg="white", fg="red")
+        # lbl_note.pack(side=BOTTOM, fill=X)
+
         # Create the treeview widget for product details
         self.product_Table = ttk.Treeview(ProductFrame3, columns=("pid", "name", "price", "qty", "status"),
                                           yscrollcommand=scrolly.set, xscrollcommand=scrollx.set)
-        scrollx.pack(side=BOTTOM, fill=X)
-        scrolly.pack(side=RIGHT, fill=Y)
-        scrollx.config(command=self.product_Table.xview)
-        scrolly.config(command=self.product_Table.yview)
+        scrollx.pack(side=BOTTOM, fill=X)  # Horizontal scrollbar
+        scrolly.pack(side=RIGHT, fill=Y)  # Vertical scrollbar
+        scrollx.config(command=self.product_Table.xview)  # Connect horizontal scrollbar to treeview
+        scrolly.config(command=self.product_Table.yview)  # Connect vertical scrollbar to treeview
 
-        # Set headings for columns
+        # Configure column headings
         self.product_Table.heading("pid", text="PID.")
         self.product_Table.heading("name", text="Name")
         self.product_Table.heading("price", text="Price")
         self.product_Table.heading("qty", text="QTY")
         self.product_Table.heading("status", text="Status")
 
-        self.product_Table["show"] = "headings"
+        self.product_Table["show"] = "headings"  # Only show headings, not the default column
 
-        # Set column widths
+        # Define column widths
         self.product_Table.column("pid", width=40)
         self.product_Table.column("name", width=100)
         self.product_Table.column("price", width=100)
         self.product_Table.column("qty", width=40)
         self.product_Table.column("status", width=90)
 
-        self.product_Table.pack(fill=BOTH, expand=1)
-        self.product_Table.bind("<ButtonRelease-1>", self.get_data)
+        self.product_Table.pack(fill=BOTH, expand=1)  # Pack to make the table visible
+        self.product_Table.bind("<ButtonRelease-1>", self.get_data)  # Bind a function to item selection
 
-        # Note label
-        lbl_note = Label(ProductFrame1, text="Note: 'Enter  0 Quantity to remove product from the cart' ",
+        # Note label for additional instructions
+        lbl_note = Label(ProductFrame1, text="Note: 'Enter 0 Quantity to remove product from the cart'",
                          font=("Arial", 12), anchor='w', bg="white", fg="red")
-        lbl_note.pack(side=BOTTOM, fill=X)
+        lbl_note.pack(side=BOTTOM, fill=X)  # Display note at the bottom of the frame
 
         #========CustomerFrame==============
         # self.var_cname = StringVar()
@@ -184,6 +247,33 @@ class BillClass:
         self.var_cname = StringVar()
         self.var_contact = StringVar()
 
+        # # Create a frame for customer details
+        # CustomerFrame = Frame(self.root, bd=4, relief=RIDGE, bg="white")
+        # CustomerFrame.place(x=420, y=110, width=530, height=70)
+        #
+        # # Title label for the customer frame
+        # cTitle = Label(CustomerFrame, text="Customer Details", font=("Arial", 15), bg="lightgray")
+        # cTitle.pack(side=TOP, fill=X)
+        #
+        # # Labels and entry fields for customer name and contact
+        # lbl_name = Label(CustomerFrame, text="Name", font=("Arial", 12), bg="white")
+        # lbl_name.place(x=5, y=35)
+        # txt_name = Entry(CustomerFrame, textvariable=self.var_cname, font=("Arial", 10), bg="light yellow")
+        # txt_name.place(x=80, y=35, width=180)
+        #
+        # lbl_contact = Label(CustomerFrame, text="Contact No", font=("Arial", 12), bg="white")
+        # lbl_contact.place(x=270, y=35)
+        # txt_contact = Entry(CustomerFrame, textvariable=self.var_contact, font=("Arial", 10), bg="light yellow")
+        # txt_contact.place(x=380, y=35, width=140)
+        #
+        # # ======Cal Cart Frame===============
+        # Cal_cart_Frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
+        # Cal_cart_Frame.place(x=420, y=190, width=530, height=360)
+
+        # Define StringVars for customer name and contact
+        self.var_cname = StringVar()
+        self.var_contact = StringVar()
+
         # Create a frame for customer details
         CustomerFrame = Frame(self.root, bd=4, relief=RIDGE, bg="white")
         CustomerFrame.place(x=420, y=110, width=530, height=70)
@@ -203,9 +293,12 @@ class BillClass:
         txt_contact = Entry(CustomerFrame, textvariable=self.var_contact, font=("Arial", 10), bg="light yellow")
         txt_contact.place(x=380, y=35, width=140)
 
-        # ======Cal Cart Frame===============
+        # Create a frame for calculations and cart management
         Cal_cart_Frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         Cal_cart_Frame.place(x=420, y=190, width=530, height=360)
+
+        # This setup provides a dedicated area for entering and viewing customer details
+        # and a separate frame for operations related to calculations or cart management in a sales application.
 
         # ======Calculator Frame===============
         # self.var_cal_input = StringVar()
@@ -698,7 +791,7 @@ class BillClass:
             self.var_qty.set('1')
         else:
             # Optionally, clear all fields or notify the user if no data is found in the row
-            self.clear_fields()  # You would need to implement this method to clear all fields or handle this case appropriately.
+            self.clear_cart()
 
     # def get_data_cart(self, ev):
     #     f = self.CartTable.focus()

@@ -283,216 +283,322 @@ class EmployeeClass:
         print(f"Original: {test_input}, Encrypted: {encrypted_test}, Decrypted: {decrypted_test}")
     '''
 
-    # Add data to the database
     def add(self):
         """
         Adds a new employee record to the database after validating that the employee ID is unique.
+        Ensures all required fields are filled and the employee ID does not already exist in the database.
         """
-        # Connect to the SQLite database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+        if self.var_emp_id.get() == "":
+            messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
+            return
 
         try:
-            # Validate if the employee ID field is not empty
-            if self.var_emp_id.get() == "":
-                messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
-            else:
+            with sqlite3.connect(database=r'ims.db') as con:
+                cur = con.cursor()
                 # Check if the employee ID already exists in the database
                 cur.execute("SELECT * FROM employee WHERE eid=?", (self.var_emp_id.get(),))
-                row = cur.fetchone()
-                if row is not None:
-                    # If the ID already exists, notify the user
+                if cur.fetchone() is not None:
                     messagebox.showerror("Error", "This Employee ID already assigned, try different", parent=self.root)
-                else:
-                    # If the ID is unique, insert the new employee record into the database
-                    cur.execute(
-                        "INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (
-                            self.var_emp_id.get(),
-                            self.encrypt_data(self.var_name.get()),
-                            self.encrypt_data(self.var_email.get()),
-                            self.var_gender.get(),
-                            self.encrypt_data(self.var_contact.get()),
-                            self.var_dob.get(),
-                            self.var_doj.get(),
-                            self.encrypt_data(self.var_pass.get()),
-                            self.var_utype.get(),
-                            self.encrypt_data(self.txt_address.get('1.0', END).strip()),
-                            self.var_salary.get(),
-                        ))
-                    con.commit()
-                    # Inform the user of success
-                    messagebox.showinfo("Success", "Employee Added Successfully", parent=self.root)
-                    # Refresh the display to show the new record
-                    self.show()
+                    return
+
+                # Insert the new employee record into the database
+                cur.execute(
+                    "INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, "
+                    "salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        self.var_emp_id.get(),
+                        self.encrypt_data(self.var_name.get()),
+                        self.encrypt_data(self.var_email.get()),
+                        self.var_gender.get(),
+                        self.encrypt_data(self.var_contact.get()),
+                        self.var_dob.get(),
+                        self.var_doj.get(),
+                        self.encrypt_data(self.var_pass.get()),
+                        self.var_utype.get(),
+                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),
+                        self.var_salary.get(),
+                    ))
+                # Commit changes to the database
+                con.commit()
+                messagebox.showinfo("Success", "Employee Added Successfully", parent=self.root)
+                self.show()  # Refresh the display to show the new record
         except Exception as ex:
-            # If an exception occurred, show an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # Show data in the table
     def show(self):
         """
         Fetches and displays all employee records from the database into the EmployeeTable.
-        Data fields that require confidentiality are decrypted before display.
+        Sensitive data fields are decrypted before display to ensure confidentiality.
         """
-        # Establish connection to the SQLite database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
-
         try:
-            # Execute a query to fetch all employee data
-            cur.execute("SELECT * FROM employee")
-            rows = cur.fetchall()
+            with sqlite3.connect(database=r'ims.db') as con:
+                cur = con.cursor()
+                cur.execute("SELECT * FROM employee")
+                rows = cur.fetchall()
 
-            # Clear existing data in the table before updating
-            self.EmployeeTable.delete(*self.EmployeeTable.get_children())
+                # Clear existing data in the table to ensure it reflects the current database state
+                self.EmployeeTable.delete(*self.EmployeeTable.get_children())
 
-            # Iterate through each record fetched from the database
-            for row in rows:
-                # Decrypt sensitive data before adding it to the table view
-                decrypted_row = [
-                    row[0],  # Employee ID
-                    self.decrypt_data(row[1]),  # Name
-                    self.decrypt_data(row[2]),  # Email
-                    row[3],  # Gender
-                    self.decrypt_data(row[4]),  # Contact
-                    row[5],  # Date of Birth
-                    row[6],  # Date of Joining
-                    self.decrypt_data(row[7]),  # Password
-                    row[8],  # User Type
-                    self.decrypt_data(row[9]),  # Address
-                    row[10]  # Salary
-                ]
-                # Insert the decrypted data row into the table
-                self.EmployeeTable.insert('', END, values=decrypted_row)
+                # Populate the EmployeeTable with decrypted data
+                for row in rows:
+                    decrypted_row = [
+                        row[0],  # Employee ID
+                        self.decrypt_data(row[1]),  # Name
+                        self.decrypt_data(row[2]),  # Email
+                        row[3],  # Gender
+                        self.decrypt_data(row[4]),  # Contact
+                        row[5],  # Date of Birth
+                        row[6],  # Date of Joining
+                        self.decrypt_data(row[7]),  # Password
+                        row[8],  # User Type
+                        self.decrypt_data(row[9]),  # Address
+                        row[10]  # Salary
+                    ]
+                    self.EmployeeTable.insert('', END, values=decrypted_row)
         except Exception as ex:
-            # If an error occurs, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Get data from the table and fill the form fields
+    # def get_data(self, ev):
+    #     """
+    #     Retrieves data from the selected row in the EmployeeTable and sets it into the corresponding form fields.
+    #     This method allows the user to see and possibly edit the data of an employee selected from the list.
+    #     """
+    #     # Get the current focus of the table, which corresponds to the selected row
+    #     f = self.EmployeeTable.focus()
+    #     # Retrieve the item's data from the focused row
+    #     content = self.EmployeeTable.item(f)
+    #     row = content['values']
+    #
+    #     # Check if the row has data to prevent errors on empty row selection
+    #     if row:
+    #         # Update form fields with the data from the selected row
+    #         self.var_emp_id.set(str(row[0]))  # Set Employee ID
+    #         self.var_name.set(str(row[1]))  # Set Name
+    #         self.var_email.set(str(row[2]))  # Set Email
+    #         self.var_gender.set(str(row[3]))  # Set Gender
+    #         self.var_contact.set(str(row[4]))  # Set Contact
+    #         self.var_dob.set(str(row[5]))  # Set Date of Birth
+    #         self.var_doj.set(str(row[6]))  # Set Date of Joining
+    #         self.var_pass.set(str(row[7]))  # Set Password
+    #         self.var_utype.set(str(row[8]))  # Set User Type
+    #         self.txt_address.delete('1.0', END)  # Clear the existing address text
+    #         self.txt_address.insert(END, str(row[9]))  # Insert Address
+    #         self.var_salary.set(str(row[10]))  # Set Salary
+
     def get_data(self, ev):
         """
-        Retrieves data from the selected row in the EmployeeTable and sets it into the corresponding form fields.
-        This method allows the user to see and possibly edit the data of an employee selected from the list.
+        Retrieves and updates form fields with data from the selected row in the EmployeeTable.
+        Enables editing of employee data directly from the selected table entry.
         """
-        # Get the current focus of the table, which corresponds to the selected row
-        f = self.EmployeeTable.focus()
-        # Retrieve the item's data from the focused row
-        content = self.EmployeeTable.item(f)
+        # Retrieve the currently focused item in the EmployeeTable
+        focused_item = self.EmployeeTable.focus()
+        content = self.EmployeeTable.item(focused_item)
         row = content['values']
 
-        # Check if the row has data to prevent errors on empty row selection
+        # Only proceed if the row contains data
         if row:
-            # Update form fields with the data from the selected row
-            self.var_emp_id.set(str(row[0]))  # Set Employee ID
-            self.var_name.set(str(row[1]))  # Set Name
-            self.var_email.set(str(row[2]))  # Set Email
-            self.var_gender.set(str(row[3]))  # Set Gender
-            self.var_contact.set(str(row[4]))  # Set Contact
-            self.var_dob.set(str(row[5]))  # Set Date of Birth
-            self.var_doj.set(str(row[6]))  # Set Date of Joining
-            self.var_pass.set(str(row[7]))  # Set Password
-            self.var_utype.set(str(row[8]))  # Set User Type
-            self.txt_address.delete('1.0', END)  # Clear the existing address text
-            self.txt_address.insert(END, str(row[9]))  # Insert Address
-            self.var_salary.set(str(row[10]))  # Set Salary
+            # Populate the form fields with the data from the selected row
+            self.var_emp_id.set(row[0])  # Employee ID
+            self.var_name.set(row[1])  # Name
+            self.var_email.set(row[2])  # Email
+            self.var_gender.set(row[3])  # Gender
+            self.var_contact.set(row[4])  # Contact
+            self.var_dob.set(row[5])  # Date of Birth
+            self.var_doj.set(row[6])  # Date of Joining
+            self.var_pass.set(row[7])  # Password
+            self.var_utype.set(row[8])  # User Type
+            self.txt_address.delete('1.0', END)  # Clear existing address text
+            self.txt_address.insert(END, row[9])  # New Address
+            self.var_salary.set(row[10])  # Salary
 
     # Update existing data in the database
+    # def update(self):
+    #     """
+    #     Updates the details of an existing employee in the database. The employee is identified by their ID.
+    #     All editable fields in the employee form can be updated through this method.
+    #     """
+    #     # Connect to the SQLite database
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #
+    #     try:
+    #         # Check if the Employee ID field is empty (it should never be empty for an update operation)
+    #         if self.var_emp_id.get() == "":
+    #             messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
+    #         else:
+    #             # Execute the SQL command to update the employee details in the database
+    #             cur.execute(
+    #                 "UPDATE employee set name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, "
+    #                 "address=?, salary=? WHERE eid=?",
+    #                 (
+    #                     self.encrypt_data(self.var_name.get()),  # Encrypt and update name
+    #                     self.encrypt_data(self.var_email.get()),  # Encrypt and update email
+    #                     self.var_gender.get(),  # Update gender
+    #                     self.encrypt_data(self.var_contact.get()),  # Encrypt and update contact
+    #                     self.var_dob.get(),  # Update date of birth
+    #                     self.var_doj.get(),  # Update date of joining
+    #                     self.encrypt_data(self.var_pass.get()),  # Encrypt and update password
+    #                     self.var_utype.get(),  # Update user type
+    #                     self.encrypt_data(self.txt_address.get('1.0', END).strip()),  # Encrypt and update address
+    #                     self.var_salary.get(),  # Update salary
+    #                     self.var_emp_id.get(),  # Specify which employee to update
+    #                 ))
+    #             con.commit()  # Commit changes to the database
+    #             messagebox.showinfo("Success", "Employee Updated Successfully", parent=self.root)
+    #             self.show()  # Refresh the displayed data
+    #     except Exception as ex:
+    #         # If an error occurs during the update, display an error message
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def update(self):
         """
-        Updates the details of an existing employee in the database. The employee is identified by their ID.
-        All editable fields in the employee form can be updated through this method.
+        Updates the details of an existing employee in the database based on the provided employee ID.
+        It encrypts sensitive data before updating to maintain security.
         """
-        # Connect to the SQLite database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+        if not self.var_emp_id.get():  # Check if the Employee ID field is empty
+            messagebox.showerror("Error", "Employee ID is required", parent=self.root)
+            return
 
         try:
-            # Check if the Employee ID field is empty (it should never be empty for an update operation)
-            if self.var_emp_id.get() == "":
-                messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
-            else:
+            with sqlite3.connect(database=r'ims.db') as con:  # Context manager to handle database connection
+                cur = con.cursor()
+                # Prepare data for update
+                data = (
+                    self.encrypt_data(self.var_name.get()),  # Encrypt and update name
+                    self.encrypt_data(self.var_email.get()),  # Encrypt and update email
+                    self.var_gender.get(),  # Update gender
+                    self.encrypt_data(self.var_contact.get()),  # Encrypt and update contact
+                    self.var_dob.get(),  # Update date of birth
+                    self.var_doj.get(),  # Update date of joining
+                    self.encrypt_data(self.var_pass.get()),  # Encrypt and update password
+                    self.var_utype.get(),  # Update user type
+                    self.encrypt_data(self.txt_address.get('1.0', END).strip()),  # Encrypt and update address
+                    self.var_salary.get(),  # Update salary
+                    self.var_emp_id.get(),  # Employee ID for the WHERE clause
+                )
+
                 # Execute the SQL command to update the employee details in the database
                 cur.execute(
-                    "UPDATE employee set name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, address=?, salary=? WHERE eid=?",
-                    (
-                        self.encrypt_data(self.var_name.get()),  # Encrypt and update name
-                        self.encrypt_data(self.var_email.get()),  # Encrypt and update email
-                        self.var_gender.get(),  # Update gender
-                        self.encrypt_data(self.var_contact.get()),  # Encrypt and update contact
-                        self.var_dob.get(),  # Update date of birth
-                        self.var_doj.get(),  # Update date of joining
-                        self.encrypt_data(self.var_pass.get()),  # Encrypt and update password
-                        self.var_utype.get(),  # Update user type
-                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),  # Encrypt and update address
-                        self.var_salary.get(),  # Update salary
-                        self.var_emp_id.get(),  # Specify which employee to update
-                    ))
+                    "UPDATE employee SET name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, "
+                    "address=?, salary=? WHERE eid=?",
+                    data)
                 con.commit()  # Commit changes to the database
                 messagebox.showinfo("Success", "Employee Updated Successfully", parent=self.root)
                 self.show()  # Refresh the displayed data
+
         except Exception as ex:
-            # If an error occurs during the update, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Delete data from the database
+    # def delete(self):
+    #     """
+    #     Deletes an employee record from the database based on the provided employee ID.
+    #     Before deletion, the method confirms the existence of the employee and seeks user confirmation.
+    #     """
+    #     # Connect to the SQLite database
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #
+    #     try:
+    #         # Check if the Employee ID field is empty, which is necessary to perform the deletion
+    #         if self.var_emp_id.get() == "":
+    #             messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
+    #         else:
+    #             # Check if the employee exists in the database
+    #             cur.execute("Select * from employee where eid=?", (self.var_emp_id.get(),))
+    #             row = cur.fetchone()
+    #             if row is None:
+    #                 # If no record is found, display an error message
+    #                 messagebox.showerror("Error", "invalid Employee ID", parent=self.root)
+    #             else:
+    #                 # Confirm with the user if they really want to delete the record
+    #                 op = messagebox.askyesno("Confirm", "Do you really want to delete")
+    #                 if op:
+    #                     # If user confirms, execute the delete operation
+    #                     cur.execute("delete from employee where eid=?", (self.var_emp_id.get(),))
+    #                     con.commit()  # Commit changes to the database
+    #                     messagebox.showinfo("Delete", "Employee deleted Successfully", parent=self.root)
+    #                     self.clear()  # Clear all input fields after deletion
+    #
+    #     except Exception as ex:
+    #         # If an error occurs, display an error message
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def delete(self):
         """
-        Deletes an employee record from the database based on the provided employee ID.
-        Before deletion, the method confirms the existence of the employee and seeks user confirmation.
+        Deletes an employee record from the database after confirming that the employee ID exists and the user
+        confirms the action. Provides feedback on the outcome of the operation.
         """
-        # Connect to the SQLite database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+        if not self.var_emp_id.get():  # Ensure an employee ID is provided
+            messagebox.showerror("Error", "Employee ID is required", parent=self.root)
+            return
 
         try:
-            # Check if the Employee ID field is empty, which is necessary to perform the deletion
-            if self.var_emp_id.get() == "":
-                messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
-            else:
-                # Check if the employee exists in the database
-                cur.execute("Select * from employee where eid=?", (self.var_emp_id.get(),))
-                row = cur.fetchone()
-                if row is None:
-                    # If no record is found, display an error message
-                    messagebox.showerror("Error", "invalid Employee ID", parent=self.root)
-                else:
-                    # Confirm with the user if they really want to delete the record
-                    op = messagebox.askyesno("Confirm", "Do you really want to delete")
-                    if op:
-                        # If user confirms, execute the delete operation
-                        cur.execute("delete from employee where eid=?", (self.var_emp_id.get(),))
-                        con.commit()  # Commit changes to the database
-                        messagebox.showinfo("Delete", "Employee deleted Successfully", parent=self.root)
-                        self.clear()  # Clear all input fields after deletion
+            with sqlite3.connect(database=r'ims.db') as con:  # Manage the database connection
+                cur = con.cursor()
+                # Verify the existence of the employee before attempting deletion
+                cur.execute("SELECT * FROM employee WHERE eid=?", (self.var_emp_id.get(),))
+                if not cur.fetchone():
+                    messagebox.showerror("Error", "Invalid Employee ID", parent=self.root)
+                    return
+
+                # Ask for confirmation before deletion
+                if messagebox.askyesno("Confirm", "Do you really want to delete this employee?", parent=self.root):
+                    # Proceed with deleting the employee record
+                    cur.execute("DELETE FROM employee WHERE eid=?", (self.var_emp_id.get(),))
+                    con.commit()
+                    messagebox.showinfo("Success", "Employee deleted successfully", parent=self.root)
+                    self.clear()  # Clear form fields after deletion
 
         except Exception as ex:
-            # If an error occurs, display an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     # Clear all form fields
+    # def clear(self):
+    #     """
+    #     Resets all form fields to their default values, effectively clearing any data entered or displayed
+    #     in the form inputs. This method is typically used to prepare the form for a new entry or to clear
+    #     current data after operations like delete or update.
+    #     """
+    #     # Reset each variable tied to the form fields to their default empty or preset states
+    #     self.var_emp_id.set("")
+    #     self.var_name.set("")
+    #     self.var_email.set("")
+    #     self.var_gender.set("Select")  # Reset dropdown to default 'Select'
+    #     self.var_contact.set("")
+    #     self.var_dob.set("")
+    #     self.var_doj.set("")
+    #     self.var_pass.set("")
+    #     self.var_utype.set("Admin")  # Set user type back to default 'Admin'
+    #     self.var_salary.set("")
+    #     self.var_searctxt.set("")
+    #     self.var_search.set("Select")  # Reset search criteria dropdown to 'Select'
+    #
+    #     # Clear any text from the multiline Text widget used for addresses
+    #     self.txt_address.delete('1.0', END)  # Clear from the first character to the end
+
     def clear(self):
         """
-        Resets all form fields to their default values, effectively clearing any data entered or displayed
-        in the form inputs. This method is typically used to prepare the form for a new entry or to clear
-        current data after operations like delete or update.
+        Resets all form fields to their default or initial values after operations such as add, update, or delete.
+        This prepares the form for new entries or ensures clean slate operations.
         """
-        # Reset each variable tied to the form fields to their default empty or preset states
+        # Reset variables to default values
         self.var_emp_id.set("")
         self.var_name.set("")
         self.var_email.set("")
-        self.var_gender.set("Select")  # Reset dropdown to default 'Select'
+        self.var_gender.set("Select")  # Default for dropdown
         self.var_contact.set("")
         self.var_dob.set("")
         self.var_doj.set("")
         self.var_pass.set("")
-        self.var_utype.set("Admin")  # Set user type back to default 'Admin'
+        self.var_utype.set("Admin")  # Default user type
         self.var_salary.set("")
         self.var_searctxt.set("")
-        self.var_search.set("Select")  # Reset search criteria dropdown to 'Select'
+        self.var_search.set("Select")  # Default for search dropdown
 
-        # Clear any text from the multiline Text widget used for addresses
-        self.txt_address.delete('1.0', END)  # Clear from the first character to the end
+        # Clear address field
+        self.txt_address.delete('1.0', END)  # Remove all content from the address text field
 
     # Search for data based on user input
     def search(self):

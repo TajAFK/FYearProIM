@@ -1,39 +1,45 @@
-# Import necessary modules
-import json
-import os
-import smtplib
-import sqlite3
-import subprocess
-from random import randint
-from tkinter import *
-from tkinter import messagebox
-from tkinter.ttk import Style
+# Import essential libraries for system operations, UI, security, and email handling
+import json         # For loading and parsing JSON files
+import os           # For interacting with the operating system
+import smtplib      # For sending emails via SMTP
+import sqlite3      # For database interactions
+import subprocess   # For executing external processes
+from random import randint  # For generating random numbers, useful for OTPs
+from tkinter import *       # For GUI creation
+from tkinter import messagebox # For displaying messages
+from tkinter.ttk import Style  # For displaying styling the GUI
+from cryptography.fernet import Fernet  # For encrypting and decrypting data
 
-from cryptography.fernet import Fernet
 
 
 # Define the main class for the login system
 class LoginSystem:
     def __init__(self, root):
-        # Initialize variables and GUI settings
-        self.forget_win = None
-        self.btn_reset = None
+        """
+        Initializes the main window for the Inventory Management System with essential GUI components,
+        configuration settings, and cryptographic settings for secure operations.
+        """
+        # Basic window configuration
         self.root = root
         self.root.title("Inventory Management System | Ariatech")
-        self.root.geometry("1350x700+0+0")
-        self.root.config(bg="#fafafa")
-        self.otp = ''
+        self.root.geometry("1350x700+0+0")  # Set the size and position of the window
+        self.root.config(bg="#fafafa")  # Set the background color
 
-        self.var_otp = StringVar()
-        self.var_new_pass = StringVar()
-        self.var_conf_pass = StringVar()
+        # Variable initialization for password reset functionality
+        self.var_otp = StringVar()  # OTP input by the user
+        self.var_new_pass = StringVar()  # New password input
+        self.var_conf_pass = StringVar()  # Confirm new password input
 
-        # Load encryption key and initialize cipher
-        self.cipher = self.load_key_and_initialize_cipher()
+        # Initialize placeholder attributes for dynamic GUI components
+        self.forget_win = None  # Placeholder for the forgot password window
+        self.btn_reset = None  # Placeholder for the reset button
 
-        # ====images====
-        self.phone_image = PhotoImage(file="images/phone.png")
-        Label(self.root, image=self.phone_image, bd=0).place(x=200, y=50)
+        # Encryption setup
+        self.cipher = self.load_key_and_initialize_cipher()  # Load existing encryption key or create new
+
+        # GUI components
+        self.phone_image = PhotoImage(file="images/phone.png")  # Load phone image
+        Label(self.root, image=self.phone_image, bd=0).place(x=200, y=50)  # Place phone image on the window
 
         # ====Login Frame======
         # Initialize StringVars for holding login credentials
@@ -176,60 +182,69 @@ class LoginSystem:
 
     def login(self):
         """
-        Handles the login functionality:
-        - Connects to the database to retrieve user details.
-        - Validates user credentials.
-        - Redirects the user based on their role.
+        Handles user login by verifying credentials against the database.
+        Redirects the user to appropriate dashboards based on their role if login is successful.
+        "Encryption was chosen over hashing for password storage in this project to facilitate secure password recovery
+        capabilities, which is a requirement for administrative users in the scenario simulated by this system.
+        Additionally, using encryption allows for reversible transformation, which is aligned with specific legacy
+        system integration requirements that necessitate access to the original password data for authentication
+        processes."
         """
         try:
-            # Connect to the database
             with sqlite3.connect(database=r'ims.db') as con:
                 cur = con.cursor()
 
-                # Check if the employee ID or password fields are empty
+                # Validate non-empty credentials input
                 if not self.employee_id.get() or not self.password.get():
                     messagebox.showerror("Error", "All fields are required", parent=self.root)
                     return
 
-                # Retrieve user type and encrypted password from the database
+                # Execute query to fetch user type and password for the given employee ID
                 cur.execute("SELECT utype, pass FROM employee WHERE eid=?", (self.employee_id.get(),))
                 user = cur.fetchone()
 
-                # Handle invalid login credentials
+                # Validate existence of user record
                 if user is None:
                     messagebox.showerror("Error", "Invalid USERNAME/PASSWORD", parent=self.root)
                     return
 
-                # Decrypt the stored password
+                # Decrypt the password retrieved from the database
                 decrypted_password = self.cipher.decrypt(user[1].encode()).decode()
 
-                # Validate the decrypted password with the user input
+                # Check if decrypted password matches the input password
                 if decrypted_password == self.password.get():
-                    # Navigate to the appropriate dashboard based on the user type
+                    # Successful login, proceed based on user type
                     self.root.destroy()
                     if user[0] == "Admin":
                         subprocess.run(["python", "dashboard.py"], check=True)
                     else:
                         subprocess.run(["python", "billing.py"], check=True)
                 else:
+                    # Password does not match
                     messagebox.showerror("Error", "Invalid USERNAME/PASSWORD", parent=self.root)
+
         except Exception as ex:
+            # Log or handle any exceptions raised during the login process
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def forget_window(self):
         """
-        Handles forget password functionality.
+        Handles the password reset process for users who have forgotten their password. The process includes verifying the
+        employee ID, sending an OTP to the registered email, and allowing the user to reset their password.
         """
         try:
+            # Check for empty Employee ID field
             if self.employee_id.get() == "":
                 messagebox.showerror("Error", "Employee ID must be required", parent=self.root)
                 return
-
+            # Establish database connection to retrieve the encrypted email
             con = sqlite3.connect(database=r'ims.db')
             cur = con.cursor()
             cur.execute("select email from employee where eid=?", (self.employee_id.get(),))
             email_encrypted = cur.fetchone()  # This will fetch the encrypted email
-            con.close()  # Close the connection early
+            con.close()  # Close the database connection promptly
+
+            # Handle case where the Employee ID is not found
             if email_encrypted is None:
                 messagebox.showerror("Error", "Invalid Employee ID, try again", parent=self.root)
                 return
@@ -239,18 +254,18 @@ class LoginSystem:
 
             # =========Forget Window=============
             # Call send_email_function
-            result = self.send_email(email)
-            if result != 's':  # Assuming 's' means success, based on your send_email method
+            # Send OTP to the registered email address
+            if not self.send_email(email):
                 messagebox.showerror("Error", "Failed to send email. Please check your connection and try again.",
                                      parent=self.root)
                 return
-
+            # Setup the password reset window after successful email sending
             self.forget_win = Toplevel(self.root)
             self.forget_win.title("Reset Password")
             self.forget_win.geometry("400x400")
             self.forget_win.config(bg="#f0f0f0")
 
-            # Title Label
+            # Define UI elements for password reset
             Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5",
                   fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
 
@@ -288,38 +303,64 @@ class LoginSystem:
             self.btn_update.place(x=150, y=300, width=100, height=30)
 
         except Exception as ex:
+            # Handle exceptions and show an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def update_password(self):
         """
-        Updates the password in the database after validation.
+        Validates and updates the user's password in the database. Ensures that the new password is confirmed correctly
+        before updating to prevent errors.
         """
+        # Validate password fields are not empty
         if self.var_new_pass.get() == "" or self.var_conf_pass.get() == "":
             messagebox.showerror("Error", "Password is required", parent=self.forget_win)
-        elif self.var_new_pass.get() != self.var_conf_pass.get():
-            messagebox.showerror("Error", "Password must be same", parent=self.forget_win)
-        else:
-            con = sqlite3.connect(database=r'ims.db')
-            cur = con.cursor()
-            try:
-                # Encrypt the new password before updating it in the database
+            return
+
+        # Check if the new password and confirmation password match
+        if self.var_new_pass.get() != self.var_conf_pass.get():
+            messagebox.showerror("Error", "Passwords do not match", parent=self.forget_win)
+            return
+
+        # Proceed with updating the password in the database
+        try:
+            # Establish a connection to the database
+            with sqlite3.connect(database=r'ims.db') as con:
+                cur = con.cursor()
+                # Encrypt the new password
                 encrypted_password = self.cipher.encrypt(self.var_new_pass.get().encode()).decode()
-                cur.execute("Update employee SET pass=? where eid=?", (encrypted_password, self.employee_id.get()))
-                con.commit()
+                # Update the password in the database
+                cur.execute("UPDATE employee SET pass=? WHERE eid=?", (encrypted_password, self.employee_id.get()))
+                con.commit()  # Commit changes to ensure data is saved
                 messagebox.showinfo("Success", "Password updated successfully", parent=self.forget_win)
-                self.forget_win.destroy()
-            except Exception as ex:
-                messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+                self.forget_win.destroy()  # Close the reset window upon success
+        except Exception as ex:
+            # Handle exceptions that may occur during database operations
+            messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def validate_otp(self):
         """
-        Validates the OTP entered by the user.
+        Validates the OTP entered by the user against a pre-stored value. Enables the update button if valid,
+        otherwise notifies the user of an invalid OTP.
         """
-        if int(self.otp) == int(self.var_otp.get()):
-            self.btn_update.config(state=NORMAL)
-            self.btn_reset.config(state=DISABLED)
-        else:
-            messagebox.showerror("Error", "Invalid OTP, Try again", parent=self.forget_win)
+        try:
+            # Convert user input and stored OTP to integers for comparison
+            user_otp = int(self.var_otp.get())
+            stored_otp = int(self.otp)
+
+            # Check if the OTP entered matches the expected OTP
+            if user_otp == stored_otp:
+                # Enable the update password button and disable the submit button
+                self.btn_update.config(state=NORMAL)
+                self.btn_reset.config(state=DISABLED)
+            else:
+                # Notify user of invalid OTP
+                messagebox.showerror("Error", "Invalid OTP, please try again", parent=self.forget_win)
+        except ValueError:
+            # Handle non-integer input gracefully
+            messagebox.showerror("Error", "OTP should be a numeric value", parent=self.forget_win)
+        except Exception as ex:
+            # Catch any other unexpected errors
+            messagebox.showerror("Error", f"An error occurred: {str(ex)}", parent=self.forget_win)
 
     def load_credentials(self):
         """
@@ -332,39 +373,50 @@ class LoginSystem:
     def send_email(self, to_):
         """
         Sends an email with a randomly generated OTP to the provided email address.
+        Uses SMTP to connect to the Gmail server and handles potential errors gracefully.
         """
-        # Load credentials from a JSON file
+        # Attempt to load email credentials from a JSON configuration file
         try:
             with open('config.json', 'r') as config_file:
                 config = json.load(config_file)
             email_ = config['email']
             pass_ = config['password']
-        except IOError:
-            print("Failed to read configuration file")
+        except FileNotFoundError:
+            print("Configuration file not found.")
             return 'f'
         except KeyError:
-            print("Invalid configuration settings")
+            print("Essential email configuration data is missing.")
+            return 'f'
+        except json.JSONDecodeError:
+            print("Configuration file is not in valid JSON format.")
             return 'f'
 
+        # Attempt to send an email with the generated OTP
         try:
             smtp_server = 'smtp.gmail.com'
             smtp_port = 587
-            s = smtplib.SMTP(smtp_server, smtp_port)
-            s.starttls()
-            s.login(email_, pass_)
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()  # Upgrade the connection to secure
+            server.login(email_, pass_)
 
             # Generate a six-digit OTP
             self.otp = randint(100000, 999999)
 
+            # Prepare the email message
             subj = 'IMS-Reset Password OTP'
             msg = f'Dear Sir/Madam,\n\nYour Reset OTP is {self.otp}.\n\nWith Regards,\nIMS Team'
             msg = f"Subject:{subj}\n\n{msg}"
-            s.sendmail(email_, to_, msg)
-            s.quit()
-            return 's'
+
+            # Send the email
+            server.sendmail(email_, to_, msg)
         except smtplib.SMTPException as e:
-            print(f"SMTP error occurred: {str(e)}")
+            print(f"Failed to send email due to SMTP error: {str(e)}")
             return 'f'
+        finally:
+            server.quit()  # Ensure the connection to the server is closed
+
+        # Return 's' for success if the email has been sent
+        return 's'
 
 
 root = Tk()

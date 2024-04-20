@@ -1,8 +1,6 @@
 from tkinter import *
 from tkinter import ttk, messagebox
-from PIL import Image, ImageTk
 import sqlite3
-from tkinter import font
 
 
 class categoryclass:
@@ -54,16 +52,16 @@ class categoryclass:
         cat_frame.place(x=400, y=100, width=380, height=300)
 
         # Create vertical and horizontal scrollbars
-        scrolly = Scrollbar(cat_frame, orient=VERTICAL)
-        scrollx = Scrollbar(cat_frame, orient=HORIZONTAL)
+        scroll_y = Scrollbar(cat_frame, orient=VERTICAL)
+        scroll_x = Scrollbar(cat_frame, orient=HORIZONTAL)
 
         # Create the treeview widget for category table
-        self.category_table = ttk.Treeview(cat_frame, columns=("cid", "name"), yscrollcommand=scrolly.set,
-                                           xscrollcommand=scrollx.set)
-        scrollx.pack(side=BOTTOM, fill=X)
-        scrolly.pack(side=RIGHT, fill=Y)
-        scrollx.config(command=self.category_table.xview)
-        scrolly.config(command=self.category_table.yview)
+        self.category_table = ttk.Treeview(cat_frame, columns=("cid", "name"), yscrollcommand=scroll_y.set,
+                                           xscrollcommand=scroll_x.set)
+        scroll_x.pack(side=BOTTOM, fill=X)
+        scroll_y.pack(side=RIGHT, fill=Y)
+        scroll_x.config(command=self.category_table.xview)
+        scroll_y.config(command=self.category_table.yview)
 
         # Set headings for columns
         self.category_table.heading("cid", text="C ID")
@@ -100,7 +98,7 @@ class categoryclass:
 
         self.show()
 
-        #=============Functions=====================
+    # ALL Functions
 
     # def add(self):
     #     con = sqlite3.connect(database=r'ims.db')
@@ -125,119 +123,255 @@ class categoryclass:
     #     except Exception as ex:
     #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
+    # def add(self):
+    #     # Connect to the database
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #         # Check if the category name is provided
+    #         if self.var_name.get() == "":
+    #             messagebox.showerror("Error", "Category name must be required", parent=self.root)
+    #         else:
+    #             # Check if the category already exists
+    #             cur.execute("SELECT * FROM category WHERE name=?", (self.var_name.get(),))
+    #             row = cur.fetchone()
+    #             if row is not None:
+    #                 messagebox.showerror("Error", "Category already present, try different", parent=self.root)
+    #             else:
+    #                 # Insert the new category into the database
+    #                 cur.execute("INSERT INTO category(name) VALUES(?)", (self.var_name.get(),))
+    #                 con.commit()
+    #                 messagebox.showinfo("Success", "Category Added Successfully", parent=self.root)
+    #                 # Refresh the category table to show the newly added category
+    #                 self.show()
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+    #     finally:
+    #         # Close the database connection
+    #         con.close()
+
     def add(self):
-        # Connect to the database
+        """
+        Adds a new category to the database after verifying that the category name does not already exist.
+        Displays appropriate messages for errors or success.
+        """
+        # Establish a connection to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
-            # Check if the category name is provided
-            if self.var_name.get() == "":
+            # Ensure a category name has been provided
+            if not self.var_name.get():
                 messagebox.showerror("Error", "Category name must be required", parent=self.root)
-            else:
-                # Check if the category already exists
-                cur.execute("SELECT * FROM category WHERE name=?", (self.var_name.get(),))
-                row = cur.fetchone()
-                if row is not None:
-                    messagebox.showerror("Error", "Category already present, try different", parent=self.root)
-                else:
-                    # Insert the new category into the database
-                    cur.execute("INSERT INTO category(name) VALUES(?)", (self.var_name.get(),))
-                    con.commit()
-                    messagebox.showinfo("Success", "Category Added Successfully", parent=self.root)
-                    # Refresh the category table to show the newly added category
-                    self.show()
+                return
+
+            # Check if the category already exists to prevent duplicates
+            cur.execute("SELECT * FROM category WHERE name=?", (self.var_name.get(),))
+            if cur.fetchone():
+                messagebox.showerror("Error", "Category already present, try a different name", parent=self.root)
+                return
+
+            # Insert the new category into the database
+            cur.execute("INSERT INTO category(name) VALUES(?)", (self.var_name.get(),))
+            con.commit()
+            messagebox.showinfo("Success", "Category Added Successfully", parent=self.root)
+            # Refresh the category table to show the newly added category
+            self.show()
+
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
         finally:
             # Close the database connection
             con.close()
 
-        # =================SHOW DATA=================
+    #     # =================SHOW DATA=================
+
+    # def show(self):
+    #     # Connect to the SQLite database
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #     try:
+    #         # Execute the SQL query to fetch all data from the category table
+    #         cur.execute("SELECT * FROM category")
+    #
+    #         # Fetch all rows
+    #         rows = cur.fetchall()
+    #
+    #         # Delete any existing data in the treeview widget
+    #         self.category_table.delete(*self.category_table.get_children())
+    #
+    #         # Insert the fetched rows into the treeview widget
+    #         for row in rows:
+    #             self.category_table.insert('', END, values=row)
+    #
+    #         # Center align the data in the cells
+    #         for col in self.category_table["columns"]:
+    #             self.category_table.heading(col, anchor=CENTER)
+    #             self.category_table.column(col, anchor=CENTER)
+    #     except Exception as ex:
+    #         # Display an error message if an exception occurs
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def show(self):
-        # Connect to the SQLite database
+        """
+        Fetches and displays all category records from the database into the category_table.
+        Ensures the latest data is always shown, handles exceptions, and closes database connections properly
+        to avoid resource leaks.
+        """
+        # Establish connection to the database
         con = sqlite3.connect(database=r'ims.db')
         cur = con.cursor()
+
         try:
-            # Execute the SQL query to fetch all data from the category table
+            # Retrieve all category records from the database
             cur.execute("SELECT * FROM category")
+            rows = cur.fetchall()  # Fetch all rows from the executed query
 
-            # Fetch all rows
-            rows = cur.fetchall()
-
-            # Delete any existing data in the treeview widget
+            # Clear existing entries in the category table to ensure it reflects the current database state
             self.category_table.delete(*self.category_table.get_children())
 
-            # Insert the fetched rows into the treeview widget
+            # Populate the category table with rows fetched from the database
             for row in rows:
-                self.category_table.insert('', END, values=row)
+                self.category_table.insert('', END, values=row)  # Insert each row into the table
 
-            # Center align the data in the cells
+            # Adjust column settings to center-align the column headers and their contents for better readability
             for col in self.category_table["columns"]:
                 self.category_table.heading(col, anchor=CENTER)
                 self.category_table.column(col, anchor=CENTER)
+
         except Exception as ex:
-            # Display an error message if an exception occurs
+            # Handle any exceptions that occur during the fetch operation
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-        # ====================== Get Data Back to Form =======================
+        finally:
+            # Ensure the database connection is closed to avoid leaking resources
+            con.close()
+
+    #     # ====================== Get Data Back to Form =======================
+
+    # def get_data(self, ev):
+    #     # Get the focused item in the category table
+    #     focused_item = self.category_table.focus()
+    #
+    #     # Get the content of the focused item
+    #     content = self.category_table.item(focused_item)
+    #
+    #     # Extract the row values from the content
+    #     row_values = content['values']
+    #
+    #     # If row values are found
+    #     if row_values:
+    #         # Set the category ID variable
+    #         self.var_cat_id.set(row_values[0])
+    #
+    #         # Set the category name variable
+    #         self.var_name.set(row_values[1])
 
     def get_data(self, ev):
-        # Get the focused item in the category table
+        """
+        Retrieves and populates the form fields with data from the selected row in the category table.
+        This method is invoked when a row in the table is selected, allowing the user to view or edit the data.
+        """
+        # Get the identifier for the currently focused item in the category table
         focused_item = self.category_table.focus()
 
-        # Get the content of the focused item
+        # Retrieve the item's data dictionary from the focused row
         content = self.category_table.item(focused_item)
 
-        # Extract the row values from the content
-        row_values = content['values']
+        # Extract the data values from the 'values' key of the dictionary
+        row_values = content.get('values')
 
-        # If row values are found
+        # Check if the row is empty, which happens if no item is selected
         if row_values:
-            # Set the category ID variable
-            self.var_cat_id.set(row_values[0])
+            # Assign the extracted values to the respective variable holders for display in the entry fields
+            self.var_cat_id.set(row_values[0])  # Set the Category ID from the first column of the row
+            self.var_name.set(row_values[1])  # Set the Category Name from the second column of the row
+        else:
+            # Clear the fields if no row is selected or if an empty part of the table is clicked
+            self.var_cat_id.set("")
+            self.var_name.set("")
+            messagebox.showinfo("Selection", "Please select a valid row from the table.", parent=self.root)
 
-            # Set the category name variable
-            self.var_name.set(row_values[1])
+    # def delete(self):
+    #     # Connect to the database
+    #     con = sqlite3.connect(database=r'ims.db')
+    #     cur = con.cursor()
+    #
+    #     try:
+    #         # Check if category ID is empty
+    #         if self.var_cat_id.get() == "":
+    #             messagebox.showerror("Error", "Please select category from the list", parent=self.root)
+    #         else:
+    #             # Check if the category exists
+    #             cur.execute("SELECT * FROM category WHERE cid=?", (self.var_cat_id.get(),))
+    #             row = cur.fetchone()
+    #
+    #             # If category does not exist
+    #             if row is None:
+    #                 messagebox.showerror("Error", "Error, Please try again", parent=self.root)
+    #             else:
+    #                 # Confirm deletion
+    #                 op = messagebox.askyesno("Confirm", "Do you really want to delete")
+    #                 if op:
+    #                     # Delete category from database
+    #                     cur.execute("DELETE FROM category WHERE cid=?", (self.var_cat_id.get(),))
+    #                     con.commit()
+    #
+    #                     # Show success message
+    #                     messagebox.showinfo("Delete", "Category deleted Successfully", parent=self.root)
+    #
+    #                     # Refresh category table
+    #                     self.show()
+    #
+    #                     # Reset category ID and name variables
+    #                     self.var_cat_id.set("")
+    #                     self.var_name.set("")  # Reset the var_name variable to an empty string
+    #
+    #     except Exception as ex:
+    #         # Show error message if any exception occurs
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def delete(self):
-        # Connect to the database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
+        """
+        Deletes a selected category from the database after user confirmation. It ensures that the
+        category exists and prevents any action if no category is selected. This function uses parameterized
+        queries to enhance security and avoid SQL injection.
+        """
+        # Verify that a category has been selected
+        global con
+        if not self.var_cat_id.get():
+            messagebox.showerror("Error", "Please select a category from the list", parent=self.root)
+            return
 
+        # Establish a connection to the database
         try:
-            # Check if category ID is empty
-            if self.var_cat_id.get() == "":
-                messagebox.showerror("Error", "Please select category from the list", parent=self.root)
-            else:
-                # Check if the category exists
-                cur.execute("SELECT * FROM category WHERE cid=?", (self.var_cat_id.get(),))
-                row = cur.fetchone()
+            con = sqlite3.connect(database=r'ims.db')
+            cur = con.cursor()
 
-                # If category does not exist
-                if row is None:
-                    messagebox.showerror("Error", "Error, Please try again", parent=self.root)
-                else:
-                    # Confirm deletion
-                    op = messagebox.askyesno("Confirm", "Do you really want to delete")
-                    if op:
-                        # Delete category from database
-                        cur.execute("DELETE FROM category WHERE cid=?", (self.var_cat_id.get(),))
-                        con.commit()
+            # Check for the existence of the category to ensure it can be safely deleted
+            cur.execute("SELECT * FROM category WHERE cid=?", (self.var_cat_id.get(),))
+            if not cur.fetchone():
+                messagebox.showerror("Error", "Selected category does not exist", parent=self.root)
+                return
 
-                        # Show success message
-                        messagebox.showinfo("Delete", "Category deleted Successfully", parent=self.root)
+            # Confirm with the user before deletion
+            if messagebox.askyesno("Confirm", "Do you really want to delete this category?"):
+                # Execute the deletion if confirmed
+                cur.execute("DELETE FROM category WHERE cid=?", (self.var_cat_id.get(),))
+                con.commit()
+                messagebox.showinfo("Success", "Category deleted successfully", parent=self.root)
+                self.show()  # Refresh the list to reflect the deletion
 
-                        # Refresh category table
-                        self.show()
-
-                        # Reset category ID and name variables
-                        self.var_cat_id.set("")
-                        self.var_name.set("")  # Reset the var_name variable to an empty string
+                # Reset the input fields
+                self.var_cat_id.set("")
+                self.var_name.set("")
 
         except Exception as ex:
-            # Show error message if any exception occurs
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+        finally:
+            # Ensure the database connection is always closed
+            con.close()
 
 
 # Entry point of the program
