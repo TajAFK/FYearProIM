@@ -157,15 +157,25 @@ class LoginSystem:
     @staticmethod
     def load_key_and_initialize_cipher():
         """
-        Load encryption key from file and initialize cipher.
+        Load the encryption key from a file named 'secret.key' and initialize a Fernet cipher object.
+        Raises:
+            FileNotFoundError: If the 'secret.key' file does not exist.
+            Exception: For any issues encountered during key reading or cipher initialization.
         """
         key_path = 'secret.key'
         if not os.path.exists(key_path):
-            # If key does not exist, handle it appropriately
-            raise Exception("Encryption key file not found")
-        with open(key_path, 'rb') as key_file:
-            key = key_file.read()
-        return Fernet(key)
+            # Raises an error if the encryption key file does not exist
+            raise FileNotFoundError("Encryption key file not found")
+
+        try:
+            # Attempt to read the key from the file
+            with open(key_path, 'rb') as key_file:
+                key = key_file.read()
+            # Initialize and return the Fernet cipher object using the loaded key
+            return Fernet(key)
+        except Exception as e:
+            # Handle any exceptions during file reading or cipher initialization
+            raise Exception(f"An error occurred while loading the encryption key: {str(e)}")
 
     def animate(self):
         """

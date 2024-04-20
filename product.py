@@ -671,7 +671,7 @@ class productclass:
             con.close()
 
 
-# Entry point of the program
+# Entry point of the programú
 if __name__ == "__main__":
     # Create a Tkinter root window
     root = Tk()
