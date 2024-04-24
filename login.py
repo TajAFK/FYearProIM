@@ -1,15 +1,14 @@
 # Import essential libraries for system operations, UI, security, and email handling
-import json         # For loading and parsing JSON files
-import os           # For interacting with the operating system
-import smtplib      # For sending emails via SMTP
-import sqlite3      # For database interactions
-import subprocess   # For executing external processes
+import json  # For loading and parsing JSON files
+import os  # For interacting with the operating system
+import smtplib  # For sending emails via SMTP
+import sqlite3  # For database interactions
+import subprocess  # For executing external processes
 from random import randint  # For generating random numbers, useful for OTPs
-from tkinter import *       # For GUI creation
-from tkinter import messagebox # For displaying messages
+from tkinter import *  # For GUI creation
+from tkinter import messagebox  # For displaying messages
 from tkinter.ttk import Style  # For displaying styling the GUI
 from cryptography.fernet import Fernet  # For encrypting and decrypting data
-
 
 
 # Define the main class for the login system
@@ -424,7 +423,7 @@ class LoginSystem:
             return 'f'
         finally:
             server.quit()  # Ensure the connection to the server is closed
-
+            
         # Return 's' for success if the email has been sent
         return 's'
 

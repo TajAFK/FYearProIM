@@ -10,6 +10,7 @@ from cryptography.fernet import \
     Fernet  # Provides encryption and decryption functionality using Fernet symmetric encryption
 import random
 
+
 class BillClass:
     def __init__(self, root):
         self.root = root
