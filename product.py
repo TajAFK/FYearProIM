@@ -195,6 +195,54 @@ class productclass:
             # Handle any exceptions that occur and display an error message
             messagebox.showerror("Error", f"Error retrieving data: {str(ex)}", parent=self.root)
 
+    # def add(self):
+    #     """
+    #     Adds a new product to the database after validating that all required fields are filled and ensuring no duplicate product names exist.
+    #     Handles exceptions and ensures the database connection is closed properly to maintain data integrity and system performance.
+    #     """
+    #     try:
+    #         with sqlite3.connect(database=r'ims.db') as con:
+    #             cur = con.cursor()
+    #
+    #             # Validate all required fields
+    #             if any(not getattr(self, f"var_{field}").get() or self.var_cat.get() in ["Select", "Empty"]
+    #                    for field in ["sup", "name", "price", "qty", "status"]):
+    #                 messagebox.showerror("Error", "All fields are required, please fill all the fields",
+    #                                      parent=self.root)
+    #                 return  # Early exit if any field is empty or unselected
+    #
+    #                 # Get supplier_id from supplier name
+    #                 cur.execute("SELECT supplier_id FROM supplier WHERE name=?", (self.var_sup.get(),))
+    #                 supplier_id = cur.fetchone()
+    #                 if supplier_id is None:
+    #                     messagebox.showerror("Error", "Selected supplier does not exist", parent=self.root)
+    #                     return
+    #
+    #                 # Get category_id from category name
+    #                 cur.execute("SELECT cid FROM category WHERE name=?", (self.var_cat.get(),))
+    #                 category_id = cur.fetchone()
+    #                 if category_id is None:
+    #                     messagebox.showerror("Error", "Selected category does not exist", parent=self.root)
+    #                     return
+    #
+    #             # Prevent duplicate product names in the database
+    #             cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
+    #             if cur.fetchone():
+    #                 messagebox.showerror("Error", "This Product already exists, try a different name", parent=self.root)
+    #                 return  # Stop execution if a duplicate name is found
+    #
+    #             # Insert the new product into the database
+    #             cur.execute(
+    #                 "INSERT INTO product (supplier_id, category_id, name, price, qty, status) VALUES (?, ?, ?, ?, ?, ?)",
+    #                 (supplier_id[0], category_id[0], self.var_name.get(), self.var_price.get(),
+    #                  self.var_qty.get(), self.var_status.get()))
+    #             con.commit()
+    #             messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
+    #             #self.show()  # Refresh the display to show the new product
+    #
+    #     except Exception as ex:
+    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
     def add(self):
         """
         Adds a new product to the database after validating that all required fields are filled and ensuring no duplicate product names exist.
@@ -205,11 +253,25 @@ class productclass:
                 cur = con.cursor()
 
                 # Validate all required fields
-                if any(not getattr(self, f"var_{field}").get() or self.var_cat.get() in ["Select", "Empty"]
-                       for field in ["sup", "name", "price", "qty", "status"]):
+                if any(not getattr(self, f"var_{field}").get() or self.var_cat.get() == "Select"
+                       for field in ["name", "price", "qty", "status"]):
                     messagebox.showerror("Error", "All fields are required, please fill all the fields",
                                          parent=self.root)
                     return  # Early exit if any field is empty or unselected
+
+                # Get supplier_id from supplier name
+                cur.execute("SELECT supplier_id FROM supplier WHERE name=?", (self.var_sup.get(),))
+                supplier_id = cur.fetchone()
+                if supplier_id is None:
+                    messagebox.showerror("Error", "Selected supplier does not exist", parent=self.root)
+                    return
+
+                # Get category_id from category name
+                cur.execute("SELECT cid FROM category WHERE name=?", (self.var_cat.get(),))
+                category_id = cur.fetchone()
+                if category_id is None:
+                    messagebox.showerror("Error", "Selected category does not exist", parent=self.root)
+                    return
 
                 # Prevent duplicate product names in the database
                 cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
@@ -219,8 +281,8 @@ class productclass:
 
                 # Insert the new product into the database
                 cur.execute(
-                    "INSERT INTO product (Category, Supplier, name, price, qty, status) VALUES (?, ?, ?, ?, ?, ?)",
-                    (self.var_cat.get(), self.var_sup.get(), self.var_name.get(), self.var_price.get(),
+                    "INSERT INTO product (supplier_id, category_id, name, price, qty, status) VALUES (?, ?, ?, ?, ?, ?)",
+                    (supplier_id[0], category_id[0], self.var_name.get(), self.var_price.get(),
                      self.var_qty.get(), self.var_status.get()))
                 con.commit()
                 messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
@@ -228,6 +290,35 @@ class productclass:
 
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
+    # def show(self):
+    #     """
+    #     Fetches and displays all product records from the database into the product_table,
+    #     ensuring the display is up-to-date. This method handles database operations safely,
+    #     ensuring exceptions are caught and resources are properly managed.
+    #     """
+    #     try:
+    #         # Use context manager to handle database connection
+    #         with sqlite3.connect(database=r'ims.db') as con:
+    #             cur = con.cursor()
+    #             cur.execute("SELECT * FROM product")
+    #             rows = cur.fetchall()
+    #
+    #         # Clear the table before inserting new rows to reflect the latest data
+    #         self.product_table.delete(*self.product_table.get_children())
+    #
+    #         # Populate the table with fresh data from the database
+    #         for row in rows:
+    #             self.product_table.insert('', END, values=row)
+    #
+    #         # Center align the table headers and content for aesthetics and readability
+    #         for col in self.product_table["columns"]:
+    #             self.product_table.heading(col, anchor=CENTER)
+    #             self.product_table.column(col, anchor=CENTER)
+    #
+    #     except Exception as ex:
+    #         # Inform the user if an error occurs during the database operation
+    #         messagebox.showerror("Error", f"Error retrieving data: {str(ex)}", parent=self.root)
 
     def show(self):
         """
@@ -239,7 +330,9 @@ class productclass:
             # Use context manager to handle database connection
             with sqlite3.connect(database=r'ims.db') as con:
                 cur = con.cursor()
-                cur.execute("SELECT * FROM product")
+                # Modify the SQL query to join the product and supplier tables
+                cur.execute(
+                    "SELECT product.pid, supplier.name, category.name, product.name, product.price, product.qty, product.status FROM product INNER JOIN supplier ON product.supplier_id = supplier.supplier_id INNER JOIN category ON product.category_id = category.cid")
                 rows = cur.fetchall()
 
             # Clear the table before inserting new rows to reflect the latest data

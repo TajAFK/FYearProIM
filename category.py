@@ -184,7 +184,7 @@ class categoryclass:
         queries to enhance security and avoid SQL injection.
         """
         # Verify that a category has been selected
-        global con
+
         if not self.var_cat_id.get():
             messagebox.showerror("Error", "Please select a category from the list", parent=self.root)
             return

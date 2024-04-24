@@ -106,7 +106,7 @@ class supplierclass:
         scroll_x = Scrollbar(emp_frame, orient=HORIZONTAL)
 
         # Treeview table to display supplier details
-        self.supplierTable = ttk.Treeview(emp_frame, columns=("invoice", "name", "contact", "desc"),
+        self.supplierTable = ttk.Treeview(emp_frame, columns=("supplier_id","invoice", "name", "contact", "desc"),
                                           yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
         scroll_x.pack(side=BOTTOM, fill=X)
         scroll_y.pack(side=RIGHT, fill=Y)
@@ -114,11 +114,13 @@ class supplierclass:
         scroll_y.config(command=self.supplierTable.yview)
 
         # Setting up the headings and column widths
+        self.supplierTable.heading("supplier_id", text="Sno.")
         self.supplierTable.heading("invoice", text="Invoice No.")
         self.supplierTable.heading("name", text="Name")
         self.supplierTable.heading("contact", text="Contact")
         self.supplierTable.heading("desc", text="Description")
         self.supplierTable["show"] = "headings"
+        self.supplierTable.column("supplier_id", width=30)
         self.supplierTable.column("invoice", width=90)
         self.supplierTable.column("name", width=100)
         self.supplierTable.column("contact", width=100)
@@ -234,6 +236,11 @@ class supplierclass:
             con.commit()  # Commit the transaction to the database
             messagebox.showinfo("Success", "Supplier Added Successfully", parent=self.root)
             self.show()  # Refresh the display to include the new supplier
+            print("Invoice:", self.var_sup_invoice.get())
+            print("Name:", self.var_name.get())
+            print("Contact:", self.encrypt_data(self.var_contact.get()))
+            print("Description:", self.txt_desc.get('1.0', END).strip())
+
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
         finally:
@@ -259,10 +266,10 @@ class supplierclass:
             # Insert fetched rows into the table after decrypting sensitive data
             for row in rows:
                 # Decrypt contact information in the third column (index 2)
-                decrypted_contact = self.decrypt_data(row[2])
+                decrypted_contact = self.decrypt_data(row[3])
                 # Replace the encrypted contact data with decrypted data
                 decrypted_row = list(row)
-                decrypted_row[2] = decrypted_contact
+                decrypted_row[3] = decrypted_contact
                 # Insert the modified row into the table
                 self.supplierTable.insert('', END, values=decrypted_row)
 
@@ -294,11 +301,11 @@ class supplierclass:
             return  # Exit the function if no item is selected
 
         # Assign the extracted values to the respective variable holders for display in the entry fields
-        self.var_sup_invoice.set(row[0])  # Set the Supplier Invoice
-        self.var_name.set(row[1])  # Set the Supplier Name
-        self.var_contact.set(row[2])  # Contact is already decrypted using show() function
+        self.var_sup_invoice.set(row[1])  # Set the Supplier Invoice
+        self.var_name.set(row[2])  # Set the Supplier Name
+        self.var_contact.set(row[3])  # Contact is already decrypted using show() function
         self.txt_desc.delete('1.0', END)  # Clear existing description
-        self.txt_desc.insert(END, row[3])  # Insert the Supplier Description
+        self.txt_desc.insert(END, row[4])  # Insert the Supplier Description
 
     def update(self):
         """

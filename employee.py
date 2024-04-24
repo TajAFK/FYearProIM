@@ -308,7 +308,7 @@ class EmployeeClass:
                         self.encrypt_data(self.var_email.get()),
                         self.var_gender.get(),
                         self.encrypt_data(self.var_contact.get()),
-                        self.var_dob.get(),
+                        self.encrypt_data(self.var_dob.get()),
                         self.var_doj.get(),
                         self.encrypt_data(self.var_pass.get()),
                         self.var_utype.get(),
@@ -344,7 +344,7 @@ class EmployeeClass:
                         self.decrypt_data(row[2]),  # Email
                         row[3],  # Gender
                         self.decrypt_data(row[4]),  # Contact
-                        row[5],  # Date of Birth
+                        self.decrypt_data(row[5]),  # Date of Birth
                         row[6],  # Date of Joining
                         self.decrypt_data(row[7]),  # Password
                         row[8],  # User Type
@@ -445,6 +445,7 @@ class EmployeeClass:
                     con.commit()
                     messagebox.showinfo("Success", "Employee deleted successfully", parent=self.root)
                     self.clear()  # Clear form fields after deletion
+                    self.show()
 
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
