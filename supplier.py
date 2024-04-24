@@ -235,11 +235,15 @@ class supplierclass:
                          self.encrypt_data(self.var_contact.get()), self.txt_desc.get('1.0', END).strip()))
             con.commit()  # Commit the transaction to the database
             messagebox.showinfo("Success", "Supplier Added Successfully", parent=self.root)
+            self.clear()
             self.show()  # Refresh the display to include the new supplier
-            print("Invoice:", self.var_sup_invoice.get())
-            print("Name:", self.var_name.get())
-            print("Contact:", self.encrypt_data(self.var_contact.get()))
-            print("Description:", self.txt_desc.get('1.0', END).strip())
+
+
+            # Debug to check if fields are picking the right data
+            # print("Invoice:", self.var_sup_invoice.get())
+            # print("Name:", self.var_name.get())
+            # print("Contact:", self.encrypt_data(self.var_contact.get()))
+            # print("Description:", self.txt_desc.get('1.0', END).strip())
 
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
@@ -390,14 +394,11 @@ class supplierclass:
         Clears all input fields in the supplier form to their default states. This method is used after
         operations such as add, update, or delete, or when the user wants to reset the form for new input.
         """
-        # Check if there is a currently focused item in the supplier table
-        focused_item = self.supplierTable.focus()
-        if focused_item:
-            # Clear all form fields
-            self.var_sup_invoice.set("")  # Clear the invoice input
-            self.var_name.set("")  # Clear the name input
-            self.var_contact.set("")  # Clear the contact input
-            self.txt_desc.delete('1.0', END)  # Clear the description text box
+        # Clear all form fields regardless of whether there is a focused item
+        self.var_sup_invoice.set("")  # Clear the invoice input
+        self.var_name.set("")  # Clear the name input
+        self.var_contact.set("")  # Clear the contact input
+        self.txt_desc.delete('1.0', END)  # Clear the description text box
 
         # Optionally, clear any search text that might be present
         self.var_searctxt.set("")
