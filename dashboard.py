@@ -10,6 +10,7 @@ from employee import EmployeeClass  # Handles employee management functionalitie
 from supplier import supplierclass  # Manages supplier-related information.
 from category import categoryclass  # Manages product categories.
 from product import productclass  # Handles product information management.
+from billing import BillClass  # Handles billing information management.
 from sales import salesClass  # Manages sales transactions.
 
 # SQLite3 for database operations to store and retrieve application data.
@@ -28,7 +29,7 @@ import subprocess
 class IMS:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("1350x700+0+0")
+        self.root.geometry("1350x750+0+0")
         self.root.title("Inventory management System")
         self.root.config(bg="white")
 
@@ -63,7 +64,7 @@ class IMS:
 
         # Menu Background
         LeftMenu = Frame(self.root, bd=3, relief=RIDGE, bg="#005662")
-        LeftMenu.place(x=0, y=102, width=200, height=565)
+        LeftMenu.place(x=0, y=102, width=200, height=665)
 
         # Menu Logo
         lbl_menuLogo = Label(LeftMenu, image=self.MenuLogo, bg="#005662")
@@ -94,6 +95,7 @@ class IMS:
         create_menu_button(LeftMenu, "Supplier", self.supplier, self.icon_side)  # Supplier management
         create_menu_button(LeftMenu, "Category", self.category, self.icon_side)  # Category management
         create_menu_button(LeftMenu, "Product", self.product, self.icon_side)  # Product management
+        create_menu_button(LeftMenu, "Billing", self.billing, self.icon_side)  # Billing management
         create_menu_button(LeftMenu, "Sales", self.sales, self.icon_side)  # Sales records
 
         # Label for displaying the total number of employees.
@@ -169,60 +171,19 @@ class IMS:
         self.new_win = Toplevel(self.root)  # Create a new top-level window
         self.new_obj = productclass(self.new_win)  # Instantiate the productclass in the new window
 
+    def billing(self):
+        """
+        Opens a new window for managing product details by instantiating the productclass.
+        """
+        self.new_win = Toplevel(self.root)  # Create a new top-level window
+        self.new_obj = BillClass(self.new_win)  # Instantiate the Billing Class in the new window
+
     def sales(self):
         """
         Opens a new window for managing sales transactions by instantiating the salesClass.
         """
         self.new_win = Toplevel(self.root)  # Create a new top-level window
         self.new_obj = salesClass(self.new_win)  # Instantiate the salesClass in the new window
-
-    # def update_content(self):
-    #     """
-    #     Updates the content on the dashboard dynamically by fetching the latest data from the database.
-    #     This includes counts of products, suppliers, categories, employees, and sales.
-    #     Also updates the current date and time on the display.
-    #     """
-    #     con = sqlite3.connect(database=r'ims.db')  # Connect to the SQLite database
-    #     cur = con.cursor()  # Create a cursor object to execute SQL queries
-    #
-    #     try:
-    #         # Update product count
-    #         cur.execute("select * from product")
-    #         product = cur.fetchall()
-    #         self.lbl_product.config(text=f'Total Product\n[{str(len(product))}]')  # Display the number of products
-    #
-    #         # Update supplier count
-    #         cur.execute("select * from supplier")
-    #         supplier = cur.fetchall()
-    #         self.lbl_supplier.config(text=f'Total Suppliers\n[{str(len(supplier))}]')  # Display the number of suppliers
-    #
-    #         # Update category count
-    #         cur.execute("select * from category")
-    #         category = cur.fetchall()
-    #         self.lbl_category.config(
-    #             text=f'Total Categories\n[{str(len(category))}]')  # Display the number of categories
-    #
-    #         # Update employee count
-    #         cur.execute("select * from employee")
-    #         employee = cur.fetchall()
-    #         self.lbl_employee.config(text=f'Total Employees\n[{str(len(employee))}]')  # Display the number of employees
-    #
-    #         # Update sales count
-    #         self.lbl_sales.config(
-    #             text=f'Total Sales\n[{str(len(os.listdir('bill')))}]')  # Display the number of sales files
-    #
-    #         # Update current time and date display
-    #         current_time = time.strftime("%I:%M:%S %p")  # Format time in 12-hour format with AM/PM
-    #         current_date = time.strftime("%d-%m-%Y")  # Format date in Day-Month-Year format
-    #         self.lbl_clock.config(
-    #             text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
-    #
-    #         # Schedule the update_content function to run again after 200 milliseconds
-    #         self.lbl_clock.after(200, self.update_content)
-    #
-    #     except Exception as ex:
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}",
-    #                              parent=self.root)  # Display error if any issue occurs
 
     def update_content(self):
         """
@@ -254,9 +215,14 @@ class IMS:
                 employee_count = cur.fetchone()[0]
                 self.lbl_employee.config(text=f'Total Employees\n[{employee_count}]')
 
-                # Fetch and update sales count
-                sales_count = len(os.listdir('bill'))
-                self.lbl_sales.config(text=f'Total Sales\n[{sales_count}]')
+                # Fetch and update sales count from bill files in the 'bill' directory
+                # if to count text bills in folder
+                # sales_count = len([f for f in os.listdir('bill') if f.endswith('.txt')])
+                # self.lbl_sales.config(text=f'Total Sales\n[{sales_count}]')
+
+                cur.execute("SELECT COUNT(*) FROM bills")
+                bills_count = cur.fetchone()[0]
+                self.lbl_sales.config(text=f'Total Sales\n[{bills_count}]')
 
             # Update current time and date display
             current_time = time.strftime("%I:%M:%S %p")
@@ -264,8 +230,8 @@ class IMS:
             self.lbl_clock.config(
                 text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
 
-            # Schedule the update_content function to run again after 200 milliseconds
-            self.lbl_clock.after(200, self.update_content)
+            # Schedule the update_content function to run again after 10 seconds
+            self.lbl_clock.after(10000, self.update_content)
 
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)

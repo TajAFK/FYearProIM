@@ -167,37 +167,6 @@ class productclass:
 
         self.show()  # Display initial product data
 
-    # def fetch_cat_sup(self):
-    #     """
-    #     Fetches categories and suppliers from the database and updates the corresponding lists used in the dropdown menus.
-    #     Handles database connections and exceptions to ensure robust application performance.
-    #     """
-    #     con = sqlite3.connect(database=r'ims.db')  # Connect to the database
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Prepare lists by resetting them and adding 'Select' as the first item
-    #         self.cat_list = ["Select"]
-    #         self.sup_list = ["Select"]
-    #
-    #         # Fetch category names from the category table and update cat_list
-    #         cur.execute("SELECT name FROM category")
-    #         categories = cur.fetchall()
-    #         self.cat_list.extend([cat[0] for cat in categories if cat[0]])
-    #
-    #         # Fetch supplier names from the supplier table and update sup_list
-    #         cur.execute("SELECT name FROM supplier")
-    #         suppliers = cur.fetchall()
-    #         self.sup_list.extend([sup[0] for sup in suppliers if sup[0]])
-    #
-    #     except Exception as ex:
-    #         # Handle exceptions and display error messages
-    #         messagebox.showerror("Error", f"Error retrieving data: {str(ex)}", parent=self.root)
-    #
-    #     finally:
-    #         # Ensure the database connection is always closed
-    #         con.close()
-
     def fetch_cat_sup(self):
         """
         Fetches categories and suppliers from the database to update dropdown menus. It initializes the category
@@ -225,54 +194,6 @@ class productclass:
         except Exception as ex:
             # Handle any exceptions that occur and display an error message
             messagebox.showerror("Error", f"Error retrieving data: {str(ex)}", parent=self.root)
-
-    # =====================ADD DATA=========================================================================
-
-    # def add(self):
-    #     """
-    #     Adds a new product to the database after validating that all required fields are filled and ensuring no duplicate product names exist.
-    #     Handles exceptions and ensures the database connection is closed properly to maintain data integrity and system performance.
-    #     """
-    #     # Establish connection to the database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Check if all required fields are properly filled
-    #         if (self.var_cat.get() in ["Select", "Empty"] or
-    #                 not self.var_sup.get() or
-    #                 not self.var_name.get() or
-    #                 not self.var_price.get() or
-    #                 not self.var_qty.get() or
-    #                 not self.var_status.get()):
-    #             # Prompt error if any field is not filled
-    #             messagebox.showerror("Error", "All fields are required, please fill all the fields", parent=self.root)
-    #             return  # Early exit to avoid further processing
-    #
-    #         # Check for existing product name to avoid duplicates
-    #         cur.execute("SELECT * FROM product WHERE name=?", (self.var_name.get(),))
-    #         if cur.fetchone() is not None:
-    #             # Alert user if product name already exists
-    #             messagebox.showerror("Error", "This Product already exists, try a different name", parent=self.root)
-    #             return  # Early exit to avoid further processing
-    #
-    #         # Insert new product record into database
-    #         cur.execute(
-    #             "INSERT INTO product (Category, Supplier, name, price, qty, status) VALUES (?, ?, ?, ?, ?, ?)",
-    #             (self.var_cat.get(), self.var_sup.get(), self.var_name.get(), self.var_price.get(),
-    #              self.var_qty.get(), self.var_status.get()))
-    #         con.commit()  # Commit changes to database
-    #         messagebox.showinfo("Success", "Product Added Successfully", parent=self.root)
-    #         # Refresh the product list to reflect new addition
-    #         self.show()
-    #
-    #     except Exception as ex:
-    #         # Handle any exceptions that occur during the database operation
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-    #
-    #     finally:
-    #         # Ensure the database connection is closed on completion
-    #         con.close()
 
     def add(self):
         """
@@ -308,41 +229,6 @@ class productclass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # =================SHOW DATA=================
-    # def show(self):
-    #     """
-    #     Fetches and displays all product records from the database into the product_table.
-    #     This method ensures that the latest data is always shown, handles exceptions,
-    #     and closes database connections properly to avoid resource leaks.
-    #     """
-    #     # Establish connection to the database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #     try:
-    #         # Retrieve all product records from the database
-    #         cur.execute("SELECT * FROM product")
-    #         rows = cur.fetchall()  # Fetch all rows from the executed query
-    #
-    #         # Clear existing entries in the product table to ensure it reflects the current database state
-    #         self.product_table.delete(*self.product_table.get_children())
-    #
-    #         # Populate the product table with rows fetched from the database
-    #         for row in rows:
-    #             self.product_table.insert('', END, values=row)  # Insert each row into the table
-    #
-    #         # Adjust column settings to center-align the column headers and their contents for better readability
-    #         for col in self.product_table["columns"]:
-    #             self.product_table.heading(col, anchor=CENTER)
-    #             self.product_table.column(col, anchor=CENTER)
-    #
-    #     except Exception as ex:
-    #         # Handle any exceptions that occur during the fetch operation
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-    #
-    #     finally:
-    #         # Ensure the database connection is closed to avoid leaking resources
-    #         con.close()
-
     def show(self):
         """
         Fetches and displays all product records from the database into the product_table,
@@ -371,32 +257,6 @@ class productclass:
         except Exception as ex:
             # Inform the user if an error occurs during the database operation
             messagebox.showerror("Error", f"Error retrieving data: {str(ex)}", parent=self.root)
-
-    # ====================== Get Data Back to Form =======================
-    # def get_data(self, ev):
-    #     """
-    #     Retrieves and displays the data from the selected row in the product table.
-    #     This method updates the form fields with information from the selected product to allow editing.
-    #     """
-    #     # Get the identifier for the currently focused item in the product table
-    #     f = self.product_table.focus()
-    #
-    #     # Retrieve the item's data dictionary from the focused row
-    #     content = self.product_table.item(f)
-    #
-    #     # Extract the data values from the 'values' key of the dictionary
-    #     row = content.get('values')
-    #     if not row:  # Check if the row is empty, which happens if no item is selected
-    #         return  # Exit the function if no item is selected
-    #
-    #     # Assign the extracted values to the respective variable holders for display in the entry fields
-    #     self.var_pid.set(row[0])  # Set the Product ID
-    #     self.var_sup.set(row[1])  # Set the Supplier
-    #     self.var_cat.set(row[2])  # Set the Category, corrected the order based on your description
-    #     self.var_name.set(row[3])  # Set the Product Name
-    #     self.var_price.set(row[4])  # Set the Price
-    #     self.var_qty.set(row[5])  # Set the Quantity
-    #     self.var_status.set(row[6])  # Set the Status
 
     def get_data(self, ev):
         """
@@ -470,47 +330,6 @@ class productclass:
                 # Handle any exceptions during the database operation
                 messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # def delete(self):
-    #     """
-    #     Deletes a selected product from the database after confirming the action with the user.
-    #     Validates that a product is selected and exists before attempting deletion.
-    #     This function uses parameterized queries to enhance security and prevent SQL injection.
-    #     """
-    #     # Establish a connection to the database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Ensure a product ID has been selected
-    #         if self.var_pid.get() == "":
-    #             messagebox.showerror("Error", "Select product from the list", parent=self.root)
-    #         else:
-    #             # Verify the existence of the product using the provided Product ID with a parameterized query
-    #             cur.execute("SELECT * FROM product WHERE pid=?", (self.var_pid.get(),))
-    #             row = cur.fetchone()
-    #             if row is None:
-    #                 messagebox.showerror("Error", "Invalid Product", parent=self.root)
-    #             else:
-    #                 # Confirm deletion with the user
-    #                 op = messagebox.askyesno("Confirm", "Do you really want to delete")
-    #                 if op:
-    #                     # Proceed with deleting the product from the database using a parameterized query
-    #                     cur.execute("DELETE FROM product WHERE pid=?", (self.var_pid.get(),))
-    #                     con.commit()
-    #                     messagebox.showinfo("Delete", "Product deleted Successfully", parent=self.root)
-    #                     # Refresh the display to remove the deleted product
-    #                     self.show()
-    #                     # Optionally clear any form fields related to the product
-    #                     self.clear()
-    #
-    #     except Exception as ex:
-    #         # Handle any exceptions that occur during the delete operation
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-    #
-    #     finally:
-    #         # Ensure the database connection is closed to avoid resource leaks
-    #         con.close()
-
     def delete(self):
         """
         Deletes a selected product from the database after user confirmation. Ensures that a product is
@@ -550,27 +369,6 @@ class productclass:
             # Close the database connection to avoid resource leaks
             con.close()
 
-    # def clear(self):
-    #     """
-    #     Clears all input and selection fields in the product management form and resets them to their default states.
-    #     This method is used to reset the form after adding, updating, or deleting products, or to clear the form for new entries.
-    #     """
-    #     # Reset product detail variables to default values
-    #     self.var_cat.set("Select")  # Reset category selection
-    #     self.var_sup.set("Select")  # Reset supplier selection
-    #     self.var_name.set("")  # Clear the name field
-    #     self.var_price.set("")  # Clear the price field
-    #     self.var_qty.set("")  # Clear the quantity field
-    #     self.var_status.set("Active")  # Set status to 'Active' by default
-    #     self.var_pid.set("")  # Clear the product ID field
-    #
-    #     # Reset the search input fields to their defaults
-    #     self.var_searctxt.set("")  # Clear the search text field
-    #     self.var_searchby.set("Select")  # Reset the search category to 'Select'
-    #
-    #     # Refresh the product table to reflect current data or defaults
-    #     self.show()
-
     def clear(self):
         """
         Resets all input fields in the product management form to their default states, preparing the form
@@ -592,44 +390,6 @@ class productclass:
 
         # Refresh the display to show updated or default data
         self.show()
-
-    # def search(self):
-    #     """
-    #     Searches for products based on selected criteria and keyword input by the user.
-    #     Displays the matching records in the product table or an error if no matches are found.
-    #     Uses parameterized queries to enhance security and prevent SQL injection.
-    #     """
-    #     # Establish a connection to the database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Validate that a search category and keyword have been provided
-    #         if self.var_searchby.get() == "Select":
-    #             messagebox.showerror("Error", "Select Search By option", parent=self.root)
-    #         elif self.var_searctxt.get() == "":
-    #             messagebox.showerror("Error", "Search input should be required", parent=self.root)
-    #         else:
-    #             # Formulate SQL query using the chosen search criteria and input
-    #             # Using parameterized SQL to ensure safe queries
-    #             query = f"SELECT * FROM product WHERE {self.var_searchby.get()} LIKE ?"
-    #             cur.execute(query, ('%' + self.var_searctxt.get() + '%',))
-    #             rows = cur.fetchall()
-    #
-    #             # Check if any products were found
-    #             if len(rows) > 0:
-    #                 # Clear existing entries in the table
-    #                 self.product_table.delete(*self.product_table.get_children())
-    #                 # Populate the table with the search results
-    #                 for row in rows:
-    #                     self.product_table.insert('', END, values=row)
-    #             else:
-    #                 # Notify the user if no products match the search criteria
-    #                 messagebox.showerror("Error", "No record found", parent=self.root)
-    #
-    #     except Exception as ex:
-    #         # Display an error message if the search operation fails
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def search(self):
         """

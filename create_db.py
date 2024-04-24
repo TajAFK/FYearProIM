@@ -59,6 +59,40 @@ def create_db():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS customers (
+            customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            contact TEXT
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS bills (
+            bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_number TEXT,
+            customer_id INTEGER,
+            bill_date DATE,
+            total_amount REAL,
+            discount_given REAL,
+            net_amount REAL,
+            FOREIGN KEY (customer_id) REFERENCES customers (customer_id)
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS bill_items (
+            item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            bill_id INTEGER,
+            product_id INTEGER,
+            quantity INTEGER,
+            price_per_unit REAL,
+            total_price REAL,
+            FOREIGN KEY (bill_id) REFERENCES bills (bill_id),
+            FOREIGN KEY (product_id) REFERENCES product (pid)
+        )
+    """)
+
     # Commit changes and close the connection to apply the table creation
     con.commit()
     con.close()

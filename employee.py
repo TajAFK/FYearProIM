@@ -2,7 +2,6 @@ import os  # Importing os module for file operations
 import sqlite3  # Importing sqlite3 module for database operations
 from tkinter import *
 from tkinter import ttk, messagebox  # Importing required modules from tkinter
-
 from cryptography.fernet import Fernet  # Importing Fernet for encryption
 
 
@@ -43,9 +42,7 @@ class EmployeeClass:
         # Debugging to check if encrypt decrypt working perfectly
         #self.test_encryption_consistency()
 
-        # Search Frame Initialize a LabelFrame widget for employee search operations. This frame is designed with a
-        # white background and bold font, enhancing its visibility on the interface. It is positioned centrally with
-        # specific dimensions.
+        # Search Frame Initialize a LabelFrame widget for employee search operations.
         SearchFrame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
                                  bd=2, relief=RIDGE)
         SearchFrame.place(x=250, y=20, width=600, height=70)  # Set the frame's position and size on the main window.
@@ -66,58 +63,58 @@ class EmployeeClass:
               bg="lightyellow").place(x=200, y=10)  # Position the entry field within the SearchFrame.
 
         # Search Button
-        # Create a button to initiate the search operation. The button is styled with a green background and white text.
+        # Create a button to initiate the search operation.
         # Clicking this button triggers the 'search' method to perform the search based on the selected criteria and input text.
         Button(SearchFrame, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white",
                cursor="hand2").place(x=410, y=9, width=150, height=30)  # Position the button next to the entry field.
 
         # Title Label
-        # Display a label at the top of the form to indicate the section for Employee Details, using a contrasting color scheme.
-        title = Label(self.root, text="Employee Details", font=("goudy old style", 15), bg="#0f4d7d", fg="white").place(
-            x=50, y=100, width=1000)  # Set the position and width to span across the window for visibility.
+        # Display a label at the top of the form to indicate the section for Employee Details
+        Label(self.root, text="Employee Details", font=("goudy old style", 15), bg="#0f4d7d", fg="white").place(
+            x=50, y=100, width=1000)
 
         # Content: Row 1 - Employee Information
         # Label and entry for Employee ID
-        lbl_empid = Label(self.root, text="Emp ID", font=("goudy old style", 15), bg="white").place(x=50, y=150)
-        txt_empid = Entry(self.root, textvariable=self.var_emp_id, font=("goudy old style", 15),
-                          bg="lightyellow").place(x=150, y=150, width=180)
+        Label(self.root, text="Emp ID", font=("goudy old style", 15), bg="white").place(x=50, y=150)
+        Entry(self.root, textvariable=self.var_emp_id, font=("goudy old style", 15),
+              bg="lightyellow").place(x=150, y=150, width=180)
 
         # Label and combobox for selecting Gender
-        lbl_gender = Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
+        Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
         cmb_gender = ttk.Combobox(self.root, textvariable=self.var_gender, values=("Select", "Male", "Female", "Other"),
                                   state='readonly', justify=CENTER, font=("goudy old style", 15))
         cmb_gender.place(x=500, y=150, width=180)
         cmb_gender.current(0)  # Default to the first entry 'Select'
 
         # Label and entry for Contact Information
-        lbl_contact = Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
-        txt_contact = Entry(self.root, textvariable=self.var_contact, font=("goudy old style", 15),
-                            bg="lightyellow").place(x=850, y=150, width=180)
+        Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
+        Entry(self.root, textvariable=self.var_contact, font=("goudy old style", 15),
+              bg="lightyellow").place(x=850, y=150, width=180)
 
         # Content: Row 2 - Additional Employee Information
         # Label and entry for Employee Name
-        lbl_name = Label(self.root, text="Name", font=("goudy old style", 15), bg="white").place(x=50, y=190)
-        txt_name = Entry(self.root, textvariable=self.var_name, font=("goudy old style", 15), bg="lightyellow").place(
+        Label(self.root, text="Name", font=("goudy old style", 15), bg="white").place(x=50, y=190)
+        Entry(self.root, textvariable=self.var_name, font=("goudy old style", 15), bg="lightyellow").place(
             x=150, y=190, width=180)
 
         # Label and entry for Employee Date of Birth (D.O.B)
-        lbl_dob = Label(self.root, text="D.O.B", font=("goudy old style", 15), bg="white").place(x=350, y=190)
-        txt_dob = Entry(self.root, textvariable=self.var_dob, font=("goudy old style", 15), bg="lightyellow").place(
+        Label(self.root, text="D.O.B", font=("goudy old style", 15), bg="white").place(x=350, y=190)
+        Entry(self.root, textvariable=self.var_dob, font=("goudy old style", 15), bg="lightyellow").place(
             x=500, y=190, width=180)
 
         # Label and entry for Employee Date of Joining (D.O.J)
-        lbl_doj = Label(self.root, text="D.O.J", font=("goudy old style", 15), bg="white").place(x=750, y=190)
-        txt_doj = Entry(self.root, textvariable=self.var_doj, font=("goudy old style", 15), bg="lightyellow").place(
+        Label(self.root, text="D.O.J", font=("goudy old style", 15), bg="white").place(x=750, y=190)
+        Entry(self.root, textvariable=self.var_doj, font=("goudy old style", 15), bg="lightyellow").place(
             x=850, y=190, width=180)
 
         # Row 3
-        lbl_email = Label(self.root, text="Email", font=("goudy old style", 15), bg="white").place(x=50, y=230)
-        lbl_pass = Label(self.root, text="Password", font=("goudy old style", 15), bg="white").place(x=350, y=230)
-        lbl_utype = Label(self.root, text="User Type", font=("goudy old style", 15), bg="white").place(x=750, y=230)
+        Label(self.root, text="Email", font=("goudy old style", 15), bg="white").place(x=50, y=230)
+        Label(self.root, text="Password", font=("goudy old style", 15), bg="white").place(x=350, y=230)
+        Label(self.root, text="User Type", font=("goudy old style", 15), bg="white").place(x=750, y=230)
 
-        txt_email = Entry(self.root, textvariable=self.var_email, font=("goudy old style", 15), bg="lightyellow").place(
+        Entry(self.root, textvariable=self.var_email, font=("goudy old style", 15), bg="lightyellow").place(
             x=150, y=230, width=180)
-        txt_pass = Entry(self.root, textvariable=self.var_pass, font=("goudy old style", 15), bg="lightyellow").place(
+        Entry(self.root, textvariable=self.var_pass, font=("goudy old style", 15), bg="lightyellow").place(
             x=500, y=230, width=180)
         cmb_utype = ttk.Combobox(self.root, textvariable=self.var_utype, values=("Admin", "Employee"), state='readonly',
                                  justify=CENTER, font=("goudy old style", 15))
@@ -125,13 +122,13 @@ class EmployeeClass:
         cmb_utype.current(0)
 
         # Row 4
-        lbl_address = Label(self.root, text="Address", font=("goudy old style", 15), bg="white").place(x=50, y=270)
-        lbl_salary = Label(self.root, text="Salary", font=("goudy old style", 15), bg="white").place(x=500, y=270)
+        Label(self.root, text="Address", font=("goudy old style", 15), bg="white").place(x=50, y=270)
+        Label(self.root, text="Salary", font=("goudy old style", 15), bg="white").place(x=500, y=270)
 
         self.txt_address = Text(self.root, font=("goudy old style", 15), bg="lightyellow")
         self.txt_address.place(x=150, y=270, width=300, height=60)  # Corrected this line
-        txt_salary = Entry(self.root, textvariable=self.var_salary, font=("goudy old style", 15),
-                           bg="lightyellow").place(x=600, y=270, width=180)
+        Entry(self.root, textvariable=self.var_salary, font=("goudy old style", 15),
+              bg="lightyellow").place(x=600, y=270, width=180)
 
         # Buttons
         Button(self.root, text="Save", command=self.add, font=("goudy old style", 15), bg="#2196f3", fg="white",
@@ -358,34 +355,6 @@ class EmployeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # Get data from the table and fill the form fields
-    # def get_data(self, ev):
-    #     """
-    #     Retrieves data from the selected row in the EmployeeTable and sets it into the corresponding form fields.
-    #     This method allows the user to see and possibly edit the data of an employee selected from the list.
-    #     """
-    #     # Get the current focus of the table, which corresponds to the selected row
-    #     f = self.EmployeeTable.focus()
-    #     # Retrieve the item's data from the focused row
-    #     content = self.EmployeeTable.item(f)
-    #     row = content['values']
-    #
-    #     # Check if the row has data to prevent errors on empty row selection
-    #     if row:
-    #         # Update form fields with the data from the selected row
-    #         self.var_emp_id.set(str(row[0]))  # Set Employee ID
-    #         self.var_name.set(str(row[1]))  # Set Name
-    #         self.var_email.set(str(row[2]))  # Set Email
-    #         self.var_gender.set(str(row[3]))  # Set Gender
-    #         self.var_contact.set(str(row[4]))  # Set Contact
-    #         self.var_dob.set(str(row[5]))  # Set Date of Birth
-    #         self.var_doj.set(str(row[6]))  # Set Date of Joining
-    #         self.var_pass.set(str(row[7]))  # Set Password
-    #         self.var_utype.set(str(row[8]))  # Set User Type
-    #         self.txt_address.delete('1.0', END)  # Clear the existing address text
-    #         self.txt_address.insert(END, str(row[9]))  # Insert Address
-    #         self.var_salary.set(str(row[10]))  # Set Salary
-
     def get_data(self, ev):
         """
         Retrieves and updates form fields with data from the selected row in the EmployeeTable.
@@ -411,45 +380,6 @@ class EmployeeClass:
             self.txt_address.delete('1.0', END)  # Clear existing address text
             self.txt_address.insert(END, row[9])  # New Address
             self.var_salary.set(row[10])  # Salary
-
-    # Update existing data in the database
-    # def update(self):
-    #     """
-    #     Updates the details of an existing employee in the database. The employee is identified by their ID.
-    #     All editable fields in the employee form can be updated through this method.
-    #     """
-    #     # Connect to the SQLite database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Check if the Employee ID field is empty (it should never be empty for an update operation)
-    #         if self.var_emp_id.get() == "":
-    #             messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
-    #         else:
-    #             # Execute the SQL command to update the employee details in the database
-    #             cur.execute(
-    #                 "UPDATE employee set name=?, email=?, gender=?, contact=?, dob=?, doj=?, pass=?, utype=?, "
-    #                 "address=?, salary=? WHERE eid=?",
-    #                 (
-    #                     self.encrypt_data(self.var_name.get()),  # Encrypt and update name
-    #                     self.encrypt_data(self.var_email.get()),  # Encrypt and update email
-    #                     self.var_gender.get(),  # Update gender
-    #                     self.encrypt_data(self.var_contact.get()),  # Encrypt and update contact
-    #                     self.var_dob.get(),  # Update date of birth
-    #                     self.var_doj.get(),  # Update date of joining
-    #                     self.encrypt_data(self.var_pass.get()),  # Encrypt and update password
-    #                     self.var_utype.get(),  # Update user type
-    #                     self.encrypt_data(self.txt_address.get('1.0', END).strip()),  # Encrypt and update address
-    #                     self.var_salary.get(),  # Update salary
-    #                     self.var_emp_id.get(),  # Specify which employee to update
-    #                 ))
-    #             con.commit()  # Commit changes to the database
-    #             messagebox.showinfo("Success", "Employee Updated Successfully", parent=self.root)
-    #             self.show()  # Refresh the displayed data
-    #     except Exception as ex:
-    #         # If an error occurs during the update, display an error message
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def update(self):
         """
@@ -490,41 +420,6 @@ class EmployeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # Delete data from the database
-    # def delete(self):
-    #     """
-    #     Deletes an employee record from the database based on the provided employee ID.
-    #     Before deletion, the method confirms the existence of the employee and seeks user confirmation.
-    #     """
-    #     # Connect to the SQLite database
-    #     con = sqlite3.connect(database=r'ims.db')
-    #     cur = con.cursor()
-    #
-    #     try:
-    #         # Check if the Employee ID field is empty, which is necessary to perform the deletion
-    #         if self.var_emp_id.get() == "":
-    #             messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
-    #         else:
-    #             # Check if the employee exists in the database
-    #             cur.execute("Select * from employee where eid=?", (self.var_emp_id.get(),))
-    #             row = cur.fetchone()
-    #             if row is None:
-    #                 # If no record is found, display an error message
-    #                 messagebox.showerror("Error", "invalid Employee ID", parent=self.root)
-    #             else:
-    #                 # Confirm with the user if they really want to delete the record
-    #                 op = messagebox.askyesno("Confirm", "Do you really want to delete")
-    #                 if op:
-    #                     # If user confirms, execute the delete operation
-    #                     cur.execute("delete from employee where eid=?", (self.var_emp_id.get(),))
-    #                     con.commit()  # Commit changes to the database
-    #                     messagebox.showinfo("Delete", "Employee deleted Successfully", parent=self.root)
-    #                     self.clear()  # Clear all input fields after deletion
-    #
-    #     except Exception as ex:
-    #         # If an error occurs, display an error message
-    #         messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
-
     def delete(self):
         """
         Deletes an employee record from the database after confirming that the employee ID exists and the user
@@ -554,30 +449,6 @@ class EmployeeClass:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # Clear all form fields
-    # def clear(self):
-    #     """
-    #     Resets all form fields to their default values, effectively clearing any data entered or displayed
-    #     in the form inputs. This method is typically used to prepare the form for a new entry or to clear
-    #     current data after operations like delete or update.
-    #     """
-    #     # Reset each variable tied to the form fields to their default empty or preset states
-    #     self.var_emp_id.set("")
-    #     self.var_name.set("")
-    #     self.var_email.set("")
-    #     self.var_gender.set("Select")  # Reset dropdown to default 'Select'
-    #     self.var_contact.set("")
-    #     self.var_dob.set("")
-    #     self.var_doj.set("")
-    #     self.var_pass.set("")
-    #     self.var_utype.set("Admin")  # Set user type back to default 'Admin'
-    #     self.var_salary.set("")
-    #     self.var_searctxt.set("")
-    #     self.var_search.set("Select")  # Reset search criteria dropdown to 'Select'
-    #
-    #     # Clear any text from the multiline Text widget used for addresses
-    #     self.txt_address.delete('1.0', END)  # Clear from the first character to the end
-
     def clear(self):
         """
         Resets all form fields to their default or initial values after operations such as add, update, or delete.
@@ -601,7 +472,8 @@ class EmployeeClass:
         self.txt_address.delete('1.0', END)  # Remove all content from the address text field
 
     # Search for data based on user input
-    def search(self):
+    @staticmethod
+    def search():
 
         """
             Searches for employee records based on a specified field and input value using encrypted fields.
