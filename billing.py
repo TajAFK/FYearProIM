@@ -191,10 +191,50 @@ class BillClass:
         txt_contact = Entry(customer_frame, textvariable=self.var_contact, font=("Arial", 10), bg="light yellow")
         txt_contact.place(x=380, y=35, width=140)
 
-        # Create a frame for calculations and cart management
+        # # Create a frame for calculations and cart management
+        # cal_cart_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
+        # cal_cart_frame.place(x=420, y=190, width=530, height=360)
+        #
+        # # Create a frame within cal_cart_frame for adding notes
+        # notes_frame = Frame(cal_cart_frame, bd=4, relief=RIDGE, bg="white")
+        # notes_frame.place(x=5, y=10, width=245, height=342)
+        #
+        # # Label for notes section
+        # lbl_notes = Label(notes_frame, text="Delivery Notes", font=("Arial", 15, "bold"), bg="#333", fg="white")
+        # lbl_notes.pack(side=TOP, fill=X)
+        #
+        # # Text area for entering notes
+        # self.txt_notes = Text(notes_frame, font=('Arial', 12), bd=5, relief=GROOVE)
+        # self.txt_notes.pack(expand=True, fill=BOTH, padx=5, pady=5)
+        #
+        # # Optionally, add a scrollbar for the text area
+        # scroll_notes = Scrollbar(notes_frame, command=self.txt_notes.yview)
+        # scroll_notes.pack(side=RIGHT, fill=Y)
+        # self.txt_notes.config(yscrollcommand=scroll_notes.set)
+
+        # Set up a main frame for additional functionalities in the billing system, such as adding notes.
         cal_cart_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         cal_cart_frame.place(x=420, y=190, width=530, height=360)
 
+        # Create a specific frame within the main cart management frame for entering delivery notes.
+        notes_frame = Frame(cal_cart_frame, bd=4, relief=RIDGE, bg="white")
+        notes_frame.place(x=5, y=10, width=245, height=342)  # Positioned to allow space for future additions
+
+        # Add a label at the top of the notes frame to clearly indicate this section is for delivery notes.
+        lbl_notes = Label(notes_frame, text="Delivery Notes", font=("Arial", 15, "bold"), bg="#333", fg="white")
+        lbl_notes.pack(side=TOP, fill=X)  # Fill the width of the frame for clear visibility
+
+        # Initialize a text area for inputting delivery notes, allowing multiple lines of text.
+        self.txt_notes = Text(notes_frame, font=('Arial', 12), bd=5, relief=GROOVE)
+        self.txt_notes.pack(expand=True, fill=BOTH, padx=5, pady=5)  # Make the text area expandable and fill the frame
+
+        # Implement a vertical scrollbar to the text area to facilitate navigation through longer notes.
+        scroll_notes = Scrollbar(notes_frame, command=self.txt_notes.yview)
+        scroll_notes.pack(side=RIGHT, fill=Y)  # Attach the scrollbar to the right side of the notes area
+        self.txt_notes.config(yscrollcommand=scroll_notes.set)  # Ensure the scrollbar adjusts with text area content
+
+        '''
+        Calculator was removed and instead a notes section is given for adding delivery notes as per feedback
         # Calculator frame styling and function
         # Define StringVar for calculator input
         self.var_cal_input = StringVar()
@@ -236,6 +276,7 @@ class BillClass:
             pady_val = 15 if text in ('0', 'c', '=', '/') else 10
             Button(cal_frame, text=text, font=('Arial', 15, 'bold'), command=lambda t=text: button_click(t), bd=5,
                    width=4, pady=pady_val, cursor='hand2').grid(row=row, column=column)
+        '''
 
         # Cart frame styling and setup
         cart_frame = Frame(cal_cart_frame, bd=3, relief=RIDGE, bg="white")
@@ -651,6 +692,18 @@ class BillClass:
             # Display an error message if there's an issue updating the cart table
             messagebox.showerror("Error", f"Error updating cart display: {str(ex)}", parent=self.root)
 
+    def get_current_date(self):
+        """
+        Returns the current date formatted as 'DD-MM-YYYY'.
+        """
+        return time.strftime("%d-%m-%Y")
+
+    def get_current_time(self):
+        """
+        Returns the current time formatted as 'HH:MM:SS AM/PM'.
+        """
+        return time.strftime("%I:%M:%S %p")
+
     def generate_bill(self):
         """
         Generates a bill from the cart contents, validates customer details, saves the bill to a file,
@@ -666,11 +719,16 @@ class BillClass:
             messagebox.showerror("Error", "Add products to the cart before generating a bill.", parent=self.root)
             return
 
+        # Ask user for confirmation before generating the bill
+        if not messagebox.askyesno("Confirm", "Are you sure? Once the bill is generated, it cannot be changed.",
+                                       parent=self.root):
+            return  # User clicked 'No', so exit the function
+
         # Prepare the bill content
         self.bill_top()
         self.bill_middle()
         self.bill_bottom()
-        self.save_bill_to_database()
+        self.save_bill_to_database() #Save bill to database
 
         # Attempt to encrypt the bill content and save it to a file
         try:
@@ -687,37 +745,35 @@ class BillClass:
 
     def save_bill_to_database(self):
         """
-        Saves all bill-related details to the database, including entries for customer details, the main bill,
-        and individual bill items.
+        Persists bill data to the database including customer, bill, and item details, ensuring data integrity.
         """
         try:
-            # Open a connection to the SQLite database.
+            # Establish database connection
             con = sqlite3.connect(database=r'ims.db')
             cur = con.cursor()
 
-            # Insert encrypted customer details and fetch the new customer ID.
+            # Encrypt and store customer details
             cur.execute("INSERT INTO customers (name, contact) VALUES (?, ?)", (
                 self.encrypt_data(self.var_cname.get()),
                 self.encrypt_data(self.var_contact.get()),
             ))
-            customer_id = cur.lastrowid
+            customer_id = cur.lastrowid  # Retrieve new customer ID
 
-            # Prepare and execute the main bill entry with today's date.
-            today_date = time.strftime("%d-%m-%Y")  # Current date in 'YYYY-MM-DD' format.
+            # Insert bill details with current date
             cur.execute("""
                 INSERT INTO bills (invoice_number, customer_id, bill_date, total_amount, discount_given, net_amount) 
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 self.invoice,
                 customer_id,
-                today_date,
+                self.get_current_date(),
                 self.bill_amt,
                 self.discount,
                 self.net_pay
             ))
-            bill_id = cur.lastrowid
+            bill_id = cur.lastrowid  # Retrieve new bill ID
 
-            # Iterate through each item in the cart list to insert bill item details.
+            # Process each cart item and insert into bill_items table
             for item in self.cart_list:
                 cur.execute("""
                     INSERT INTO bill_items (bill_id, product_id, quantity, price_per_unit, total_price) 
@@ -727,61 +783,56 @@ class BillClass:
                     item[0],  # Product ID
                     item[3],  # Quantity
                     item[2],  # Price per unit
-                    float(item[2]) * int(item[3])  # Total price
+                    float(item[2]) * int(item[3])  # Calculate total price
                 ))
 
-            # Commit all changes to the database.
+            # Commit transaction to save all changes
             con.commit()
-            #messagebox.showinfo("Success", "Bill saved successfully.", parent=self.root)
-
+            # messagebox.showinfo("Success", "Bill saved successfully.", parent=self.root)
         except Exception as e:
-            messagebox.showerror("Database Error", f"Failed to write bill to Database: {str(e)}", parent=self.root)
-
+            messagebox.showerror("Database Error", f"Error saving bill data: {str(e)}", parent=self.root)
         finally:
-            # Ensure the database connection is closed to free resources.
-            con.close()
+            con.close()  # Ensure closure of database connection
 
     def bill_top(self):
         """
-        Prepares the top section of the bill with customer and transaction details,
-        including a dynamically generated invoice number based on the current timestamp.
+        Prepares and displays the top section of the bill with customer and transaction details.
+        Includes the store name, contact information, customer details, and column headers for the bill items.
         """
-        # # Generate a unique invoice number based on the current date and time
-        # self.invoice = time.strftime("%Y%m%d%H%M%S")  # Format: YYYYMMDDHHMMSS
+        # Generate a unique invoice number combining the current date with a random three-digit number
+        self.invoice = f"{time.strftime('%Y%m%d')}{random.randint(100, 999)}"  # Format: YYYYMMDDXXX
 
-        # Generate a unique invoice number by concatenating the current date with a random three-digit number
-        self.invoice = f"{time.strftime('%Y%m%d')}{random.randint(100, 999)}"
-        # Format: YYYYMMDDXXX (where XXX is a three-digit random number)
-
-        # Define the bill header template with customer and invoice details
+        # Define the bill header with consistent visual styling
         bill_top_template = (
-            "\t\tAriatech-Inventory\n"
-            "\t Phone Mo. 730573****, Ipswich-IP1 5RA\n"
-            f"{'=' * 47}\n"
-            f" Customer Name: {self.var_cname.get()}\n"
-            f" Ph No. :{self.var_contact.get()}\n"
-            f" Bill No. {self.invoice}\t\t\tDate: {time.strftime('%d/%m/%Y')}\n"
-            f"{'=' * 47}\n"
-            " Product Name\t\t\tQTY\tPrice\n"
-            f"{'=' * 47}\n"
+                "\tAriatech-Inventory\n"
+                "\tPhone Mo. 730573****, Ipswich-IP1 5RA\n"
+                + "=" * 48 + "\n"  # Divider to separate header from customer details
+                + f"Customer Name: {self.var_cname.get()}\n"  # Display customer name
+                + f"Ph No. : {self.var_contact.get()}\n"  # Display customer phone number
+                + f"Bill No. {self.invoice}\t\tDate: {self.get_current_date()}\n"  # Display invoice number and date
+                + "=" * 48 + "\n"  # Divider to separate customer details from product details
+                + "{:<23}{:>3}{:>22}\n".format("Product Name", "QTY", "Price(GBP)")  # Column headers for the bill items
+                + "=" * 48 + "\n"  # Divider to mark the start of the bill item listings
         )
 
-        # Clear any existing content in the bill area and insert the new top section
-        self.txt_bill_area.delete('1.0', END)
-        self.txt_bill_area.insert('1.0', bill_top_template)
+        # Insert the top section into the billing area text widget
+        self.txt_bill_area.delete('1.0', END)  # Clear existing content
+        self.txt_bill_area.insert('1.0', bill_top_template)  # Insert the formatted bill top section
 
     def bill_bottom(self):
         """
-        Constructs and appends the bottom section of the bill to the billing area,
-        displaying the total bill amount, applied discounts, and the net payable amount.
+        Appends the bottom section of the bill to the billing area, displaying the total bill amount,
+        applied discounts, and the net payable amount. It also includes a section for delivery notes.
         """
         # Define the template for the bill's bottom section, including totals and financial calculations
         bill_bottom_template = (
-            f"{('=' * 47)}\n"
-            f" Bill Amount\t\t\t\tGBP {self.bill_amt:.2f}\n"  # Display the total bill amount formatted to two decimals
-            f" Discount\t\t\t\tGBP {self.discount:.2f}\n"  # Show the discount applied
-            f" Net Pay\t\t\t\tGBP {self.net_pay:.2f}\n"  # Show the net payable amount after discount
-            f"{('=' * 47)}\n"
+            f"{'=' * 48}\n"  # Horizontal divider for layout separation
+            f"Bill Amount\t\t\t\t\t {self.bill_amt:.2f}\n"  # Display the total amount of the bill
+            f"Discount\t\t\t\t\t {self.discount:.2f}\n"  # Display the discount given on the bill
+            f"Net Pay\t\t\t\t\t {self.net_pay:.2f}\n"  # Display the net amount payable after discount
+            f"{'=' * 48}\n"  # End section with a horizontal divider
+            "Delivery Notes:\n"  # Label for the delivery notes section
+            f"{self.txt_notes.get('1.0', END)}"  # Insert text from the delivery notes input field
         )
 
         # Append the bottom section of the bill to the existing content in the billing text area
@@ -789,35 +840,38 @@ class BillClass:
 
     def bill_middle(self):
         """
-        Processes each item in the cart, appending detailed transaction lines to the billing area and updating
-        inventory quantities in the database. Ensures consistent display formatting for product names, quantities, and prices.
+        Processes each item in the shopping cart, appending transaction lines to the billing area and updating
+        inventory quantities in the database. This function maintains a consistent display format for product names,
+        quantities, and prices in the billing section.
         """
-        # Establish a connection to the SQLite database
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
         try:
-            for row in self.cart_list:
-                pid = row[0]  # Product ID
-                name = row[1]  # Product name
-                qty = int(row[4]) - int(row[3])  # Calculate the remaining quantity after sale
-                status = 'Active' if qty > 0 else 'Inactive'  # Update status based on remaining stock
+            # Establish a database connection
+            con = sqlite3.connect(database=r'ims.db')
+            cur = con.cursor()
 
-                price = float(row[2]) * int(row[3])  # Calculate total price for the item
+            # Iterate over each item in the cart to process billing and inventory updates
+            for item in self.cart_list:
+                pid = item[0]  # Extract the Product ID from the cart item
+                name = item[1]  # Product name, used in the billing display
+                qty = item[3]  # Quantity purchased, extracted for billing calculation
+                remaining_qty = int(item[4]) - int(qty)  # Calculate remaining stock after sale
+                status = 'Active' if remaining_qty > 0 else 'Inactive'  # Determine the new status based on stock level
+                price = float(item[2]) * int(qty)  # Calculate the total price for the given quantity
 
-                # Format each transaction line for clarity in billing display
-                formatted_line = "{:<30}{:>3}\tGBP {:>8.2f}\n".format(name, row[3], price)
-                self.txt_bill_area.insert(END, formatted_line)
+                # Format the billing line item to ensure alignment and readability in the billing area
+                formatted_line = "{:<23}{:>3}\t{:>20.2f}\n".format(name, qty, price)
+                self.txt_bill_area.insert(END, formatted_line)  # Insert formatted line into the billing text area
 
-                # Update product quantity and status in the database
-                cur.execute('UPDATE product SET qty=?, status=? WHERE pid=?', (qty, status, pid))
-                con.commit()
+                # Update the product's quantity and status in the database based on the sale
+                cur.execute('UPDATE product SET qty=?, status=? WHERE pid=?', (remaining_qty, status, pid))
 
-            # Refresh the product display to reflect updated inventory
-            self.show()
+            con.commit()  # Commit all changes to the database
+            self.show()  # Refresh the product display to reflect the updated inventory status
         except Exception as ex:
+            # Handle any exceptions during the process by displaying an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
         finally:
-            # Ensure that the database connection is closed to prevent resource leakage
+            # Ensure the database connection is closed to prevent resource leakage
             con.close()
 
     def clear_cart(self):
@@ -831,6 +885,9 @@ class BillClass:
         self.var_price.set('')  # Reset price field
         self.var_qty.set('')  # Reset quantity field
         self.var_stock.set('')  # Clear stock variable
+
+        # Clear the notes field
+        self.txt_notes.delete('1.0', END)  # Clear all content from the Text widget used for notes
 
         # Update the stock label to indicate no specific stock information
         self.lbl_inStock.config(text="In Stock")
@@ -870,13 +927,10 @@ class BillClass:
         Updates the display with the current date and time continuously at specified intervals.
         This helps in keeping the interface dynamically updated with the current system time.
         """
-        # Fetch the current time and date using a 12-hour format and Day-Month-Year format
-        current_time = time.strftime("%I:%M:%S %p")
-        current_date = time.strftime("%d-%m-%Y")
 
         # Update the clock label with the new time and date, formatted for easy reading
         self.lbl_clock.config(
-            text=f"Welcome To Inventory Management System\t\t Date: {current_date}\t\t Time: {current_time}")
+            text=f"Welcome To Inventory Management System\t\t Date: {self.get_current_date()}\t\t Time: {self.get_current_time()}")
 
         # Schedule the function to automatically update every 200 milliseconds
         self.lbl_clock.after(200, self.update_date_time)

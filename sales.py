@@ -68,7 +68,7 @@ class salesClass:
         # ============ Bill Display Area ============
         # Frame for showing detailed customer bills, designed with borders and a raised layout.
         bill_Frame = Frame(self.root, bd=3, relief=RIDGE)
-        bill_Frame.place(x=280, y=140, width=410, height=330)  # Set dimensions and position on the window.
+        bill_Frame.place(x=280, y=140, width=421, height=330)  # Set dimensions and position on the window.
 
         # Label for the bill area, styled with an orange background to stand out.
         lab_title2 = Label(bill_Frame, text="Customer Bill Area", font=("Arial", 20, "bold"), bg="orange")
