@@ -16,9 +16,6 @@ from sales import salesClass  # Manages sales transactions.
 # SQLite3 for database operations to store and retrieve application data.
 import sqlite3
 
-# OS module to interact with the operating system, like file and directory manipulation.
-import os
-
 # Time module for handling operations that involve time computations.
 import time
 
@@ -34,7 +31,7 @@ class IMS:
         self.root.config(bg="white")
 
         # Title Bar
-        self.icon_title = PhotoImage(file="images/logo1.png")
+        self.icon_title = PhotoImage(file="images/cart.png")
         Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
               font=("Elephant", 40, "bold"), bg="#02457A", fg="white", anchor="w", padx=20).place(x=0, y=0,
                                                                                                   relwidth=1,
@@ -58,21 +55,21 @@ class IMS:
         '''
 
         # ====left Menu==
-        self.MenuLogo = Image.open("images/4998752.png")
-        self.MenuLogo = self.MenuLogo.resize((200, 200), Image.Resampling.LANCZOS)
-        self.MenuLogo = ImageTk.PhotoImage(self.MenuLogo)
+        self.Menu_Logo = Image.open("images/accounting.png")
+        self.Menu_Logo = self.Menu_Logo.resize((200, 200), Image.Resampling.LANCZOS)
+        self.Menu_Logo = ImageTk.PhotoImage(self.Menu_Logo)
 
         # Menu Background
-        LeftMenu = Frame(self.root, bd=3, relief=RIDGE, bg="#005662")
-        LeftMenu.place(x=0, y=102, width=200, height=665)
+        left_menu = Frame(self.root, bd=3, relief=RIDGE, bg="#005662")
+        left_menu.place(x=0, y=102, width=200, height=665)
 
         # Menu Logo
-        lbl_menuLogo = Label(LeftMenu, image=self.MenuLogo, bg="#005662")
-        lbl_menuLogo.pack(side=TOP, fill=X)
+        lbl_menu_logo = Label(left_menu, image=self.Menu_Logo, bg="#005662")
+        lbl_menu_logo.pack(side=TOP, fill=X)
 
         # Menu Title
-        self.icon_side = PhotoImage(file="images/side.png")
-        Label(LeftMenu, text="Menu", font=("times new roman", 20, "bold"), bg="#007580", fg="white").pack(side=TOP,
+        self.icon_side = PhotoImage(file="images/arrow.png")
+        Label(left_menu, text="Menu", font=("times new roman", 20, "bold"), bg="#007580", fg="white").pack(side=TOP,
                                                                                                           fill=X)
 
         # Menu Buttons
@@ -91,12 +88,12 @@ class IMS:
                                                                                                         fill=X)
 
         # Creating navigation buttons on the sidebar for various application modules
-        create_menu_button(LeftMenu, "Employee", self.employee, self.icon_side)  # Employee management
-        create_menu_button(LeftMenu, "Supplier", self.supplier, self.icon_side)  # Supplier management
-        create_menu_button(LeftMenu, "Category", self.category, self.icon_side)  # Category management
-        create_menu_button(LeftMenu, "Product", self.product, self.icon_side)  # Product management
-        create_menu_button(LeftMenu, "Billing", self.billing, self.icon_side)  # Billing management
-        create_menu_button(LeftMenu, "Sales", self.sales, self.icon_side)  # Sales records
+        create_menu_button(left_menu, "Employee", self.employee, self.icon_side)  # Employee management
+        create_menu_button(left_menu, "Supplier", self.supplier, self.icon_side)  # Supplier management
+        create_menu_button(left_menu, "Category", self.category, self.icon_side)  # Category management
+        create_menu_button(left_menu, "Product", self.product, self.icon_side)  # Product management
+        create_menu_button(left_menu, "Billing", self.billing, self.icon_side)  # Billing management
+        create_menu_button(left_menu, "Sales", self.sales, self.icon_side)  # Sales records
 
         # Label for displaying the total number of employees.
         self.lbl_employee = Label(self.root, text="Total Employee\n[0]", bd=5, relief=RIDGE,

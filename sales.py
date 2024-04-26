@@ -85,8 +85,8 @@ class salesClass:
 
         # ============ Decorative Image ============
         # Load and configure an image to enhance the visual appeal of the GUI.
-        self.bill_photo = Image.open("images/cat2.jpg").resize((450, 300),
-                                                               Image.Resampling.LANCZOS)  # Resize for optimal fit.
+        self.bill_photo = Image.open("images/boxes.jpg").resize((450, 300),
+                                                                Image.Resampling.LANCZOS)  # Resize for optimal fit.
         self.bill_photo = ImageTk.PhotoImage(self.bill_photo)  # Convert to a format suitable for Tkinter to handle.
 
         # Label to hold the image, set without a border for a seamless look.

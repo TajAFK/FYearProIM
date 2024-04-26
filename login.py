@@ -13,15 +13,15 @@ from cryptography.fernet import Fernet  # For encrypting and decrypting data
 
 # Define the main class for the login system
 class LoginSystem:
-    def __init__(self, root):
+    def __init__(self, roots):
         """
         Initializes the main window for the Inventory Management System with essential GUI components,
         configuration settings, and cryptographic settings for secure operations.
         """
         # Basic window configuration
-        self.root = root
+        self.root = roots
         self.root.title("Inventory Management System | Ariatech")
-        self.root.geometry("1350x700+0+0")  # Set the size and position of the window
+        self.root.geometry("1050x700+0+0")  # Set the size and position of the window
         self.root.config(bg="#fafafa")  # Set the background color
 
         # Variable initialization for password reset functionality
@@ -37,8 +37,8 @@ class LoginSystem:
         self.cipher = self.load_key_and_initialize_cipher()  # Load existing encryption key or create new
 
         # GUI components
-        self.phone_image = PhotoImage(file="images/phone.png")  # Load phone image
-        Label(self.root, image=self.phone_image, bd=0).place(x=200, y=50)  # Place phone image on the window
+        self.mobile_image = PhotoImage(file="images/mobile.png")  # Load phone image
+        Label(self.root, image=self.mobile_image, bd=0).place(x=200, y=50)  # Place phone image on the window
 
         # ====Login Frame======
         # Initialize StringVars for holding login credentials
@@ -140,8 +140,8 @@ class LoginSystem:
 
         # ======Animation Images=====
         # Initialize the image list and index
-        self.images = [PhotoImage(file="images/im1.png"), PhotoImage(file="images/im2.png"),
-                       PhotoImage(file="images/im3.png")]
+        self.images = [PhotoImage(file="images/fade1.png"), PhotoImage(file="images/fade2.png"),
+                       PhotoImage(file="images/fade3.png")]
         self.image_index = 0
 
         # Set up the label to display images
@@ -238,8 +238,8 @@ class LoginSystem:
 
     def forget_window(self):
         """
-        Handles the password reset process for users who have forgotten their password. The process includes verifying the
-        employee ID, sending an OTP to the registered email, and allowing the user to reset their password.
+        Handles the password reset process for users who have forgotten their password. The process includes verifying
+        the employee ID, sending an OTP to the registered email, and allowing the user to reset their password.
         """
         try:
             # Check for empty Employee ID field
@@ -249,7 +249,7 @@ class LoginSystem:
             # Establish database connection to retrieve the encrypted email
             con = sqlite3.connect(database=r'ims.db')
             cur = con.cursor()
-            cur.execute("select email from employee where eid=?", (self.employee_id.get(),))
+            cur.execute("SELECT email FROM employee WHERE eid=?", (self.employee_id.get(),))
             email_encrypted = cur.fetchone()  # This will fetch the encrypted email
             con.close()  # Close the database connection promptly
 
@@ -371,7 +371,8 @@ class LoginSystem:
             # Catch any other unexpected errors
             messagebox.showerror("Error", f"An error occurred: {str(ex)}", parent=self.forget_win)
 
-    def load_credentials(self):
+    @staticmethod
+    def load_credentials():
         """
         Loads email credentials from a configuration file.
         """

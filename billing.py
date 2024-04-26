@@ -25,7 +25,7 @@ class BillClass:
         self.cipher = self.load_key_and_initialize_cipher()
 
         # Title Bar
-        self.icon_title = PhotoImage(file="images/logo1.png")  # Load the application logo
+        self.icon_title = PhotoImage(file="images/cart.png")  # Load the application logo
         # Create a label for the title bar, combining the icon and the title text
         Label(self.root, text="Inventory Management System", image=self.icon_title, compound=LEFT,
               font=("Elephant", 40, "bold"), bg="#02457A", fg="white", anchor="w", padx=20).place(x=0, y=0,
