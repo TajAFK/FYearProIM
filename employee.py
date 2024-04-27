@@ -23,7 +23,7 @@ class EmployeeClass:
 
         # Initialize tkinter string variables for form handling
         self.var_search = StringVar()  # Variable to handle search mode (by email, name, etc.)
-        self.var_searctxt = StringVar()  # Variable to handle the search input text
+        self.var_search_txt = StringVar()  # Variable to handle the search input text
 
         # Employee data variables
         self.var_emp_id = StringVar()  # Employee ID
@@ -57,7 +57,7 @@ class EmployeeClass:
         # Entry Field for Search Text
         # Set up an entry widget for users to input their search query, configured with a specific font and background color.
         # This widget captures the search text, which is used when the 'Search' button is clicked.
-        Entry(search_frame, textvariable=self.var_searctxt, font=("goudy old style", 15),
+        Entry(search_frame, textvariable=self.var_search_txt, font=("goudy old style", 15),
               bg="lightyellow").place(x=200, y=10)  # Position the entry field within the SearchFrame.
 
         # Search Button
@@ -396,7 +396,7 @@ class EmployeeClass:
         self.var_pass.set("")
         self.var_utype.set("Admin")  # Default user type
         self.var_salary.set("")
-        self.var_searctxt.set("")
+        self.var_search_txt.set("")
         self.var_search.set("Select")  # Default for search dropdown
 
         # Clear address field
