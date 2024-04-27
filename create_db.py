@@ -1,5 +1,6 @@
 import sqlite3
 
+
 def create_db():
     """
     Create a database and define tables for an inventory management system.

@@ -1,6 +1,6 @@
 # Import essential libraries for system operations, UI, security, and email handling
 import json  # For loading and parsing JSON files
-import os  # For interacting with the operating system
+import os
 import smtplib  # For sending emails via SMTP
 import sqlite3  # For database interactions
 import subprocess  # For executing external processes
@@ -8,33 +8,124 @@ from random import randint  # For generating random numbers, useful for OTPs
 from tkinter import *  # For GUI creation
 from tkinter import messagebox  # For displaying messages
 from tkinter.ttk import Style  # For displaying styling the GUI
-from cryptography.fernet import Fernet  # For encrypting and decrypting data
+from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
+from create_db import create_db
 
 
 # Define the main class for the login system
+
 class LoginSystem:
     def __init__(self, roots):
-        """
-        Initializes the main window for the Inventory Management System with essential GUI components,
-        configuration settings, and cryptographic settings for secure operations.
-        """
-        # Basic window configuration
+        """Initialize the application with basic window configuration and cryptographic setup."""
         self.root = roots
         self.root.title("Inventory Management System | Ariatech")
-        self.root.geometry("1050x700+0+0")  # Set the size and position of the window
-        self.root.config(bg="#fafafa")  # Set the background color
+        self.root.geometry("1050x700+0+0")
+        self.root.config(bg="#fafafa")
+
+        self.forget_win = None  # Placeholder for the forgot password window
+        self.crypto_manager = CryptoManagerClass()
 
         # Variable initialization for password reset functionality
         self.var_otp = StringVar()  # OTP input by the user
         self.var_new_pass = StringVar()  # New password input
         self.var_conf_pass = StringVar()  # Confirm new password input
 
-        # Initialize placeholder attributes for dynamic GUI components
-        self.forget_win = None  # Placeholder for the forgot password window
-        self.btn_reset = None  # Placeholder for the reset button
+        self.initialize_db()
 
-        # Encryption setup
-        self.cipher = self.load_key_and_initialize_cipher()  # Load existing encryption key or create new
+    def initialize_db(self):
+        """Check for the database file and initialize it if not present, then check for admin presence."""
+        db_path = 'ims.db'
+        if not os.path.exists(db_path):
+            create_db()  # Create the database and tables
+            messagebox.showinfo("Database Setup", "Database initialized successfully!")
+        self.check_admin_user()
+
+    def check_admin_user(self):
+        """Check for admin presence and either proceed to login or setup admin."""
+        if not self.admin_exists():
+            self.create_admin_window()
+        else:
+            self.setup_login_ui()  # Initialize and display login UI if admin exists
+
+    @staticmethod
+    def admin_exists():
+        """Determine if an admin user exists in the database."""
+        try:
+            with sqlite3.connect('ims.db') as con:
+                cur = con.cursor()
+                cur.execute("SELECT * FROM employee WHERE utype='Admin'")
+                return cur.fetchone() is not None
+        except Exception as ex:
+            messagebox.showerror("Database Error", f"Error checking admin user: {str(ex)}")
+            return False
+
+    # def create_admin_window(self):
+    #     """Create a window for admin registration if no admin exists."""
+    #     admin_win = Toplevel(self.root)
+    #     admin_win.title("Initial Setup - Create Admin")
+    #     admin_win.geometry("300x300+400+200")
+    #
+    #     Label(admin_win, text="Set Admin Credentials", font=("Arial", 12, "bold")).pack(pady=10)
+    #     Label(admin_win, text="Employee ID:").pack()
+    #     username = Entry(admin_win)
+    #     username.pack(pady=5)
+    #
+    #     Label(admin_win, text="Password:").pack()
+    #     password = Entry(admin_win, show="*")
+    #     password.pack(pady=5)
+    #
+    #     Button(admin_win, text="Submit",
+    #            command=lambda: self.submit_admin(username.get(), password.get(), admin_win)).pack(pady=20)
+
+    def create_admin_window(self):
+        """Create a window for admin registration if no admin exists."""
+        admin_win = Toplevel(self.root)
+        admin_win.title("Initial Setup - Create Admin")
+        admin_win.geometry("300x300+400+200")
+
+        Label(admin_win, text="Set Admin Credentials", font=("Arial", 12, "bold")).pack(pady=10)
+        Label(admin_win, text="Employee ID [0-9]:").pack()
+
+        # Using StringVar to track changes in the entry widget
+        username_var = StringVar()
+
+        # Validation command
+        def validate_digit(input):
+            if input.isdigit() or input == "":
+                return True
+            return False
+
+        validate_command = admin_win.register(validate_digit)
+
+        username = Entry(admin_win, textvariable=username_var, validate="key", validatecommand=(validate_command, '%P'))
+        username.pack(pady=5)
+
+        Label(admin_win, text="Password:").pack()
+        password = Entry(admin_win, show="*")
+        password.pack(pady=5)
+
+        Button(admin_win, text="Submit",
+               command=lambda: self.submit_admin(username.get(), password.get(), admin_win)).pack(pady=20)
+
+    def submit_admin(self, username, password, window):
+        """Submit new admin credentials to the database and close the setup window."""
+        encrypted_pass = self.crypto_manager.encrypt_data(password)
+        try:
+            with sqlite3.connect(database=r'ims.db') as con:
+                cur = con.cursor()
+                cur.execute("INSERT INTO employee (eid, name, pass, utype) VALUES (?, ?, ?, 'Admin')",
+                            (username, username, encrypted_pass))
+                con.commit()
+                messagebox.showinfo("Setup Complete", "Admin created successfully!")
+                window.destroy()
+                self.setup_login_ui()  # Initialize the login UI after admin is created
+        except Exception as ex:
+            messagebox.showerror("Error", f"Failed to create admin: {str(ex)}")
+
+    def setup_login_ui(self):
+        """Set up and display the login UI components."""
+        # This method initializes and displays the login UI elements.
+        # This includes loading images, setting up the login frame, and other visual elements.
 
         # GUI components
         self.mobile_image = PhotoImage(file="images/mobile.png")  # Load phone image
@@ -151,30 +242,17 @@ class LoginSystem:
         # Start the animation
         self.animate()
 
-    # All Functions
-
-    @staticmethod
-    def load_key_and_initialize_cipher():
+    def encrypt_data(self, data):
         """
-        Load the encryption key from a file named 'secret.key' and initialize a Fernet cipher object.
-        Raises:
-            FileNotFoundError: If the 'secret.key' file does not exist.
-            Exception: For any issues encountered during key reading or cipher initialization.
+        Encrypts data using the cryptographic manager's encrypt method.
         """
-        key_path = 'secret.key'
-        if not os.path.exists(key_path):
-            # Raises an error if the encryption key file does not exist
-            raise FileNotFoundError("Encryption key file not found")
+        return self.crypto_manager.encrypt_data(data)
 
-        try:
-            # Attempt to read the key from the file
-            with open(key_path, 'rb') as key_file:
-                key = key_file.read()
-            # Initialize and return the Fernet cipher object using the loaded key
-            return Fernet(key)
-        except Exception as e:
-            # Handle any exceptions during file reading or cipher initialization
-            raise Exception(f"An error occurred while loading the encryption key: {str(e)}")
+    def decrypt_data(self, data):
+        """
+        Decrypts data using the cryptographic manager's decrypt method.
+        """
+        return self.crypto_manager.decrypt_data(data)
 
     def animate(self):
         """
@@ -218,7 +296,8 @@ class LoginSystem:
                     return
 
                 # Decrypt the password retrieved from the database
-                decrypted_password = self.cipher.decrypt(user[1].encode()).decode()
+                #decrypted_password = self.decrypt_data(user[1].encode()).decode()
+                decrypted_password = self.crypto_manager.decrypt_data(user[1])
 
                 # Check if decrypted password matches the input password
                 if decrypted_password == self.password.get():
@@ -258,8 +337,8 @@ class LoginSystem:
                 messagebox.showerror("Error", "Invalid Employee ID, try again", parent=self.root)
                 return
 
-            # Decrypt the email before sending it
-            email = self.cipher.decrypt(email_encrypted[0].encode()).decode()  # Decrypting the email
+            # Decrypt the email before sending OTP
+            email = self.crypto_manager.decrypt_data(email_encrypted[0])  # Decrypting the email
 
             # =========Forget Window=============
             # Call send_email_function
@@ -330,13 +409,12 @@ class LoginSystem:
             messagebox.showerror("Error", "Passwords do not match", parent=self.forget_win)
             return
 
-        # Proceed with updating the password in the database
         try:
             # Establish a connection to the database
             with sqlite3.connect(database=r'ims.db') as con:
                 cur = con.cursor()
-                # Encrypt the new password
-                encrypted_password = self.cipher.encrypt(self.var_new_pass.get().encode()).decode()
+                # Encrypt the new password using the CryptoManager's encrypt_data method
+                encrypted_password = self.crypto_manager.encrypt_data(self.var_new_pass.get())
                 # Update the password in the database
                 cur.execute("UPDATE employee SET pass=? WHERE eid=?", (encrypted_password, self.employee_id.get()))
                 con.commit()  # Commit changes to ensure data is saved
@@ -424,11 +502,13 @@ class LoginSystem:
             return 'f'
         finally:
             server.quit()  # Ensure the connection to the server is closed
-            
+
         # Return 's' for success if the email has been sent
         return 's'
 
 
-root = Tk()
-obj = LoginSystem(root)
-root.mainloop()
+# Main script execution
+if __name__ == "__main__":
+    root = Tk()
+    app = LoginSystem(root)
+    root.mainloop()
