@@ -1,27 +1,26 @@
-import os
 from tkinter import *
 from tkinter import ttk, messagebox
 import sqlite3
-from cryptography.fernet import Fernet
+from CryptoManager import CryptoManagerClass # Manage Encryption Decryption of text
 
 
-class supplierclass:
-    def __init__(self, root):
-        self.root = root
+class SupplierClass:
+    def __init__(self, roots):
+        self.root = roots
         self.root.geometry("1100x500+220+130")  # Set the size and position of the window
         self.root.title("Inventory Management System")  # Set the window title
         self.root.config(bg="white")  # Set the background color of the window
         self.root.focus_force()  # Set focus on the main window to capture all keyboard inputs
 
         # Initialize tkinter string variables for form handling
-        self.var_searchby = StringVar()  # Variable to handle search mode (by email, name, etc.)
-        self.var_searctxt = StringVar()  # Variable to handle the search input text
+        self.var_search_by = StringVar()  # Variable to handle search mode (by email, name, etc.)
+        self.var_search_txt = StringVar()  # Variable to handle the search input text
         self.var_sup_invoice = StringVar()  # Variable to manage supplier invoice number
         self.var_name = StringVar()  # Variable to manage the name input for various forms
         self.var_contact = StringVar()  # Variable to manage the contact input
 
-        # Load encryption key and initialize the cipher for securing sensitive data
-        self.cipher = self.load_key_and_initialize_cipher()
+        # Instantiate the CryptoManager for encryption and decryption tasks
+        self.crypto_manager = CryptoManagerClass()
 
         # Search Frame setup for the application
         search_frame = Frame(self.root, bg="white")
@@ -32,7 +31,7 @@ class supplierclass:
         lbl_search.grid(row=0, column=0, padx=(0, 10))  # Grid positioning with padding for better spacing
 
         # Entry widget for searching by invoice number
-        entry_search = Entry(search_frame, textvariable=self.var_searctxt, font=("Arial", 14), bg="lightyellow", bd=1,
+        entry_search = Entry(search_frame, textvariable=self.var_search_txt, font=("Arial", 14), bg="lightyellow", bd=1,
                              relief="solid", width=15)
         entry_search.grid(row=0, column=1, padx=(0, 10))  # Grid positioning with padding
 
@@ -106,7 +105,7 @@ class supplierclass:
         scroll_x = Scrollbar(emp_frame, orient=HORIZONTAL)
 
         # Treeview table to display supplier details
-        self.supplierTable = ttk.Treeview(emp_frame, columns=("supplier_id","invoice", "name", "contact", "desc"),
+        self.supplierTable = ttk.Treeview(emp_frame, columns=("supplier_id", "invoice", "name", "contact", "desc"),
                                           yscrollcommand=scroll_y.set, xscrollcommand=scroll_x.set)
         scroll_x.pack(side=BOTTOM, fill=X)
         scroll_y.pack(side=RIGHT, fill=Y)
@@ -131,82 +130,17 @@ class supplierclass:
         # Display the current supplier information in the table
         self.show()
 
-    @staticmethod
-    def load_key_and_initialize_cipher():
+    def encrypt_data(self, data):
         """
-        Loads the encryption key from a specified file and initializes a Fernet cipher object.
-        If the key file does not exist, it raises an informative exception to prevent further operations
-        without proper encryption setup.
+        Encrypts data using the cryptographic manager's encrypt method.
         """
-        key_path = 'secret.key'
+        return self.crypto_manager.encrypt_data(data)
 
-        # Check if the encryption key file exists
-        if not os.path.exists(key_path):
-            raise FileNotFoundError("Encryption key file 'secret.key' not found. Please ensure the key exists.")
-
-        # Read the encryption key from the file
-        try:
-            with open(key_path, 'rb') as key_file:
-                key = key_file.read()
-        except IOError as e:
-            raise IOError(f"Failed to read the encryption key file: {str(e)}")
-
-        # Return the cipher object initialized with the loaded key
-        return Fernet(key)
-
-    def encrypt_data(self, plain_text):
+    def decrypt_data(self, data):
         """
-        Encrypts the given plain text using the Fernet cipher.
-
-        Args:
-            plain_text (str, optional): The text to be encrypted. If it is not a string,
-                                        it will be converted to a string. If None, returns an empty string.
-
-        Returns:
-            str: The encrypted text as a base64-encoded string. If encryption fails, returns an empty string.
+        Decrypts data using the cryptographic manager's decrypt method.
         """
-        # Handle None input gracefully by returning an empty encrypted string
-        if plain_text is None:
-            return ""
-
-        # Ensure the input is a string, convert if necessary
-        if not isinstance(plain_text, str):
-            plain_text = str(plain_text)
-
-        try:
-            # Encrypt the text and return the ciphertext
-            return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            # If encryption fails, log the error and show a messagebox error
-            messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
-            return ""
-
-    def decrypt_data(self, cipher_text):
-        """
-        Decrypts the given cipher text using the Fernet cipher.
-
-        Args:
-            cipher_text (str, optional): The encrypted text to be decrypted. It should be a string that is base64-encoded.
-                                        If not a string, it will be converted to a string. If None, returns an empty string.
-
-        Returns:
-            str: The decrypted plain text. If decryption fails, returns an empty string.
-        """
-        # Handle None input by returning an empty string immediately
-        if cipher_text is None:
-            return ""
-
-        # Ensure the input is a string, convert if necessary
-        if not isinstance(cipher_text, str):
-            cipher_text = str(cipher_text)
-
-        try:
-            # Decrypt the text and return the plaintext
-            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            # If decryption fails, log the error and show a messagebox error
-            messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
-            return ""
+        return self.crypto_manager.decrypt_data(data)
 
     def add(self):
         """
@@ -401,7 +335,7 @@ class supplierclass:
         self.txt_desc.delete('1.0', END)  # Clear the description text box
 
         # Optionally, clear any search text that might be present
-        self.var_searctxt.set("")
+        self.var_search_txt.set("")
 
         # Refresh the supplier table to reflect the latest data
         self.show()
@@ -415,12 +349,12 @@ class supplierclass:
         cur = con.cursor()
         try:
             # Validate input
-            if self.var_searctxt.get() == "":
+            if self.var_search_txt.get() == "":
                 messagebox.showerror("Error", "Invoice No should be required", parent=self.root)
                 return
 
             # Execute search
-            cur.execute("SELECT * FROM supplier WHERE invoice=?", (self.var_searctxt.get(),))
+            cur.execute("SELECT * FROM supplier WHERE invoice=?", (self.var_search_txt.get(),))
             row = cur.fetchone()
 
             # Clear existing entries from the table
@@ -444,5 +378,5 @@ class supplierclass:
 # Entry point of the application
 if __name__ == "__main__":
     root = Tk()
-    obj = supplierclass(root)
+    obj = SupplierClass(root)
     root.mainloop()

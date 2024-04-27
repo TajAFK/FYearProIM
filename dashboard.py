@@ -7,11 +7,11 @@ from PIL import Image, ImageTk
 
 # Application-specific modules for different sections of the system.
 from employee import EmployeeClass  # Handles employee management functionalities.
-from supplier import supplierclass  # Manages supplier-related information.
+from supplier import SupplierClass  # Manages supplier-related information.
 from category import categoryclass  # Manages product categories.
-from product import productclass  # Handles product information management.
+from product import ProductClass  # Handles product information management.
 from billing import BillClass  # Handles billing information management.
-from sales import salesClass  # Manages sales transactions.
+from sales import SalesClass  # Manages sales transactions.
 
 # SQLite3 for database operations to store and retrieve application data.
 import sqlite3
@@ -152,7 +152,7 @@ class IMS:
         Opens a new window for managing supplier information by instantiating the supplierclass.
         """
         self.new_win = Toplevel(self.root)  # Create a new top-level window
-        self.new_obj = supplierclass(self.new_win)  # Instantiate the supplierclass in the new window
+        self.new_obj = SupplierClass(self.new_win)  # Instantiate the supplierclass in the new window
 
     def category(self):
         """
@@ -166,7 +166,7 @@ class IMS:
         Opens a new window for managing product details by instantiating the productclass.
         """
         self.new_win = Toplevel(self.root)  # Create a new top-level window
-        self.new_obj = productclass(self.new_win)  # Instantiate the productclass in the new window
+        self.new_obj = ProductClass(self.new_win)  # Instantiate the productclass in the new window
 
     def billing(self):
         """
@@ -180,7 +180,7 @@ class IMS:
         Opens a new window for managing sales transactions by instantiating the salesClass.
         """
         self.new_win = Toplevel(self.root)  # Create a new top-level window
-        self.new_obj = salesClass(self.new_win)  # Instantiate the salesClass in the new window
+        self.new_obj = SalesClass(self.new_win)  # Instantiate the salesClass in the new window
 
     def update_content(self):
         """

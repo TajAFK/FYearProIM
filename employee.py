@@ -2,7 +2,7 @@ import os  # Importing os module for file operations
 import sqlite3  # Importing sqlite3 module for database operations
 from tkinter import *
 from tkinter import ttk, messagebox  # Importing required modules from tkinter
-from cryptography.fernet import Fernet  # Importing Fernet for encryption
+from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
 
 
 class EmployeeClass:
@@ -18,10 +18,8 @@ class EmployeeClass:
         self.root.config(bg="white")  # Set the background color of the window
         self.root.focus_force()  # Set focus on the main window to capture all keyboard inputs
 
-        # Encryption setup
-        self.key = Fernet.generate_key()  # Generate a secure encryption key
-        self.cipher = Fernet(self.key)  # Create a cipher object for encrypting and decrypting
-        self.cipher = self.load_key_and_initialize_cipher()  # Load existing key if available, else generate new
+        # Instantiate the CryptoManager for encryption and decryption tasks
+        self.crypto_manager = CryptoManagerClass()
 
         # Initialize tkinter string variables for form handling
         self.var_search = StringVar()  # Variable to handle search mode (by email, name, etc.)
@@ -43,14 +41,14 @@ class EmployeeClass:
         #self.test_encryption_consistency()
 
         # Search Frame Initialize a LabelFrame widget for employee search operations.
-        SearchFrame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
-                                 bd=2, relief=RIDGE)
-        SearchFrame.place(x=250, y=20, width=600, height=70)  # Set the frame's position and size on the main window.
+        search_frame = LabelFrame(self.root, text="Search Employee", bg="white", font=("goudy old style", 12, "bold"),
+                                  bd=2, relief=RIDGE)
+        search_frame.place(x=250, y=20, width=600, height=70)  # Set the frame's position and size on the main window.
 
         # Search Options
         # Initialize a Combobox within the SearchFrame to allow users to select the criterion for searching employees.
         # It is set to 'readonly' to prevent user-typed entries, ensuring they select from predefined options.
-        cmb_search = ttk.Combobox(SearchFrame, textvariable=self.var_search,
+        cmb_search = ttk.Combobox(search_frame, textvariable=self.var_search,
                                   values=("Select", "Email", "Name", "Contact"), state='readonly', justify=CENTER,
                                   font=("goudy old style", 15))
         cmb_search.place(x=10, y=10, width=180)  # Position the combobox within the SearchFrame.
@@ -59,13 +57,13 @@ class EmployeeClass:
         # Entry Field for Search Text
         # Set up an entry widget for users to input their search query, configured with a specific font and background color.
         # This widget captures the search text, which is used when the 'Search' button is clicked.
-        Entry(SearchFrame, textvariable=self.var_searctxt, font=("goudy old style", 15),
+        Entry(search_frame, textvariable=self.var_searctxt, font=("goudy old style", 15),
               bg="lightyellow").place(x=200, y=10)  # Position the entry field within the SearchFrame.
 
         # Search Button
         # Create a button to initiate the search operation.
         # Clicking this button triggers the 'search' method to perform the search based on the selected criteria and input text.
-        Button(SearchFrame, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white",
+        Button(search_frame, text="Search", command=self.search, font=("goudy old style", 15), bg="#4caf50", fg="white",
                cursor="hand2").place(x=410, y=9, width=150, height=30)  # Position the button next to the entry field.
 
         # Title Label
@@ -190,85 +188,17 @@ class EmployeeClass:
         # Show initial data in the table
         self.show()
 
-    @staticmethod
-    def load_key_and_initialize_cipher():
+    def encrypt_data(self, data):
         """
-        Loads an encryption key from a file, or generates a new one if the file doesn't exist.
-        This method ensures that a secure key is always available for encrypting and decrypting data.
-
-        Returns:
-            Fernet: A cryptography.Fernet object initialized with the loaded or generated key.
+        Encrypts data using the cryptographic manager's encrypt method.
         """
-        key_path = 'secret.key'  # Define the path to the encryption key file
+        return self.crypto_manager.encrypt_data(data)
 
-        # Check if the encryption key file exists
-        if not os.path.exists(key_path):
-            # If the key file does not exist, generate a new encryption key
-            key = Fernet.generate_key()
-            # Write the newly generated key to a file for future use
-            with open(key_path, 'wb') as key_file:
-                key_file.write(key)
-        else:
-            # If the key file exists, load the key from the file
-            with open(key_path, 'rb') as key_file:
-                key = key_file.read()
-
-        # Return a Fernet object initialized with the loaded or generated key
-        return Fernet(key)
-
-    def encrypt_data(self, plain_text):
+    def decrypt_data(self, data):
         """
-        Encrypts the provided plain text using the Fernet encryption algorithm.
-
-        Args:
-            plain_text (str): The text data to encrypt.
-
-        Returns:
-            str: The encrypted text, encoded in utf-8 and returned as a string.
-            If encryption fails, an empty string is returned and an error message is displayed.
+        Decrypts data using the cryptographic manager's decrypt method.
         """
-        # Return an empty string if the input is None
-        if plain_text is None:
-            return ""
-
-        # Convert the input to a string if it is not already one
-        if not isinstance(plain_text, str):
-            plain_text = str(plain_text)
-
-        try:
-            # Attempt to encrypt the plain text and return it
-            return self.cipher.encrypt(plain_text.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            # Display an error message if encryption fails and return an empty string
-            messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
-            return ""
-
-    def decrypt_data(self, cipher_text):
-        """
-        Decrypts the provided encrypted text using the Fernet encryption algorithm.
-
-        Args:
-            cipher_text (str): The encrypted text to be decrypted.
-
-        Returns:
-            str: The decrypted text, returned as a utf-8 encoded string.
-            If decryption fails, an empty string is returned and an error message is displayed.
-        """
-        # Return an empty string if the input is None
-        if cipher_text is None:
-            return ""
-
-        # Ensure the input is a string before processing
-        if not isinstance(cipher_text, str):
-            cipher_text = str(cipher_text)
-
-        try:
-            # Attempt to decrypt the cipher text and return it
-            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            # Display an error message if decryption fails and return an empty string
-            messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
-            return ""
+        return self.crypto_manager.decrypt_data(data)
 
     '''
     Debug function to verify if encrypt decrypt works as it should    

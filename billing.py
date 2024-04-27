@@ -6,23 +6,24 @@ import time  # Used for handling time-related tasks
 import os  # Allows interaction with the operating system, including file and directory handling
 import tempfile  # Used for generating temporary files and directories
 import subprocess  # Enables running of subprocesses, useful for starting other programs
-from cryptography.fernet import \
-    Fernet  # Provides encryption and decryption functionality using Fernet symmetric encryption
+from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
 import random
-from datetime import date
 
 
 class BillClass:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, roots):
+        self.root = roots
         self.root.geometry("1370x700+0+0")
         self.root.title("Inventory management System")
         self.root.config(bg="white")
         self.cart_list = []
         self.chk_print = 0
 
-        # Load the encryption key and initialize the cipher
-        self.cipher = self.load_key_and_initialize_cipher()
+        # # Load the encryption key and initialize the cipher
+        # self.cipher = self.load_key_and_initialize_cipher()
+
+        # Instantiate the CryptoManager for encryption and decryption tasks
+        self.crypto_manager = CryptoManagerClass()
 
         # Title Bar
         self.icon_title = PhotoImage(file="images/cart.png")  # Load the application logo
@@ -368,7 +369,7 @@ class BillClass:
 
         # Title label for the billing area
         b_title = Label(bill_frame, text="Customer Bill Area", font=("Arial", 20, "bold"), bg="#f44336",
-                       fg="white")
+                        fg="white")
         b_title.pack(side=TOP, fill=X)
 
         # Scrollbar for the billing area
@@ -432,54 +433,17 @@ class BillClass:
 
     # =======================All Functions==========================
 
-    @staticmethod
-    def load_key_and_initialize_cipher():
+    def encrypt_data(self, data):
         """
-        Load the encryption key from a file named 'secret.key' and initialize a Fernet cipher object.
-        Raises:
-            FileNotFoundError: If the 'secret.key' file does not exist.
-            Exception: For any issues encountered during key reading or cipher initialization.
+        Encrypts data using the cryptographic manager's encrypt method.
         """
-        key_path = 'secret.key'
-        if not os.path.exists(key_path):
-            # Raises an error if the encryption key file does not exist
-            raise FileNotFoundError("Encryption key file not found")
+        return self.crypto_manager.encrypt_data(data)
 
-        try:
-            # Attempt to read the key from the file
-            with open(key_path, 'rb') as key_file:
-                key = key_file.read()
-            # Initialize and return the Fernet cipher object using the loaded key
-            return Fernet(key)
-        except Exception as e:
-            # Handle any exceptions during file reading or cipher initialization
-            raise Exception(f"An error occurred while loading the encryption key: {str(e)}")
-
-    def encrypt_data(self, plain_text):
+    def decrypt_data(self, data):
         """
-        Encrypts the provided plain text using the initialized cipher and returns the encrypted text.
-        If an error occurs during encryption, shows an error message and returns an empty string.
-
-        Args:
-            plain_text (str): The text to be encrypted.
-
-        Returns:
-            str: The encrypted text in UTF-8 encoding or an empty string if an error occurs.
+        Decrypts data using the cryptographic manager's decrypt method.
         """
-        if plain_text is None:
-            return ""  # Immediately return an empty string if the input is None.
-
-        # Ensure the input is a string to avoid type errors with encryption.
-        plain_text = str(plain_text)
-
-        try:
-            # Encrypt the text and return the encrypted data decoded to a string for easy handling.
-            encrypted_data = self.cipher.encrypt(plain_text.encode('utf-8'))
-            return encrypted_data.decode('utf-8')
-        except Exception as e:
-            # If encryption fails, log the exception and return an empty string.
-            messagebox.showerror("Encryption Error", f"Failed to encrypt data: {e}")
-            return ""
+        return self.crypto_manager.decrypt_data(data)
 
     def show(self):
         """
@@ -692,13 +656,15 @@ class BillClass:
             # Display an error message if there's an issue updating the cart table
             messagebox.showerror("Error", f"Error updating cart display: {str(ex)}", parent=self.root)
 
-    def get_current_date(self):
+    @staticmethod
+    def get_current_date():
         """
         Returns the current date formatted as 'DD-MM-YYYY'.
         """
         return time.strftime("%d-%m-%Y")
 
-    def get_current_time(self):
+    @staticmethod
+    def get_current_time():
         """
         Returns the current time formatted as 'HH:MM:SS AM/PM'.
         """
@@ -721,14 +687,14 @@ class BillClass:
 
         # Ask user for confirmation before generating the bill
         if not messagebox.askyesno("Confirm", "Are you sure? Once the bill is generated, it cannot be changed.",
-                                       parent=self.root):
+                                   parent=self.root):
             return  # User clicked 'No', so exit the function
 
         # Prepare the bill content
         self.bill_top()
         self.bill_middle()
         self.bill_bottom()
-        self.save_bill_to_database() #Save bill to database
+        self.save_bill_to_database()  # Save bill to database
 
         # Attempt to encrypt the bill content and save it to a file
         try:

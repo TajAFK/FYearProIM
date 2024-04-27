@@ -3,23 +3,24 @@ import os
 
 # Third-party library imports
 from PIL import Image, ImageTk
-from cryptography.fernet import Fernet
+
+from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
 
 # Tkinter imports for GUI components
 from tkinter import (Tk, Frame, Label, Entry, Button, Listbox, Scrollbar, Text,
-                     messagebox, StringVar, END, TOP, BOTH, RIGHT, LEFT, X, Y, RIDGE, VERTICAL)
+                     messagebox, StringVar, END, TOP, BOTH, RIGHT, X, Y, RIDGE, VERTICAL)
 
 
-class salesClass:
-    def __init__(self, root):
-        self.root = root
+class SalesClass:
+    def __init__(self, roots):
+        self.root = roots
         self.root.geometry("1100x500+220+130")
         self.root.title("Inventory Management System")
         self.root.config(bg="white")
         self.root.focus_force()
 
-        # Load the encryption key and initialize the cipher
-        self.cipher = self.load_key_and_initialize_cipher()
+        # Instantiate the CryptoManager for encryption and decryption tasks
+        self.crypto_manager = CryptoManagerClass()
 
         self.bill_list = []
         self.var_invoice = StringVar()
@@ -50,14 +51,14 @@ class salesClass:
 
         # ============ Bill List Section ============
         # Frame for displaying bills with a prominent bordered design.
-        sales_Frame = Frame(self.root, bd=3, relief=RIDGE)
-        sales_Frame.place(x=50, y=140, width=200, height=330)  # Positioned to fit within the main window.
+        sales_frame = Frame(self.root, bd=3, relief=RIDGE)
+        sales_frame.place(x=50, y=140, width=200, height=330)  # Positioned to fit within the main window.
 
         # Vertical scrollbar to navigate through the list of bills.
-        scrolly = Scrollbar(sales_Frame, orient=VERTICAL)
+        scrolly = Scrollbar(sales_frame, orient=VERTICAL)
 
         # Listbox to display sales entries, enabled with vertical scrolling.
-        self.Sales_List = Listbox(sales_Frame, font=("Arial", 15), bg="white", yscrollcommand=scrolly.set)
+        self.Sales_List = Listbox(sales_frame, font=("Arial", 15), bg="white", yscrollcommand=scrolly.set)
         scrolly.pack(side=RIGHT, fill=Y)  # Align scrollbar to the right of the Listbox.
         scrolly.config(command=self.Sales_List.yview)  # Connect the scrollbar to the Listbox.
         self.Sales_List.pack(fill=BOTH, expand=1)  # Allow the Listbox to expand and fill the frame.
@@ -67,18 +68,18 @@ class salesClass:
 
         # ============ Bill Display Area ============
         # Frame for showing detailed customer bills, designed with borders and a raised layout.
-        bill_Frame = Frame(self.root, bd=3, relief=RIDGE)
-        bill_Frame.place(x=280, y=140, width=421, height=330)  # Set dimensions and position on the window.
+        bill_frame = Frame(self.root, bd=3, relief=RIDGE)
+        bill_frame.place(x=280, y=140, width=421, height=330)  # Set dimensions and position on the window.
 
         # Label for the bill area, styled with an orange background to stand out.
-        lab_title2 = Label(bill_Frame, text="Customer Bill Area", font=("Arial", 20, "bold"), bg="orange")
+        lab_title2 = Label(bill_frame, text="Customer Bill Area", font=("Arial", 20, "bold"), bg="orange")
         lab_title2.pack(side=TOP, fill=X)  # Attach to the top of the frame and fill horizontally.
 
         # Scrollbar to navigate through the bill text area.
-        scrolly2 = Scrollbar(bill_Frame, orient=VERTICAL)
+        scrolly2 = Scrollbar(bill_frame, orient=VERTICAL)
 
         # Text area for displaying bill details, set with a light yellow background for visibility.
-        self.bill_area = Text(bill_Frame, bg="lightyellow", yscrollcommand=scrolly2.set)
+        self.bill_area = Text(bill_frame, bg="lightyellow", yscrollcommand=scrolly2.set)
         scrolly2.pack(side=RIGHT, fill=Y)  # Position the scrollbar on the right side, filling vertically.
         scrolly2.config(command=self.bill_area.yview)  # Connect the text area scrolling to the scrollbar.
         self.bill_area.pack(fill=BOTH, expand=1)  # Allow the text area to expand fully within its frame.
@@ -113,29 +114,17 @@ class salesClass:
                 # Store the base name (without extension) in bill_list for reference
                 self.bill_list.append(os.path.splitext(filename)[0])
 
-    @staticmethod
-    def load_key_and_initialize_cipher():
+    def encrypt_data(self, data):
         """
-        Load encryption key from file and initialize cipher.
+        Encrypts data using the cryptographic manager's encrypt method.
         """
-        key_path = 'secret.key'
-        if not os.path.exists(key_path):
-            # If key does not exist, handle it appropriately
-            raise Exception("Encryption key file not found")
-        with open(key_path, 'rb') as key_file:
-            key = key_file.read()
-        return Fernet(key)
+        return self.crypto_manager.encrypt_data(data)
 
-    def decrypt_data(self, cipher_text):
-        if cipher_text is None:
-            return ""
-        if not isinstance(cipher_text, str):
-            cipher_text = str(cipher_text)
-        try:
-            return self.cipher.decrypt(cipher_text.encode('utf-8')).decode('utf-8')
-        except Exception as e:
-            messagebox.showerror("Decryption Error", f"Failed to decrypt data: {e}")
-            return ""
+    def decrypt_data(self, data):
+        """
+        Decrypts data using the cryptographic manager's decrypt method.
+        """
+        return self.crypto_manager.decrypt_data(data)
 
     def get_data(self, ev):
         """
@@ -200,7 +189,8 @@ class salesClass:
         """
         Clears the bill display area and refreshes any related UI components necessary for initiating new transactions.
         """
-        # Reset the display components that list or show data, ensuring they reflect the current state or empty states as needed.
+        # Reset the display components that list or show data, ensuring they reflect the current state or empty
+        # states as needed.
         self.show()
 
         # Remove all existing content from the bill area to prepare for new data input or other interactions.
@@ -213,7 +203,7 @@ if __name__ == "__main__":
 
     # Create an instance of the 'salesClass', passing the root window as an argument.
     # The 'salesClass' is assumed to be a class that initializes the GUI and binds event handlers.
-    obj = salesClass(root)
+    obj = SalesClass(root)
 
     # Start the Tkinter event loop.
     # This call is blocking and will wait for all GUI events such as button clicks,
