@@ -1,16 +1,17 @@
 import sqlite3
 
 
-def create_db():
+def create_db(db_path='ims.db'):
     """
     Create a database and define tables for an inventory management system.
     This function sets up tables for employees, suppliers, categories, products, customers, and bills.
     Each table is created only if it does not already exist.
     """
+    con = None  # Initialize con to ensure it's in scope for the finally block
     try:
-        # Establish a connection to the SQLite database
-        con = sqlite3.connect('ims.db')
-        cur = con.cursor()
+        # Use a context manager to handle the database connection
+        with sqlite3.connect(db_path) as con:
+            cur = con.cursor()
 
         # Create 'employee' table with appropriate types for dates and numeric fields
         cur.execute("""
@@ -105,7 +106,8 @@ def create_db():
     except Exception as e:
         print("An error occurred:", e)
     finally:
-        con.close()
+        # if con:
+        #     con.close()
         print("Connection closed.")
 
 

@@ -670,20 +670,60 @@ class BillClass:
         """
         return time.strftime("%I:%M:%S %p")
 
+    # def generate_bill(self):
+    #     """
+    #     Generates a bill from the cart contents, validates customer details, saves the bill to a file,
+    #     and updates the UI to reflect the bill generation status.
+    #     """
+    #     # Check for customer details
+    #     if self.var_cname.get() == '' or self.var_contact.get() == '':
+    #         messagebox.showerror("Error", "Customer details are required to generate a bill.", parent=self.root)
+    #         return
+    #
+    #     # Ensure there are products in the cart
+    #     if len(self.cart_list) == 0:
+    #         messagebox.showerror("Error", "Add products to the cart before generating a bill.", parent=self.root)
+    #         return
+    #
+    #     # Ask user for confirmation before generating the bill
+    #     if not messagebox.askyesno("Confirm", "Are you sure? Once the bill is generated, it cannot be changed.",
+    #                                parent=self.root):
+    #         return  # User clicked 'No', so exit the function
+    #
+    #     # Prepare the bill content
+    #     self.bill_top()
+    #     self.bill_middle()
+    #     self.bill_bottom()
+    #     self.save_bill_to_database()  # Save bill to database
+    #
+    #     # Attempt to encrypt the bill content and save it to a file
+    #     try:
+    #         bill_path = f'bill/{str(self.invoice)}.txt'
+    #         with open(bill_path, 'w') as file:
+    #             # Encrypt the bill content for security
+    #             encrypted_data = self.encrypt_data(self.txt_bill_area.get('1.0', END))
+    #             file.write(encrypted_data)
+    #         messagebox.showinfo('Success', "Bill generated and saved successfully.", parent=self.root)
+    #         # Indicate that the bill is ready for printing
+    #         self.chk_print = 1
+    #     except Exception as e:
+    #         messagebox.showerror("Error", f"Failed to save bill to a text file: {str(e)}", parent=self.root)
+
     def generate_bill(self):
         """
         Generates a bill from the cart contents, validates customer details, saves the bill to a file,
         and updates the UI to reflect the bill generation status.
+        Raises ValueError if no items are in the cart or if customer details are missing.
         """
         # Check for customer details
         if self.var_cname.get() == '' or self.var_contact.get() == '':
             messagebox.showerror("Error", "Customer details are required to generate a bill.", parent=self.root)
-            return
+            raise ValueError("Customer details are required to generate a bill.")
 
         # Ensure there are products in the cart
         if len(self.cart_list) == 0:
             messagebox.showerror("Error", "Add products to the cart before generating a bill.", parent=self.root)
-            return
+            raise ValueError("Add products to the cart before generating a bill.")
 
         # Ask user for confirmation before generating the bill
         if not messagebox.askyesno("Confirm", "Are you sure? Once the bill is generated, it cannot be changed.",
