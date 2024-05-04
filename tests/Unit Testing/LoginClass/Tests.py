@@ -33,7 +33,7 @@ class TestLoginSystem(unittest.TestCase):
 
         # Call and initiate the password reset process
         login_system.employee_id.set('1001')
-        login_system.forget_window()
+        login_system.password_reset()
 
         # Simulate entering the correct OTP generated within the send_email function
         login_system.var_otp.set('123456')

@@ -73,9 +73,13 @@ class EmployeeClass:
 
         # Content: Row 1 - Employee Information
         # Label and entry for Employee ID
+
         Label(self.root, text="Emp ID", font=("goudy old style", 15), bg="white").place(x=50, y=150)
-        Entry(self.root, textvariable=self.var_emp_id, font=("goudy old style", 15),
-              bg="lightyellow").place(x=150, y=150, width=180)
+        validate_command = self.root.register(lambda input: input.isdigit() or input == "")
+        validate_emp_id = Entry(self.root, textvariable=self.var_emp_id, validate="key",
+                       validatecommand=(validate_command, '%P'), font=("goudy old style", 15),
+                       bg="lightyellow")
+        validate_emp_id.place(x=150, y=150, width=180)
 
         # Label and combobox for selecting Gender
         Label(self.root, text="Gender", font=("goudy old style", 15), bg="white").place(x=350, y=150)
@@ -85,9 +89,11 @@ class EmployeeClass:
         cmb_gender.current(0)  # Default to the first entry 'Select'
 
         # Label and entry for Contact Information
+
         Label(self.root, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=150)
+        validate_contact = self.root.register(lambda input: input.isdigit() or input in " -")
         Entry(self.root, textvariable=self.var_contact, font=("goudy old style", 15),
-              bg="lightyellow").place(x=850, y=150, width=180)
+              bg="lightyellow",validate="key", validatecommand=(validate_contact, '%P')).place(x=850, y=150, width=180)
 
         # Content: Row 2 - Additional Employee Information
         # Label and entry for Employee Name
@@ -125,8 +131,9 @@ class EmployeeClass:
 
         self.txt_address = Text(self.root, font=("goudy old style", 15), bg="lightyellow")
         self.txt_address.place(x=150, y=270, width=300, height=60)  # Corrected this line
+        validate_salary = self.root.register(lambda input: input.replace('.', '', 1).isdigit() or input == "")
         Entry(self.root, textvariable=self.var_salary, font=("goudy old style", 15),
-              bg="lightyellow").place(x=600, y=270, width=180)
+              bg="lightyellow",validate="key", validatecommand=(validate_salary, '%P')).place(x=600, y=270, width=180)
 
         # Buttons
         Button(self.root, text="Save", command=self.add, font=("goudy old style", 15), bg="#2196f3", fg="white",
@@ -215,8 +222,36 @@ class EmployeeClass:
         Adds a new employee record to the database after validating that the employee ID is unique.
         Ensures all required fields are filled and the employee ID does not already exist in the database.
         """
-        if self.var_emp_id.get() == "":
-            messagebox.showerror("Error", "Employee ID Must be required", parent=self.root)
+        missing_fields = []  # List to hold the names of missing fields
+
+        # Check each field and add the field name to the list if it's empty
+        if not self.var_emp_id.get().strip():
+            missing_fields.append("Employee ID")
+        if not self.var_name.get().strip():
+            missing_fields.append("Name")
+        if not self.var_email.get().strip():
+            missing_fields.append("Email")
+        if not self.var_gender.get() or self.var_gender.get() == "Select":
+            missing_fields.append("Gender")
+        if not self.var_contact.get().strip():
+            missing_fields.append("Contact")
+        if not self.var_dob.get().strip():
+            missing_fields.append("D.O.B")
+        if not self.var_doj.get().strip():
+            missing_fields.append("D.O.J")
+        if not self.var_pass.get().strip():
+            missing_fields.append("Password")
+        if not self.var_utype.get().strip():
+            missing_fields.append("User Type")
+        if not self.txt_address.get('1.0', END).strip():
+            missing_fields.append("Address")
+        if not self.var_salary.get().strip():
+            missing_fields.append("Salary")
+
+        # If there are any missing fields, show an error message and return
+        if missing_fields:
+            missing_fields_str = ", ".join(missing_fields)  # Convert list to comma-separated string
+            messagebox.showerror("Error", f"Missing fields: {missing_fields_str}", parent=self.root)
             return
 
         try:

@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 import sqlite3
 
 
-class categoryclass:
+class CategoryClass:
     def __init__(self, root):
         # Initialize the root window
         self.root = root
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     root = Tk()
 
     # Instantiate the category class object with the root window as parameter
-    obj = categoryclass(root)
+    obj = CategoryClass(root)
 
     # Start the Tkinter event loop
     root.mainloop()

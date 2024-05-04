@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 # Application-specific modules for different sections of the system.
 from employee import EmployeeClass  # Handles employee management functionalities.
 from supplier import SupplierClass  # Manages supplier-related information.
-from category import categoryclass  # Manages product categories.
+from category import CategoryClass  # Manages product categories.
 from product import ProductClass  # Handles product information management.
 from billing import BillClass  # Handles billing information management.
 from sales import SalesClass  # Manages sales transactions.
@@ -159,7 +159,7 @@ class IMS:
         Opens a new window for managing product categories by instantiating the categoryclass.
         """
         self.new_win = Toplevel(self.root)  # Create a new top-level window
-        self.new_obj = categoryclass(self.new_win)  # Instantiate the categoryclass in the new window
+        self.new_obj = CategoryClass(self.new_win)  # Instantiate the categoryclass in the new window
 
     def product(self):
         """

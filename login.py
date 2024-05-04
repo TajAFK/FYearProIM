@@ -1,4 +1,5 @@
 # Import essential libraries for system operations, UI, security, and email handling
+import datetime
 import json  # For loading and parsing JSON files
 import os
 import smtplib  # For sending emails via SMTP
@@ -7,6 +8,9 @@ import subprocess  # For executing external processes
 from random import randint  # For generating random numbers, useful for OTPs
 from tkinter import *  # For GUI creation
 from tkinter import messagebox, ttk  # For displaying messages
+
+from PIL._tkinter_finder import tk
+
 from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
 from create_db import create_db
 
@@ -59,7 +63,7 @@ class LoginSystem:
             self.create_admin_window()
         else:
             self.root.deiconify()  # Show the main window
-            self.setup_login_ui()  # Setup login UI if an admin exists
+            self.login_ui()  # Setup login UI if an admin exists
 
     @staticmethod
     def admin_exists():
@@ -120,8 +124,9 @@ class LoginSystem:
 
         # Label and entry for Contact Information
         Label(self.admin_win, text="Contact", font=("goudy old style", 15), bg="white").place(x=750, y=75)
-        Entry(self.admin_win, textvariable=self.var_contact, font=("goudy old style", 15),
-              bg="lightyellow").place(x=850, y=75, width=180)
+        validate_contact = self.admin_win.register(lambda input: input.isdigit() or input in " -")
+        Entry(self.admin_win, textvariable=self.var_contact, font=("goudy old style", 15), bg="lightyellow",
+              validate="key", validatecommand=(validate_contact, '%P')).place(x=850, y=75, width=180)
 
         # Content: Row 2 - Additional Employee Information
         # Label and entry for Employee Name
@@ -143,7 +148,6 @@ class LoginSystem:
         Label(self.admin_win, text="Email", font=("goudy old style", 15), bg="white").place(x=50, y=155)
         Label(self.admin_win, text="Password", font=("goudy old style", 15), bg="white").place(x=350, y=155)
         Label(self.admin_win, text="User Type", font=("goudy old style", 15), bg="white").place(x=750, y=155)
-
         Entry(self.admin_win, textvariable=self.var_email, font=("goudy old style", 15), bg="lightyellow").place(
             x=150, y=155, width=180)
         Entry(self.admin_win, textvariable=self.var_pass, font=("goudy old style", 15), bg="lightyellow").place(
@@ -155,13 +159,15 @@ class LoginSystem:
                                                                                                   width=180)
 
         # Row 4
+
         Label(self.admin_win, text="Address", font=("goudy old style", 15), bg="white").place(x=50, y=195)
         Label(self.admin_win, text="Salary", font=("goudy old style", 15), bg="white").place(x=750, y=195)
-
         self.txt_address = Text(self.admin_win, font=("goudy old style", 15), bg="lightyellow")
         self.txt_address.place(x=150, y=195, width=530, height=30)  # Corrected this line
-        Entry(self.admin_win, textvariable=self.var_salary, font=("goudy old style", 15),
-              bg="lightyellow").place(x=850, y=195, width=180)
+
+        validate_salary = self.admin_win.register(lambda input: input.replace('.', '', 1).isdigit() or input == "")
+        Entry(self.admin_win, textvariable=self.var_salary, font=("goudy old style", 15), bg="lightyellow",
+              validate="key", validatecommand=(validate_salary, '%P')).place(x=850, y=195, width=180)
 
         # Buttons
         Button(self.admin_win, text="SUBMIT", command=self.submit_admin, font=("goudy old style", 15), bg="#2196f3",
@@ -215,88 +221,133 @@ class LoginSystem:
                 messagebox.showinfo("Setup Complete", "Admin created successfully!")
                 self.admin_win.destroy()  # Close the admin window
                 self.root.deiconify()  # Make the root window visible
-                self.setup_login_ui()  # Prompt the login UI setup after admin creation
+                self.login_ui()  # Prompt the login UI setup after admin creation
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    def setup_login_ui(self):
-        """Initialize and display the login interface components including input fields, buttons, and images."""
+    # def login_ui(self):
+    #     """Initialize and display the login interface components including input fields, buttons, and images."""
+    #
+    #     # Load and display mobile imagery at specified coordinates.
+    #     self.mobile_image = PhotoImage(file="images/mobile.png")
+    #     Label(self.root, image=self.mobile_image, bd=0).place(x=200, y=50)
+    #
+    #     # Setup the login frame for user interaction.
+    #     login_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
+    #     login_frame.place(x=650, y=90, width=350, height=460)
+    #
+    #     # Title for the login section.
+    #     Label(login_frame, text="Login", font=("Arial Rounded MT Bold", 30), bg="white", fg="#00759E").pack(fill=X,
+    #                                                                                                         pady=(
+    #                                                                                                             30, 20))
+    #
+    #     Label(login_frame, text="User ID", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=100)
+    #     validate_command = login_frame.register(lambda input: input.isdigit() or input == "")
+    #     id_in = Entry(login_frame, textvariable=self.employee_id, validate="key",
+    #                   validatecommand=(validate_command, '%P'), font=("Andlus", 15), bg="#FFFFFF", fg="#343A40")
+    #     id_in.place(x=50, y=140, width=250)
+    #
+    #     # Password input field.
+    #     Label(login_frame, text="Password", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=200)
+    #     Entry(login_frame, textvariable=self.password, show="*", font=("Andlus", 15), bg="white", fg="#343A40").place(
+    #         x=50, y=240, width=250)
+    #
+    #     # Sign-in button with hover and click effects.
+    #     sign_btn = Button(login_frame, text="Sign In", command=self.login, font=("Arial Rounded MT Bold", 15),
+    #                       bg="#007BFF", fg="white", bd=0, relief=FLAT, cursor="hand2")
+    #     sign_btn.place(x=50, y=300, width=250, height=35)
+    #
+    #     # Bind hover and click effects using a dictionary for streamlined event handling.
+    #     events = {
+    #         "<Enter>": lambda e: sign_btn.config(bg="#00597A"),  # Darken on hover
+    #         "<Leave>": lambda e: sign_btn.config(bg="#007BFF"),  # Revert on hover out
+    #         "<ButtonPress-1>": lambda e: sign_btn.config(bg="#003D52"),  # Darken on click
+    #         "<ButtonRelease-1>": lambda e: sign_btn.config(bg="#007BFF")  # Revert on release
+    #     }
+    #
+    #     # Apply events to the button
+    #     for event, action in events.items():
+    #         sign_btn.bind(event, action)
+    #
+    #     # 'Forget Password?' button setup.
+    #     forget_btn = Button(login_frame, text="Forget Password?", command=self.emp_id_check,
+    #                         font=("Arial Rounded MT Bold", 13),
+    #                         bg="#00759E", fg="white", bd=0, relief=FLAT, activeforeground="white",
+    #                         activebackground="#00759E", cursor="hand2")
+    #     forget_btn.place(x=50, y=390, width=250, height=35)
+    #     forget_btn.bind("<Enter>", lambda e: forget_btn.config(bg="#00597A"))
+    #     forget_btn.bind("<Leave>", lambda e: forget_btn.config(bg="#00759E"))
+    #
+    #     # Setup additional frames and labels for promotional messages.
+    #     register_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
+    #     register_frame.place(x=650, y=570, width=350, height=60)
+    #     Label(register_frame, text="Join Our Community - Stay Updated!",
+    #           font=("Arial", 13, "bold"), fg="#00759E", bg="white").place(x=0, y=20, relwidth=1)
+    #
+    #     # Animation setup for promotional images.
+    #     self.images = [PhotoImage(file="images/fade1.png"), PhotoImage(file="images/fade2.png"),
+    #                    PhotoImage(file="images/fade3.png")]
+    #     self.image_index = 0
+    #     self.lbl_change_image = Label(self.root, image=self.images[self.image_index], bg="white")
+    #     self.lbl_change_image.place(x=367, y=153, width=240, height=428)
+    #     self.animate()
 
-        # Load and display mobile imagery at specified coordinates.
+    def login_ui(self):
+        """Setup the login interface with user ID and password fields, and controls for authentication."""
+
+        # Display mobile image at the specific position.
         self.mobile_image = PhotoImage(file="images/mobile.png")
         Label(self.root, image=self.mobile_image, bd=0).place(x=200, y=50)
 
-        # Setup the login frame for user interaction.
+        # Initialize the login frame.
         login_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         login_frame.place(x=650, y=90, width=350, height=460)
 
-        # Title for the login section.
+        # Login title.
         Label(login_frame, text="Login", font=("Arial Rounded MT Bold", 30), bg="white", fg="#00759E").pack(fill=X,
                                                                                                             pady=(
-                                                                                                                30, 20))
+                                                                                                            30, 20))
 
-        # User ID input field.
+        # User ID entry with validation.
         Label(login_frame, text="User ID", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=100)
-        Entry(login_frame, textvariable=self.employee_id, font=("Andlus", 15), bg="#FFFFFF", fg="#343A40").place(x=50,
-                                                                                                                 y=140,
-                                                                                                                 width=250)
+        validate_command = login_frame.register(lambda input: input.isdigit() or input == "")
+        Entry(login_frame, textvariable=self.employee_id, validate="key", validatecommand=(validate_command, '%P'),
+              font=("Andlus", 15), bg="#FFFFFF", fg="#343A40").place(x=50, y=140, width=250)
 
-        # Password input field.
+        # Password entry field.
         Label(login_frame, text="Password", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=200)
         Entry(login_frame, textvariable=self.password, show="*", font=("Andlus", 15), bg="white", fg="#343A40").place(
             x=50, y=240, width=250)
 
-        # Sign-in button with hover and click effects.
+        # Sign-in button with visual feedback on events.
         sign_btn = Button(login_frame, text="Sign In", command=self.login, font=("Arial Rounded MT Bold", 15),
                           bg="#007BFF", fg="white", bd=0, relief=FLAT, cursor="hand2")
         sign_btn.place(x=50, y=300, width=250, height=35)
+        sign_btn.bind("<Enter>", lambda e: sign_btn.config(bg="#00597A"))
+        sign_btn.bind("<Leave>", lambda e: sign_btn.config(bg="#007BFF"))
+        sign_btn.bind("<ButtonPress-1>", lambda e: sign_btn.config(bg="#003D52"))
+        sign_btn.bind("<ButtonRelease-1>", lambda e: sign_btn.config(bg="#007BFF"))
 
-        # Bind hover and click effects using a dictionary for streamlined event handling.
-        events = {
-            "<Enter>": lambda e: sign_btn.config(bg="#00597A"),  # Darken on hover
-            "<Leave>": lambda e: sign_btn.config(bg="#007BFF"),  # Revert on hover out
-            "<ButtonPress-1>": lambda e: sign_btn.config(bg="#003D52"),  # Darken on click
-            "<ButtonRelease-1>": lambda e: sign_btn.config(bg="#007BFF")  # Revert on release
-        }
-
-        # Apply events to the button
-        for event, action in events.items():
-            sign_btn.bind(event, action)
-
-        # 'Forget Password?' button setup.
-        forget_btn = Button(login_frame, text="Forget Password?", command=self.forget_window,
-                            font=("Arial Rounded MT Bold", 13),
-                            bg="#00759E", fg="white", bd=0, relief=FLAT, activeforeground="white",
-                            activebackground="#00759E", cursor="hand2")
+        # 'Forget Password?' link setup.
+        forget_btn = Button(login_frame, text="Forget Password?", command=self.emp_id_check,
+                            font=("Arial Rounded MT Bold", 13), bg="#00759E", fg="white", bd=0, relief=FLAT,
+                            activeforeground="white", activebackground="#00759E", cursor="hand2")
         forget_btn.place(x=50, y=390, width=250, height=35)
         forget_btn.bind("<Enter>", lambda e: forget_btn.config(bg="#00597A"))
         forget_btn.bind("<Leave>", lambda e: forget_btn.config(bg="#00759E"))
 
-        # Setup additional frames and labels for promotional messages.
+        # Promotional message setup.
         register_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
         register_frame.place(x=650, y=570, width=350, height=60)
-        Label(register_frame, text="Join Our Community - Stay Updated!",
-              font=("Arial", 13, "bold"), fg="#00759E", bg="white").place(x=0, y=20, relwidth=1)
+        Label(register_frame, text="Join Our Community - Stay Updated!", font=("Arial", 13, "bold"), fg="#00759E",
+              bg="white").place(x=0, y=20, relwidth=1)
 
-        # Animation setup for promotional images.
-        self.images = [PhotoImage(file="images/fade1.png"), PhotoImage(file="images/fade2.png"),
-                       PhotoImage(file="images/fade3.png")]
+        # Initialize image animation in the interface.
+        self.images = [PhotoImage(file=f"images/fade{i}.png") for i in range(1, 4)]
         self.image_index = 0
         self.lbl_change_image = Label(self.root, image=self.images[self.image_index], bg="white")
         self.lbl_change_image.place(x=367, y=153, width=240, height=428)
         self.animate()
-
-    def encrypt_data(self, data):
-        """
-        Encrypts data using the cryptographic manager's encrypt method.
-        """
-        return self.crypto_manager.encrypt_data(data)
-
-    def decrypt_data(self, data):
-        """
-        Decrypts data using the cryptographic manager's decrypt method.
-        """
-        return self.crypto_manager.decrypt_data(data)
 
     def animate(self):
         """
@@ -310,6 +361,132 @@ class LoginSystem:
 
         # Schedule the next call to animate
         self.lbl_change_image.after(2000, self.animate)
+
+    # def forget_ui(self):
+    #     # Setup the password reset window after successful email sending
+    #     self.forget_win = Toplevel(self.root)
+    #     self.forget_win.title("Reset Password")
+    #     self.forget_win.geometry("400x400")
+    #     self.forget_win.config(bg="#f0f0f0")
+    #
+    #     # Define UI elements for password reset
+    #     Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5",
+    #           fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
+    #
+    #     # Enter OTP Label and Entry
+    #
+    #     Label(self.forget_win, text="Enter OTP Sent on Registered Email", font=("Arial", 14)).place(x=20, y=60)
+    #     self.var_otp = StringVar()
+    #     validate_command = self.forget_win.register(lambda input: input.isdigit() or input == "")
+    #     txt_reset = Entry(self.forget_win, textvariable=self.var_otp, validate="key",
+    #                       validatecommand=(validate_command, '%P'), font=("Arial", 14), bg='lightyellow',
+    #                       bd=2, relief=GROOVE)
+    #     txt_reset.place(x=20, y=100, width=250, height=30)
+    #
+    #     # Submit Button
+    #     self.submit_otp = Button(self.forget_win, text="SUBMIT", command=self.validate_otp,
+    #                              font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
+    #                              cursor="hand2")
+    #     self.submit_otp.place(x=20, y=140, width=100, height=30)
+    #
+    #     # Re-Request OTP
+    #     self.generate_otp = Button(self.forget_win, text="REQUEST OTP", command=self.password_reset,
+    #                                font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
+    #                                cursor="hand2")
+    #     self.generate_otp.place(x=130, y=140, width=140, height=30)
+    #
+    #     # New Password Label and Entry
+    #     Label(self.forget_win, text="New Password", font=("Arial", 14)).place(x=20, y=200)
+    #     self.var_new_pass = StringVar()
+    #     txt_new_pass = Entry(self.forget_win, textvariable=self.var_new_pass, font=("Arial", 14),
+    #                          bg='lightyellow', show="*", bd=2, relief=GROOVE)
+    #     txt_new_pass.place(x=20, y=230, width=250, height=30)
+    #
+    #     # Confirm Password Label and Entry
+    #     Label(self.forget_win, text="Confirm Password", font=("Arial", 14)).place(x=20, y=265)
+    #     self.var_conf_pass = StringVar()
+    #     txt_c_pass = Entry(self.forget_win, textvariable=self.var_conf_pass, font=("Arial", 14),
+    #                        bg='lightyellow', show="*", bd=2, relief=GROOVE)
+    #     txt_c_pass.place(x=20, y=295, width=250, height=30)
+    #
+    #     # Update Button
+    #     self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
+    #                              font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED,
+    #                              cursor="hand2")
+    #     self.btn_update.place(x=150, y=340, width=100, height=30)
+
+    def forget_ui(self):
+        """Set up the password reset interface for user interaction."""
+
+        # Initialize the password reset window.
+        self.forget_win = Toplevel(self.root)
+        self.forget_win.title("Reset Password")
+        self.forget_win.geometry("400x400")
+        self.forget_win.config(bg="#f0f0f0")
+
+        # Header label for the reset password window.
+        Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5", fg="white").pack(
+            side=TOP, fill=X)
+
+        # Label and entry for OTP input.
+        Label(self.forget_win, text="Enter OTP Sent on Registered Email", font=("Arial", 14)).place(x=20, y=60)
+        self.var_otp = StringVar()
+        validate_command = self.forget_win.register(lambda input: input.isdigit() or input == "")
+        Entry(self.forget_win, textvariable=self.var_otp, validate="key", validatecommand=(validate_command, '%P'),
+              font=("Arial", 14), bg='lightyellow', bd=2, relief=GROOVE).place(x=20, y=100, width=250, height=30)
+
+        # Button to submit OTP.
+        self.submit_otp = Button(self.forget_win, text="SUBMIT", command=self.validate_otp, font=('Arial', 14),
+                                 bg="#4caf50", fg="white", bd=2, relief=RAISED, cursor="hand2")
+        self.submit_otp.place(x=20, y=140, width=100, height=30)
+
+        # Button to request OTP resend.
+        self.generate_otp = Button(self.forget_win, text="REQUEST OTP", command=self.password_reset, font=('Arial', 14),
+                                   bg="#4caf50", fg="white", bd=2, relief=RAISED, cursor="hand2")
+        self.generate_otp.place(x=130, y=140, width=140, height=30)
+
+        # Labels and entries for new password and confirmation.
+        Label(self.forget_win, text="New Password", font=("Arial", 14)).place(x=20, y=200)
+        self.var_new_pass = StringVar()
+        Entry(self.forget_win, textvariable=self.var_new_pass, font=("Arial", 14), bg='lightyellow', show="*",
+              bd=2, relief=GROOVE).place(x=20, y=230, width=250, height=30)
+
+        Label(self.forget_win, text="Confirm Password", font=("Arial", 14)).place(x=20, y=265)
+        self.var_conf_pass = StringVar()
+        Entry(self.forget_win, textvariable=self.var_conf_pass, font=("Arial", 14), bg='lightyellow', show="*",
+              bd=2, relief=GROOVE).place(x=20, y=295, width=250, height=30)
+
+        # Button to update the password.
+        self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
+                                 font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED, cursor="hand2")
+        self.btn_update.place(x=150, y=340, width=100, height=30)
+
+    def emp_id_check(self):
+        """
+        Validates the presence of an employee ID before proceeding.
+        This is a preliminary check before launching the password reset UI.
+        """
+        # Check if the employee ID field is empty
+        if not self.employee_id.get():
+            # Display an error message if the employee ID is missing
+            messagebox.showerror("Error", "Employee ID is required", parent=self.root)
+            return
+
+        # Proceed to open the password reset UI if the employee ID is provided
+        self.root.withdraw()
+        self.forget_ui()
+
+    def encrypt_data(self, data):
+        """
+        Encrypts data using the cryptographic manager's encrypt method.
+        """
+        return self.crypto_manager.encrypt_data(data)
+
+    def decrypt_data(self, data):
+        """
+        Decrypts data using the cryptographic manager's decrypt method.
+        """
+        return self.crypto_manager.decrypt_data(data)
 
     def login(self):
         """
@@ -358,84 +535,54 @@ class LoginSystem:
             # Log or handle any exceptions raised during the login process
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    def forget_window(self):
+    import sqlite3
+    from tkinter import messagebox, DISABLED, NORMAL
+
+    def password_reset(self):
         """
-        Handles the password reset process for users who have forgotten their password. The process includes verifying
-        the employee ID, sending an OTP to the registered email, and allowing the user to reset their password.
+        Process to reset the password for users who have forgotten it. Retrieves the registered email,
+        sends an OTP, and prepares the UI for password update.
         """
         try:
-            # Check for empty Employee ID field
-            if self.employee_id.get() == "":
-                messagebox.showerror("Error", "Employee ID must be required", parent=self.root)
-                return
             # Establish database connection to retrieve the encrypted email
             con = sqlite3.connect(database=r'ims.db')
             cur = con.cursor()
             cur.execute("SELECT email FROM employee WHERE eid=?", (self.employee_id.get(),))
-            email_encrypted = cur.fetchone()  # This will fetch the encrypted email
-            con.close()  # Close the database connection promptly
+            email_encrypted = cur.fetchone()
+            con.close()
 
-            # Handle case where the Employee ID is not found
-            if email_encrypted is None:
+            if not email_encrypted:
                 messagebox.showerror("Error", "Invalid Employee ID, try again", parent=self.root)
                 return
 
             # Decrypt the email before sending OTP
-            email = self.crypto_manager.decrypt_data(email_encrypted[0])  # Decrypting the email
-
-            # =========Forget Window=============
-            # Call send_email_function
-            # Send OTP to the registered email address
+            email = self.crypto_manager.decrypt_data(email_encrypted[0])
             if not self.send_email(email):
-                messagebox.showerror("Error", "Failed to send email. Please check your connection and try again.",
+                messagebox.showerror("Error", "Failed to send email. Check your connection and try again.",
                                      parent=self.root)
                 return
-            # Setup the password reset window after successful email sending
-            self.forget_win = Toplevel(self.root)
-            self.forget_win.title("Reset Password")
-            self.forget_win.geometry("400x400")
-            self.forget_win.config(bg="#f0f0f0")
 
-            # Define UI elements for password reset
-            Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5",
-                  fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
-
-            # Enter OTP Label and Entry
-            Label(self.forget_win, text="Enter OTP Sent on Registered Email", font=("Arial", 14)).place(x=20, y=60)
-            self.var_otp = StringVar()
-            txt_reset = Entry(self.forget_win, textvariable=self.var_otp, font=("Arial", 14), bg='lightyellow',
-                              bd=2, relief=GROOVE)
-            txt_reset.place(x=20, y=100, width=250, height=30)
-
-            # Submit Button
-            self.btn_reset = Button(self.forget_win, text="SUBMIT", command=self.validate_otp,
-                                    font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
-                                    cursor="hand2")
-            self.btn_reset.place(x=280, y=100, width=100, height=30)
-
-            # New Password Label and Entry
-            Label(self.forget_win, text="New Password", font=("Arial", 14)).place(x=20, y=160)
-            self.var_new_pass = StringVar()
-            txt_new_pass = Entry(self.forget_win, textvariable=self.var_new_pass, font=("Arial", 14),
-                                 bg='lightyellow', show="*", bd=2, relief=GROOVE)
-            txt_new_pass.place(x=20, y=190, width=250, height=30)
-
-            # Confirm Password Label and Entry
-            Label(self.forget_win, text="Confirm Password", font=("Arial", 14)).place(x=20, y=225)
-            self.var_conf_pass = StringVar()
-            txt_c_pass = Entry(self.forget_win, textvariable=self.var_conf_pass, font=("Arial", 14),
-                               bg='lightyellow', show="*", bd=2, relief=GROOVE)
-            txt_c_pass.place(x=20, y=255, width=250, height=30)
-
-            # Update Button
-            self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
-                                     font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED,
-                                     cursor="hand2")
-            self.btn_update.place(x=150, y=300, width=100, height=30)
+            # Disable the OTP button to prevent re-sending immediately and re-enable after 60 seconds
+            self.generate_otp.config(state=DISABLED)
+            self.countdown(60)  # Start countdown for 60 seconds
 
         except Exception as ex:
-            # Handle exceptions and show an error message
+            # Handle any exceptions and show an error message
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
+
+    def countdown(self, remaining=None):
+        """Updates the button text with the time left and re-enables the button when the countdown finishes."""
+        if remaining is not None:
+            self.remaining = remaining
+
+        if self.remaining <= 0:
+            self.generate_otp.config(text="REQUEST OTP")
+            self.generate_otp.config(state=NORMAL)
+        else:
+            self.generate_otp.config(text=f"Please wait {self.remaining}s")
+            self.remaining = self.remaining - 1
+            # Schedule the countdown function to be called after 1 second
+            self.root.after(1000, lambda: self.countdown())
 
     def update_password(self):
         """
@@ -463,28 +610,33 @@ class LoginSystem:
                 con.commit()  # Commit changes to ensure data is saved
                 messagebox.showinfo("Success", "Password updated successfully", parent=self.forget_win)
                 self.forget_win.destroy()  # Close the reset window upon success
+                self.root.deiconify()  # Make the root window visible
         except Exception as ex:
             # Handle exceptions that may occur during database operations
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
     def validate_otp(self):
         """
-        Validates the OTP entered by the user against a pre-stored value. Enables the update button if valid,
-        otherwise notifies the user of an invalid OTP.
+        Validates the OTP entered by the user against a pre-stored value and checks if the OTP is still within a valid timeframe.
         """
         try:
-            # Convert user input and stored OTP to integers for comparison
             user_otp = int(self.var_otp.get())
-            stored_otp = int(self.otp)
+            current_time = datetime.datetime.now()
 
-            # Check if the OTP entered matches the expected OTP
-            if user_otp == stored_otp:
-                # Enable the update password button and disable the submit button
-                self.btn_update.config(state=NORMAL)
-                self.btn_reset.config(state=DISABLED)
+            # Check if the OTP is within the validity period (e.g., 5 minutes)
+            if self.otp_time and (current_time - self.otp_time <= datetime.timedelta(minutes=1)):
+                if user_otp == self.otp:
+                    # OTP is correct and within the time limit
+                    self.btn_update.config(state="normal")
+                    self.submit_otp.config(state="disabled")
+                    print("OTP Valid and within time.")  # Debug
+                else:
+                    # OTP is incorrect
+                    messagebox.showerror("Error", "Invalid OTP, please try again", parent=self.forget_win)
             else:
-                # Notify user of invalid OTP
-                messagebox.showerror("Error", "Invalid OTP, please try again", parent=self.forget_win)
+                # OTP is expired
+                messagebox.showerror("Error", "OTP has expired, please request a new one", parent=self.forget_win)
+
         except ValueError:
             # Handle non-integer input gracefully
             messagebox.showerror("Error", "OTP should be a numeric value", parent=self.forget_win)
@@ -532,6 +684,7 @@ class LoginSystem:
 
             # Generate a six-digit OTP
             self.otp = randint(100000, 999999)
+            self.otp_time = datetime.datetime.now()
 
             # Prepare the email message
             subj = 'IMS-Reset Password OTP'
