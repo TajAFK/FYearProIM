@@ -9,8 +9,6 @@ from random import randint  # For generating random numbers, useful for OTPs
 from tkinter import *  # For GUI creation
 from tkinter import messagebox, ttk  # For displaying messages
 
-from PIL._tkinter_finder import tk
-
 from CryptoManager import CryptoManagerClass  # Manage Encryption Decryption of text
 from create_db import create_db
 
@@ -225,73 +223,6 @@ class LoginSystem:
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
 
-    # def login_ui(self):
-    #     """Initialize and display the login interface components including input fields, buttons, and images."""
-    #
-    #     # Load and display mobile imagery at specified coordinates.
-    #     self.mobile_image = PhotoImage(file="images/mobile.png")
-    #     Label(self.root, image=self.mobile_image, bd=0).place(x=200, y=50)
-    #
-    #     # Setup the login frame for user interaction.
-    #     login_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
-    #     login_frame.place(x=650, y=90, width=350, height=460)
-    #
-    #     # Title for the login section.
-    #     Label(login_frame, text="Login", font=("Arial Rounded MT Bold", 30), bg="white", fg="#00759E").pack(fill=X,
-    #                                                                                                         pady=(
-    #                                                                                                             30, 20))
-    #
-    #     Label(login_frame, text="User ID", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=100)
-    #     validate_command = login_frame.register(lambda input: input.isdigit() or input == "")
-    #     id_in = Entry(login_frame, textvariable=self.employee_id, validate="key",
-    #                   validatecommand=(validate_command, '%P'), font=("Andlus", 15), bg="#FFFFFF", fg="#343A40")
-    #     id_in.place(x=50, y=140, width=250)
-    #
-    #     # Password input field.
-    #     Label(login_frame, text="Password", font=("Andlus", 15, "bold"), bg="white", fg="#343A40").place(x=50, y=200)
-    #     Entry(login_frame, textvariable=self.password, show="*", font=("Andlus", 15), bg="white", fg="#343A40").place(
-    #         x=50, y=240, width=250)
-    #
-    #     # Sign-in button with hover and click effects.
-    #     sign_btn = Button(login_frame, text="Sign In", command=self.login, font=("Arial Rounded MT Bold", 15),
-    #                       bg="#007BFF", fg="white", bd=0, relief=FLAT, cursor="hand2")
-    #     sign_btn.place(x=50, y=300, width=250, height=35)
-    #
-    #     # Bind hover and click effects using a dictionary for streamlined event handling.
-    #     events = {
-    #         "<Enter>": lambda e: sign_btn.config(bg="#00597A"),  # Darken on hover
-    #         "<Leave>": lambda e: sign_btn.config(bg="#007BFF"),  # Revert on hover out
-    #         "<ButtonPress-1>": lambda e: sign_btn.config(bg="#003D52"),  # Darken on click
-    #         "<ButtonRelease-1>": lambda e: sign_btn.config(bg="#007BFF")  # Revert on release
-    #     }
-    #
-    #     # Apply events to the button
-    #     for event, action in events.items():
-    #         sign_btn.bind(event, action)
-    #
-    #     # 'Forget Password?' button setup.
-    #     forget_btn = Button(login_frame, text="Forget Password?", command=self.emp_id_check,
-    #                         font=("Arial Rounded MT Bold", 13),
-    #                         bg="#00759E", fg="white", bd=0, relief=FLAT, activeforeground="white",
-    #                         activebackground="#00759E", cursor="hand2")
-    #     forget_btn.place(x=50, y=390, width=250, height=35)
-    #     forget_btn.bind("<Enter>", lambda e: forget_btn.config(bg="#00597A"))
-    #     forget_btn.bind("<Leave>", lambda e: forget_btn.config(bg="#00759E"))
-    #
-    #     # Setup additional frames and labels for promotional messages.
-    #     register_frame = Frame(self.root, bd=2, relief=RIDGE, bg="white")
-    #     register_frame.place(x=650, y=570, width=350, height=60)
-    #     Label(register_frame, text="Join Our Community - Stay Updated!",
-    #           font=("Arial", 13, "bold"), fg="#00759E", bg="white").place(x=0, y=20, relwidth=1)
-    #
-    #     # Animation setup for promotional images.
-    #     self.images = [PhotoImage(file="images/fade1.png"), PhotoImage(file="images/fade2.png"),
-    #                    PhotoImage(file="images/fade3.png")]
-    #     self.image_index = 0
-    #     self.lbl_change_image = Label(self.root, image=self.images[self.image_index], bg="white")
-    #     self.lbl_change_image.place(x=367, y=153, width=240, height=428)
-    #     self.animate()
-
     def login_ui(self):
         """Setup the login interface with user ID and password fields, and controls for authentication."""
 
@@ -362,58 +293,6 @@ class LoginSystem:
         # Schedule the next call to animate
         self.lbl_change_image.after(2000, self.animate)
 
-    # def forget_ui(self):
-    #     # Setup the password reset window after successful email sending
-    #     self.forget_win = Toplevel(self.root)
-    #     self.forget_win.title("Reset Password")
-    #     self.forget_win.geometry("400x400")
-    #     self.forget_win.config(bg="#f0f0f0")
-    #
-    #     # Define UI elements for password reset
-    #     Label(self.forget_win, text='Reset Password', font=('Arial', 20, 'bold'), bg="#3f51b5",
-    #           fg="white", padx=10, pady=5).pack(side=TOP, fill=X)
-    #
-    #     # Enter OTP Label and Entry
-    #
-    #     Label(self.forget_win, text="Enter OTP Sent on Registered Email", font=("Arial", 14)).place(x=20, y=60)
-    #     self.var_otp = StringVar()
-    #     validate_command = self.forget_win.register(lambda input: input.isdigit() or input == "")
-    #     txt_reset = Entry(self.forget_win, textvariable=self.var_otp, validate="key",
-    #                       validatecommand=(validate_command, '%P'), font=("Arial", 14), bg='lightyellow',
-    #                       bd=2, relief=GROOVE)
-    #     txt_reset.place(x=20, y=100, width=250, height=30)
-    #
-    #     # Submit Button
-    #     self.submit_otp = Button(self.forget_win, text="SUBMIT", command=self.validate_otp,
-    #                              font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
-    #                              cursor="hand2")
-    #     self.submit_otp.place(x=20, y=140, width=100, height=30)
-    #
-    #     # Re-Request OTP
-    #     self.generate_otp = Button(self.forget_win, text="REQUEST OTP", command=self.password_reset,
-    #                                font=('Arial', 14), bg="#4caf50", fg="white", bd=2, relief=RAISED,
-    #                                cursor="hand2")
-    #     self.generate_otp.place(x=130, y=140, width=140, height=30)
-    #
-    #     # New Password Label and Entry
-    #     Label(self.forget_win, text="New Password", font=("Arial", 14)).place(x=20, y=200)
-    #     self.var_new_pass = StringVar()
-    #     txt_new_pass = Entry(self.forget_win, textvariable=self.var_new_pass, font=("Arial", 14),
-    #                          bg='lightyellow', show="*", bd=2, relief=GROOVE)
-    #     txt_new_pass.place(x=20, y=230, width=250, height=30)
-    #
-    #     # Confirm Password Label and Entry
-    #     Label(self.forget_win, text="Confirm Password", font=("Arial", 14)).place(x=20, y=265)
-    #     self.var_conf_pass = StringVar()
-    #     txt_c_pass = Entry(self.forget_win, textvariable=self.var_conf_pass, font=("Arial", 14),
-    #                        bg='lightyellow', show="*", bd=2, relief=GROOVE)
-    #     txt_c_pass.place(x=20, y=295, width=250, height=30)
-    #
-    #     # Update Button
-    #     self.btn_update = Button(self.forget_win, text="Update", command=self.update_password, state=DISABLED,
-    #                              font=('Arial', 14), bg="#2196f3", fg="white", bd=2, relief=RAISED,
-    #                              cursor="hand2")
-    #     self.btn_update.place(x=150, y=340, width=100, height=30)
 
     def forget_ui(self):
         """Set up the password reset interface for user interaction."""
