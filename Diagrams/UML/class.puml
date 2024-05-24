@@ -1,0 +1,126 @@
+@startuml
+class MainWindow {
+  + __init__()
+  + show_dashboard()
+  + logout()
+}
+
+class Dashboard {
+  + __init__()
+  + show_product_form()
+  + show_employee_form()
+  + show_supplier_form()
+}
+
+class ProductForm {
+  + __init__()
+  + enterDetails()
+  + submit()
+}
+
+class EmployeeForm {
+  + __init__()
+  + enterDetails()
+  + submit()
+}
+
+class SupplierForm {
+  + __init__()
+  + enterDetails()
+  + submit()
+}
+
+class ProductManager {
+  + addProduct()
+  + updateProduct()
+  + deleteProduct()
+  + getProduct()
+}
+
+class EmployeeManager {
+  + addEmployee()
+  + updateEmployee()
+  + deleteEmployee()
+  + getEmployee()
+}
+
+class SupplierManager {
+  + addSupplier()
+  + updateSupplier()
+  + deleteSupplier()
+  + getSupplier()
+}
+
+class CategoryManager {
+  + addCategory()
+  + updateCategory()
+  + deleteCategory()
+  + getCategory()
+}
+
+class BillingManager {
+  + createBill()
+  + updateBill()
+  + deleteBill()
+  + getBill()
+}
+
+class SalesManager {
+  + getSalesReport()
+}
+
+class DatabaseHelper {
+  + executeQuery()
+  + fetchResults()
+}
+
+class ProductDAO {
+  + saveProduct()
+  + retrieveProduct()
+}
+
+class EmployeeDAO {
+  + saveEmployee()
+  + retrieveEmployee()
+}
+
+class SupplierDAO {
+  + saveSupplier()
+  + retrieveSupplier()
+}
+
+class CategoryDAO {
+  + saveCategory()
+  + retrieveCategory()
+}
+
+class BillingDAO {
+  + saveBill()
+  + retrieveBill()
+}
+
+class SalesDAO {
+  + saveSalesData()
+  + retrieveSalesData()
+}
+
+class CryptoManager {
+  + encryptData()
+  + decryptData()
+}
+
+MainWindow --> Dashboard
+Dashboard --> ProductForm
+Dashboard --> EmployeeForm
+Dashboard --> SupplierForm
+ProductForm --> ProductManager
+EmployeeForm --> EmployeeManager
+SupplierForm --> SupplierManager
+ProductManager --> ProductDAO
+EmployeeManager --> EmployeeDAO
+SupplierManager --> SupplierDAO
+CategoryManager --> CategoryDAO
+BillingManager --> BillingDAO
+SalesManager --> SalesDAO
+CryptoManager --> DatabaseHelper
+@enduml

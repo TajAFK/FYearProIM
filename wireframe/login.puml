@@ -1,0 +1,15 @@
+@startuml
+skinparam handwritten true
+
+rectangle "Login Screen" {
+  frame "Username" as U {
+    rectangle "Username\n[____________]"
+  }
+  frame "Password" as P {
+    rectangle "Password\n[____________]"
+  }
+  rectangle "Remember Me\n[ ]" as R
+  rectangle "Login Button\n[ Login ]" as L
+  rectangle "Forgot Password?\n[Link]" as F
+}
+@enduml

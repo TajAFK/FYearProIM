@@ -1,0 +1,53 @@
+@startuml
+package "Inventory Management System" {
+  [GUI] -down-> [Business Logic]
+  [Business Logic] -down-> [Data Access]
+  [Business Logic] -down-> [Security]
+}
+
+package GUI {
+  [MainWindow]
+  [Dashboard]
+  [ProductForm]
+  [EmployeeForm]
+  [SupplierForm]
+}
+
+package "Business Logic" {
+  [ProductManager]
+  [EmployeeManager]
+  [SupplierManager]
+  [CategoryManager]
+  [BillingManager]
+  [SalesManager]
+}
+
+package "Data Access" {
+  [DatabaseHelper]
+  [ProductDAO]
+  [EmployeeDAO]
+  [SupplierDAO]
+  [CategoryDAO]
+  [BillingDAO]
+  [SalesDAO]
+}
+
+package Security {
+  [CryptoManager]
+}
+
+[MainWindow] -up-> [Dashboard]
+[Dashboard] -up-> [ProductForm]
+[Dashboard] -up-> [EmployeeForm]
+[Dashboard] -up-> [SupplierForm]
+[ProductForm] -up-> [ProductManager]
+[EmployeeForm] -up-> [EmployeeManager]
+[SupplierForm] -up-> [SupplierManager]
+[ProductManager] -up-> [ProductDAO]
+[EmployeeManager] -up-> [EmployeeDAO]
+[SupplierManager] -up-> [SupplierDAO]
+[CategoryManager] -up-> [CategoryDAO]
+[BillingManager] -up-> [BillingDAO]
+[SalesManager] -up-> [SalesDAO]
+[CryptoManager] -up-> [DatabaseHelper]
+@enduml

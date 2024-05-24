@@ -1,0 +1,13 @@
+@startuml
+start
+:Open Product Form;
+:Enter Product Details;
+:Submit Product Form;
+if (Validation Success?) then (yes)
+  :Save Product to Database;
+  :Display Success Message;
+else (no)
+  :Display Error Message;
+endif
+stop
+@enduml

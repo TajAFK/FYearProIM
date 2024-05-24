@@ -1,0 +1,7 @@
+@startuml
+[*] --> New
+New --> Active : Add Product
+Active --> Inactive : Deactivate Product
+Inactive --> Active : Reactivate Product
+[*] --> Deleted : Remove Product
+@enduml

@@ -1,0 +1,29 @@
+@startuml
+actor Admin
+actor Employee
+
+Admin -> ProductManager : Manage Products
+Admin -> EmployeeManager : Manage Employees
+Admin -> SupplierManager : Manage Suppliers
+Admin -> CategoryManager : Manage Categories
+Admin -> SalesManager : View Sales Reports
+
+Employee -> BillingManager : Manage Billing
+Employee -> ProductManager : View Products
+
+ProductManager -> ProductDAO : Save/Retrieve Product
+EmployeeManager -> EmployeeDAO : Save/Retrieve Employee
+SupplierManager -> SupplierDAO : Save/Retrieve Supplier
+CategoryManager -> CategoryDAO : Save/Retrieve Category
+BillingManager -> BillingDAO : Save/Retrieve Billing
+SalesManager -> SalesDAO : Retrieve Sales Data
+
+ProductDAO -> DatabaseHelper : Query Execution
+EmployeeDAO -> DatabaseHelper : Query Execution
+SupplierDAO -> DatabaseHelper : Query Execution
+CategoryDAO -> DatabaseHelper : Query Execution
+BillingDAO -> DatabaseHelper : Query Execution
+SalesDAO -> DatabaseHelper : Query Execution
+
+CryptoManager -> DatabaseHelper : Secure Data
+@enduml

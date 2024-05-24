@@ -1,0 +1,31 @@
+@startuml
+skinparam handwritten true
+
+rectangle "Dashboard" {
+  rectangle "Navigation Menu" {
+    [Home]
+    [Products]
+    [Employees]
+    [Suppliers]
+    [Categories]
+    [Billing]
+    [Sales Reports]
+    [Logout]
+  }
+
+  rectangle "Main Content" {
+    rectangle "Summary Statistics" {
+      [Total Products]
+      [Total Employees]
+      [Total Suppliers]
+      [Total Categories]
+      [Total Sales]
+    }
+
+    rectangle "Content Area" {
+      [Graph/Chart Area]
+      [Recent Activities]
+    }
+  }
+}
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+actor User
+User -> ProductForm: open()
+User -> ProductForm: enterDetails()
+User -> ProductForm: submit()
+ProductForm -> ProductManager: addProduct()
+ProductManager -> ProductDAO: saveProduct()
+ProductDAO -> DatabaseHelper: insert()
+DatabaseHelper --> ProductDAO: success()
+ProductDAO --> ProductManager: success()
+ProductManager --> ProductForm: success()
+ProductForm --> User: success()
+@enduml

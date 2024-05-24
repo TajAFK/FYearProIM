@@ -1,0 +1,13 @@
+@startuml
+actor Admin
+actor Employee
+
+Admin --> (Manage Employees)
+Admin --> (Manage Suppliers)
+Admin --> (Manage Categories)
+Admin --> (Manage Products)
+Admin --> (View Sales Reports)
+
+Employee --> (Manage Billing)
+Employee --> (View Products)
+@enduml

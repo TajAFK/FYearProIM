@@ -1,0 +1,8 @@
+@startuml
+node "Client Machine" {
+  [Inventory Management System]
+  [SQLite Database]
+}
+
+[Inventory Management System] --> [SQLite Database]
+@enduml
