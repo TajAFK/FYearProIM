@@ -1,0 +1,13 @@
+@startuml
+Participant "Jan 16\n2024" as Start
+Participant "Feb 06\n2024" as Phase2
+Participant "Apr 02\n2024" as Phase3
+Participant "May 07\n2024" as Phase4
+Participant "May 26\n2024" as End
+
+Start -> Phase2: Initiation and Planning\n(3 weeks)
+Phase2 -> Phase3: Development and Implementation\n(8 weeks)
+Phase3 -> Phase4: Testing and Quality Assurance\n(4 weeks)
+Phase4 -> End: Deployment, Training,\nand Finalization\n(3 weeks)
+
+@enduml
