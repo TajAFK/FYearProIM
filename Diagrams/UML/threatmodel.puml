@@ -1,0 +1,47 @@
+@startuml
+allowmixing
+
+package "Inventory Management System" {
+    class "User Interface" as UI
+    class "Application Logic" as AppLogic
+    class "Database" as DB
+    class "Security" as Security
+}
+
+actor User
+
+User --> UI : "Interacts with"
+
+UI --> AppLogic : "Sends requests"
+AppLogic --> DB : "Reads/Writes data"
+AppLogic --> Security : "Encrypts/Decrypts data"
+
+Security --> DB : "Stores/Retrieves encrypted data"
+
+note right of UI
+    Possible Threats:
+    - Spoofing
+    - Information Disclosure
+end note
+
+note right of AppLogic
+    Possible Threats:
+    - Tampering
+    - Information Disclosure
+    - Elevation of Privilege
+end note
+
+note right of DB
+    Possible Threats:
+    - Information Disclosure
+    - Tampering
+    - Denial of Service
+end note
+
+note right of Security
+    Possible Threats:
+    - Tampering
+    - Denial of Service
+    - Information Disclosure
+end note
+@enduml

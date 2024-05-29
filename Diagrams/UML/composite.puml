@@ -1,0 +1,106 @@
+@startuml
+package "Inventory Management System" {
+  class MainWindow
+  class Dashboard
+  class ProductForm
+  class EmployeeForm
+  class SupplierForm
+  class ProductManager
+  class EmployeeManager
+  class SupplierManager
+  class CategoryManager
+  class BillingManager
+  class SalesManager
+  class DatabaseHelper
+  class ProductDAO
+  class EmployeeDAO
+  class SupplierDAO
+  class CategoryDAO
+  class BillingDAO
+  class SalesDAO
+  class CryptoManager
+
+  MainWindow -[hidden]--> Dashboard
+  Dashboard -[hidden]--> ProductForm
+  Dashboard -[hidden]--> EmployeeForm
+  Dashboard -[hidden]--> SupplierForm
+  ProductForm -[hidden]--> ProductManager
+  EmployeeForm -[hidden]--> EmployeeManager
+  SupplierForm -[hidden]--> SupplierManager
+  ProductManager -[hidden]--> ProductDAO
+  EmployeeManager -[hidden]--> EmployeeDAO
+  SupplierManager -[hidden]--> SupplierDAO
+  CategoryManager -[hidden]--> CategoryDAO
+  BillingManager -[hidden]--> BillingDAO
+  SalesManager -[hidden]--> SalesDAO
+  CryptoManager -[hidden]--> DatabaseHelper
+
+  MainWindow -down-> Dashboard
+  Dashboard -down-> ProductForm
+  Dashboard -down-> EmployeeForm
+  Dashboard -down-> SupplierForm
+  ProductForm -down-> ProductManager
+  EmployeeForm -down-> EmployeeManager
+  SupplierForm -down-> SupplierManager
+  ProductManager -down-> ProductDAO
+  EmployeeManager -down-> EmployeeDAO
+  SupplierManager -down-> SupplierDAO
+  CategoryManager -down-> CategoryDAO
+  BillingManager -down-> BillingDAO
+  SalesManager -down-> SalesDAO
+  CryptoManager -down-> DatabaseHelper
+
+  ProductForm -up-> "Product: Contains" Product
+  EmployeeForm -up-> "Employee: Contains" Employee
+  SupplierForm -up-> "Supplier: Contains" Supplier
+  BillingManager -up-> "Bill: Contains" Bill
+  SalesManager -up-> "Sales: Contains" Sales
+  CategoryManager -up-> "Category: Contains" Category
+
+  class Product {
+    + productId
+    + productName
+    + price
+    + quantity
+  }
+
+  class Employee {
+    + employeeId
+    + employeeName
+    + email
+    + contact
+  }
+
+  class Supplier {
+    + supplierId
+    + supplierName
+    + contact
+    + address
+  }
+
+  class Bill {
+    + billId
+    + billDate
+    + totalAmount
+    + discount
+  }
+
+  class Sales {
+    + salesId
+    + salesDate
+    + totalSales
+  }
+
+  class Category {
+    + categoryId
+    + categoryName
+  }
+
+  ProductManager -- Product
+  EmployeeManager -- Employee
+  SupplierManager -- Supplier
+  BillingManager -- Bill
+  SalesManager -- Sales
+  CategoryManager -- Category
+}
+@enduml

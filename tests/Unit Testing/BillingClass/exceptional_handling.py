@@ -1,22 +1,29 @@
-import unittest
-from unittest.mock import patch, MagicMock
-from tkinter import Tk, PhotoImage
-from billing import BillClass
+import unittest  # Import the unittest module for creating and running tests
+from unittest.mock import patch, MagicMock  # Import patch and MagicMock for mocking objects and methods
+from tkinter import Tk, PhotoImage  # Import Tk and PhotoImage from the tkinter module
+from billing import BillClass  # Import the BillClass from the billing module
 
 class TestBillClassExceptionHandling(unittest.TestCase):
+    """Test case class for testing exception handling in BillClass."""
+
     def setUp(self):
         """Set up a Tkinter root window and the BillClass instance."""
+        # Create a Tkinter root window
         self.root = Tk()
-        self.root.withdraw()  # Hide the Tkinter GUI since we are not testing GUI components
+        # Hide the Tkinter GUI since we are not testing GUI components
+        self.root.withdraw()
 
     def tearDown(self):
         """Destroy the Tkinter root window after each test."""
+        # Destroy the Tkinter root window to clean up after tests
         self.root.destroy()
 
     @patch('billing.PhotoImage', return_value=MagicMock(spec=PhotoImage))
     def test_init(self, mock_photoimage):
         """Test that the BillClass initializes correctly with mocked PhotoImage."""
+        # Initialize the BillClass instance
         bill = BillClass(self.root)
+        # Check if the instance is of type BillClass
         self.assertIsInstance(bill, BillClass)
 
     @patch('billing.BillClass.save_bill_to_database')
@@ -25,6 +32,8 @@ class TestBillClassExceptionHandling(unittest.TestCase):
         # Configure the mock to raise an Exception when trying to save a bill
         mock_save_bill.side_effect = Exception("Database save failed")
 
+        # Create a BillClass instance
+        self.bill = BillClass(self.root)
         # Set necessary variables to simulate a ready-to-save state
         self.bill.var_cname.set("John Doe")
         self.bill.var_contact.set("123456789")
@@ -40,7 +49,9 @@ class TestBillClassExceptionHandling(unittest.TestCase):
         # Simulate a scenario where bill_top method encounters corrupted data
         mock_bill_top.side_effect = ValueError("Corrupted data encountered")
 
-        # Simulate a ready state to generate a bill
+        # Create a BillClass instance
+        self.bill = BillClass(self.root)
+        # Set necessary variables to simulate a ready state to generate a bill
         self.bill.var_cname.set("Jane Doe")
         self.bill.var_contact.set("987654321")
         self.bill.cart_list = [['1', 'Widget', '15.00', '3', '30']]
@@ -50,4 +61,4 @@ class TestBillClassExceptionHandling(unittest.TestCase):
             self.bill.generate_bill()
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()  # Run the tests when the script is executed directly
