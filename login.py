@@ -190,28 +190,20 @@ class LoginSystem:
                     messagebox.showerror("Error", "This Employee ID already assigned, try different", parent=self.root)
                     return
 
-                # Encrypt sensitive data
-                encrypted_name = self.encrypt_data(self.var_name.get())
-                encrypted_email = self.encrypt_data(self.var_email.get())
-                encrypted_contact = self.encrypt_data(self.var_contact.get())
-                encrypted_dob = self.encrypt_data(self.var_dob.get())
-                encrypted_pass = self.encrypt_data(self.var_pass.get())
-                encrypted_address = self.encrypt_data(self.txt_address.get('1.0', END).strip())
-
                 # Insert the new admin record into the database
                 cur.execute(
                     "INSERT INTO employee (eid, name, email, gender, contact, dob, doj, pass, utype, address, salary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (
                         self.var_emp_id.get(),
-                        encrypted_name,
-                        encrypted_email,
+                        self.encrypt_data(self.var_name.get()),
+                        self.encrypt_data(self.var_email.get()),
                         self.var_gender.get(),
-                        encrypted_contact,
-                        encrypted_dob,
+                        self.encrypt_data(self.var_contact.get()),
+                        self.encrypt_data(self.var_dob.get()),
                         self.var_doj.get(),
-                        encrypted_pass,
+                        self.encrypt_data(self.var_pass.get()),
                         self.var_utype.get(),
-                        encrypted_address,
+                        self.encrypt_data(self.txt_address.get('1.0', END).strip()),
                         self.var_salary.get(),
                     ))
                 # Commit changes to the database
