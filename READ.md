@@ -24,7 +24,7 @@ Follow these steps to run the Inventory Management System program:
     pip install -r requirements.txt
     ```
 
-5. **Run the Program**: Once the project is set up and dependencies are installed, you can run the program. Locate the main Python file (e.g., `main.py` or `app.py`) in the project directory and open it. Then, right-click anywhere in the editor window and select "Run <filename>".
+5. **Run the Program**: Once the project is set up and dependencies are installed, you can run the program. Locate the main Python file (`login.py`) in the project directory and open it. Then, right-click anywhere in the editor window and select "Run <filename>".
 
 6. **Follow Program Instructions**: Depending on the program's design, you may need to follow on-screen instructions, such as providing input or interacting with the graphical user interface (GUI).
 
